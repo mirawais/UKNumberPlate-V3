@@ -68,7 +68,7 @@ const PlateCustomizer = () => {
     }
     
     if (carBrands?.length) {
-      setCustomization(prev => ({...prev, carBrand: ""})); // Default to none
+      setCustomization(prev => ({...prev, carBrand: "none"})); // Default to none
     }
   }, [plateSizes, textStyles, colors, carBrands]);
   
@@ -141,7 +141,7 @@ const PlateCustomizer = () => {
       textColor: colors?.[0]?.id.toString() || '',
       badge: 'gb',
       borderColor: colors?.[0]?.id.toString() || '',
-      carBrand: '',
+      carBrand: 'none',
       isRoadLegal: true
     });
     
@@ -263,7 +263,7 @@ const PlateCustomizer = () => {
                   <SelectContent>
                     {plateSizes?.map((size) => (
                       <SelectItem key={size.id} value={size.id.toString()}>
-                        {size.name} ({size.dimensions}) {size.additionalPrice > 0 ? `- +£${size.additionalPrice}` : '- £0.00'}
+                        {size.name} ({size.dimensions}) {Number(size.additionalPrice) > 0 ? `- +£${Number(size.additionalPrice).toFixed(2)}` : '- £0.00'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -288,7 +288,7 @@ const PlateCustomizer = () => {
                     <SelectContent>
                       {textStyles?.map((style) => (
                         <SelectItem key={style.id} value={style.id.toString()}>
-                          {style.name} {style.additionalPrice > 0 ? `- +£${style.additionalPrice}` : '- £0.00'}
+                          {style.name} {Number(style.additionalPrice) > 0 ? `- +£${Number(style.additionalPrice).toFixed(2)}` : '- £0.00'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -381,7 +381,7 @@ const PlateCustomizer = () => {
                     <SelectValue placeholder="Select car brand" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {carBrands?.map((brand) => (
                       <SelectItem key={brand.id} value={brand.id.toString()}>
                         {brand.name}

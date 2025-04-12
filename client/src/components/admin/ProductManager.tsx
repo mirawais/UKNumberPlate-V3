@@ -36,7 +36,7 @@ const ProductManager = () => {
   const [modalData, setModalData] = useState<any>({});
   const [modalAction, setModalAction] = useState<'create' | 'edit'>('create');
   
-  // Create/Update mutations
+  // Create/Update mutations for Plate Sizes
   const createPlateSizeMutation = useMutation({
     mutationFn: (data: Omit<PlateSize, 'id'>) => apiRequest('POST', '/api/plate-sizes', data),
     onSuccess: () => {
@@ -69,6 +69,138 @@ const ProductManager = () => {
     }
   });
   
+  // Create/Update mutations for Text Styles
+  const createTextStyleMutation = useMutation({
+    mutationFn: (data: Omit<TextStyle, 'id'>) => apiRequest('POST', '/api/text-styles', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/text-styles'] });
+      toast({ title: "Success", description: "Text style created successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to create text style", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  const updateTextStyleMutation = useMutation({
+    mutationFn: (data: TextStyle) => apiRequest('PUT', `/api/text-styles/${data.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/text-styles'] });
+      toast({ title: "Success", description: "Text style updated successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to update text style", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  // Create/Update mutations for Badges
+  const createBadgeMutation = useMutation({
+    mutationFn: (data: Omit<Badge, 'id'>) => apiRequest('POST', '/api/badges', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/badges'] });
+      toast({ title: "Success", description: "Badge created successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to create badge", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  const updateBadgeMutation = useMutation({
+    mutationFn: (data: Badge) => apiRequest('PUT', `/api/badges/${data.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/badges'] });
+      toast({ title: "Success", description: "Badge updated successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to update badge", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  // Create/Update mutations for Colors
+  const createColorMutation = useMutation({
+    mutationFn: (data: Omit<Color, 'id'>) => apiRequest('POST', '/api/colors', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/colors'] });
+      toast({ title: "Success", description: "Color created successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to create color", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  const updateColorMutation = useMutation({
+    mutationFn: (data: Color) => apiRequest('PUT', `/api/colors/${data.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/colors'] });
+      toast({ title: "Success", description: "Color updated successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to update color", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  // Create/Update mutations for Car Brands
+  const createCarBrandMutation = useMutation({
+    mutationFn: (data: Omit<CarBrand, 'id'>) => apiRequest('POST', '/api/car-brands', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/car-brands'] });
+      toast({ title: "Success", description: "Car brand created successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to create car brand", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  const updateCarBrandMutation = useMutation({
+    mutationFn: (data: CarBrand) => apiRequest('PUT', `/api/car-brands/${data.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/car-brands'] });
+      toast({ title: "Success", description: "Car brand updated successfully" });
+      setIsModalOpen(false);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to update car brand", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
   // Delete mutations
   const deletePlateSizeMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/plate-sizes/${id}`, {}),
@@ -80,6 +212,66 @@ const ProductManager = () => {
       toast({ 
         title: "Error", 
         description: "Failed to delete plate size", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  const deleteTextStyleMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/text-styles/${id}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/text-styles'] });
+      toast({ title: "Success", description: "Text style deleted successfully" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to delete text style", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  const deleteBadgeMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/badges/${id}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/badges'] });
+      toast({ title: "Success", description: "Badge deleted successfully" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to delete badge", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  const deleteColorMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/colors/${id}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/colors'] });
+      toast({ title: "Success", description: "Color deleted successfully" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to delete color", 
+        variant: "destructive" 
+      });
+    }
+  });
+  
+  const deleteCarBrandMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/car-brands/${id}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/car-brands'] });
+      toast({ title: "Success", description: "Car brand deleted successfully" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to delete car brand", 
         variant: "destructive" 
       });
     }
@@ -119,7 +311,7 @@ const ProductManager = () => {
           name: modalData.name,
           dimensions: modalData.dimensions,
           additionalPrice: modalData.additionalPrice,
-          isActive: modalData.isActive || true
+          isActive: modalData.isActive !== false // Default to true
         });
       } else {
         updatePlateSizeMutation.mutate({
@@ -130,16 +322,84 @@ const ProductManager = () => {
           isActive: modalData.isActive
         });
       }
+    } else if (modalType === 'textStyle') {
+      if (modalAction === 'create') {
+        createTextStyleMutation.mutate({
+          name: modalData.name,
+          description: modalData.description,
+          imagePath: modalData.imagePath,
+          additionalPrice: modalData.additionalPrice,
+          isActive: modalData.isActive !== false // Default to true
+        });
+      } else {
+        updateTextStyleMutation.mutate({
+          id: modalData.id,
+          name: modalData.name,
+          description: modalData.description,
+          imagePath: modalData.imagePath,
+          additionalPrice: modalData.additionalPrice,
+          isActive: modalData.isActive
+        });
+      }
+    } else if (modalType === 'badge') {
+      if (modalAction === 'create') {
+        createBadgeMutation.mutate({
+          name: modalData.name,
+          imagePath: modalData.imagePath,
+          isActive: modalData.isActive !== false // Default to true
+        });
+      } else {
+        updateBadgeMutation.mutate({
+          id: modalData.id,
+          name: modalData.name,
+          imagePath: modalData.imagePath,
+          isActive: modalData.isActive
+        });
+      }
+    } else if (modalType === 'color') {
+      if (modalAction === 'create') {
+        createColorMutation.mutate({
+          name: modalData.name,
+          hexCode: modalData.hexCode,
+          isActive: modalData.isActive !== false // Default to true
+        });
+      } else {
+        updateColorMutation.mutate({
+          id: modalData.id,
+          name: modalData.name,
+          hexCode: modalData.hexCode,
+          isActive: modalData.isActive
+        });
+      }
+    } else if (modalType === 'carBrand') {
+      if (modalAction === 'create') {
+        createCarBrandMutation.mutate({
+          name: modalData.name,
+          isActive: modalData.isActive !== false // Default to true
+        });
+      } else {
+        updateCarBrandMutation.mutate({
+          id: modalData.id,
+          name: modalData.name,
+          isActive: modalData.isActive
+        });
+      }
     }
-    // Add similar handlers for other types...
   };
   
   // Handler for deleting an item
   const handleDelete = (type: string, id: number) => {
     if (type === 'plateSize') {
       deletePlateSizeMutation.mutate(id);
+    } else if (type === 'textStyle') {
+      deleteTextStyleMutation.mutate(id);
+    } else if (type === 'badge') {
+      deleteBadgeMutation.mutate(id);
+    } else if (type === 'color') {
+      deleteColorMutation.mutate(id);
+    } else if (type === 'carBrand') {
+      deleteCarBrandMutation.mutate(id);
     }
-    // Add similar handlers for other types...
   };
   
   // Handler for updating pricing
@@ -296,7 +556,317 @@ const ProductManager = () => {
           </Table>
         </TabsContent>
         
-        {/* Add similar tabs for other configuration types... */}
+        {/* Text Styles Tab */}
+        <TabsContent value="textStyles">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={() => handleOpenModal('textStyle', 'create')}
+              className="flex items-center gap-2"
+            >
+              <PlusIcon className="h-4 w-4" /> Add Text Style
+            </Button>
+          </div>
+          
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Image</TableHead>
+                <TableHead>Additional Price (£)</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {textStyles?.map((style) => (
+                <TableRow key={style.id}>
+                  <TableCell>{style.name}</TableCell>
+                  <TableCell>{style.description}</TableCell>
+                  <TableCell>
+                    {style.imagePath && (
+                      <div className="h-10 w-16 relative">
+                        <img 
+                          src={style.imagePath} 
+                          alt={style.name}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>£{Number(style.additionalPrice).toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Switch 
+                      checked={style.isActive} 
+                      onCheckedChange={() => {
+                        updateTextStyleMutation.mutate({
+                          ...style,
+                          isActive: !style.isActive
+                        });
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenModal('textStyle', 'edit', style)}
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete('textStyle', style.id)}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+        
+        {/* Badges Tab */}
+        <TabsContent value="badges">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={() => handleOpenModal('badge', 'create')}
+              className="flex items-center gap-2"
+            >
+              <PlusIcon className="h-4 w-4" /> Add Badge
+            </Button>
+          </div>
+          
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Image</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {badges?.map((badge) => (
+                <TableRow key={badge.id}>
+                  <TableCell>{badge.name}</TableCell>
+                  <TableCell>
+                    {badge.imagePath && (
+                      <div className="h-10 w-16 relative">
+                        <img 
+                          src={badge.imagePath} 
+                          alt={badge.name}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Switch 
+                      checked={badge.isActive} 
+                      onCheckedChange={() => {
+                        updateBadgeMutation.mutate({
+                          ...badge,
+                          isActive: !badge.isActive
+                        });
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenModal('badge', 'edit', badge)}
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete('badge', badge.id)}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+        
+        {/* Colors Tab */}
+        <TabsContent value="colors">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={() => handleOpenModal('color', 'create')}
+              className="flex items-center gap-2"
+            >
+              <PlusIcon className="h-4 w-4" /> Add Color
+            </Button>
+          </div>
+          
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Color</TableHead>
+                <TableHead>Hex Code</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {colors?.map((color) => (
+                <TableRow key={color.id}>
+                  <TableCell>{color.name}</TableCell>
+                  <TableCell>
+                    <div 
+                      className="h-6 w-6 rounded-full" 
+                      style={{ backgroundColor: color.hexCode }}
+                    />
+                  </TableCell>
+                  <TableCell>{color.hexCode}</TableCell>
+                  <TableCell>
+                    <Switch 
+                      checked={color.isActive} 
+                      onCheckedChange={() => {
+                        updateColorMutation.mutate({
+                          ...color,
+                          isActive: !color.isActive
+                        });
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenModal('color', 'edit', color)}
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete('color', color.id)}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+        
+        {/* Car Brands Tab */}
+        <TabsContent value="carBrands">
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={() => handleOpenModal('carBrand', 'create')}
+              className="flex items-center gap-2"
+            >
+              <PlusIcon className="h-4 w-4" /> Add Car Brand
+            </Button>
+          </div>
+          
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {carBrands?.map((brand) => (
+                <TableRow key={brand.id}>
+                  <TableCell>{brand.name}</TableCell>
+                  <TableCell>
+                    <Switch 
+                      checked={brand.isActive} 
+                      onCheckedChange={() => {
+                        updateCarBrandMutation.mutate({
+                          ...brand,
+                          isActive: !brand.isActive
+                        });
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenModal('carBrand', 'edit', brand)}
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete('carBrand', brand.id)}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+        
+        {/* Payment Methods Tab */}
+        <TabsContent value="paymentMethods">
+          <div className="flex justify-end mb-4">
+            <Button disabled className="flex items-center gap-2">
+              <PlusIcon className="h-4 w-4" /> Add Payment Method
+            </Button>
+          </div>
+          
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paymentMethods?.map((method) => (
+                <TableRow key={method.id}>
+                  <TableCell>{method.name}</TableCell>
+                  <TableCell>
+                    <Switch checked={method.isActive} disabled />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <p className="text-sm text-muted-foreground mt-4">
+            Payment methods are managed through integrations. Currently only Stripe is supported.
+          </p>
+        </TabsContent>
       </Tabs>
       
       {/* Modal for Adding/Editing Items */}
@@ -354,7 +924,173 @@ const ProductManager = () => {
               </>
             )}
             
-            {/* Add similar form fields for other types... */}
+            {modalType === 'textStyle' && (
+              <>
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input 
+                    id="name" 
+                    value={modalData.name || ''} 
+                    onChange={(e) => setModalData({...modalData, name: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Input 
+                    id="description" 
+                    value={modalData.description || ''} 
+                    onChange={(e) => setModalData({...modalData, description: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="imagePath">Image URL</Label>
+                  <Input 
+                    id="imagePath" 
+                    value={modalData.imagePath || ''} 
+                    onChange={(e) => setModalData({...modalData, imagePath: e.target.value})}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="additionalPrice">Additional Price (£)</Label>
+                  <Input 
+                    id="additionalPrice" 
+                    type="number" 
+                    step="0.01"
+                    value={modalData.additionalPrice || '0'} 
+                    onChange={(e) => setModalData({...modalData, additionalPrice: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    id="isActive"
+                    checked={modalData.isActive !== false} // Default to true
+                    onCheckedChange={(checked) => setModalData({...modalData, isActive: checked})}
+                  />
+                  <Label htmlFor="isActive">Active</Label>
+                </div>
+              </>
+            )}
+            
+            {modalType === 'badge' && (
+              <>
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input 
+                    id="name" 
+                    value={modalData.name || ''} 
+                    onChange={(e) => setModalData({...modalData, name: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="imagePath">Image URL</Label>
+                  <Input 
+                    id="imagePath" 
+                    value={modalData.imagePath || ''} 
+                    onChange={(e) => setModalData({...modalData, imagePath: e.target.value})}
+                    placeholder="https://example.com/badge.png"
+                    required
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    id="isActive"
+                    checked={modalData.isActive !== false} // Default to true
+                    onCheckedChange={(checked) => setModalData({...modalData, isActive: checked})}
+                  />
+                  <Label htmlFor="isActive">Active</Label>
+                </div>
+                
+                {modalData.imagePath && (
+                  <div className="mt-4">
+                    <Label>Preview</Label>
+                    <div className="h-20 w-20 mt-2 border rounded flex items-center justify-center">
+                      <img 
+                        src={modalData.imagePath} 
+                        alt="Badge Preview" 
+                        className="max-h-full max-w-full object-contain"
+                        onError={(e) => e.currentTarget.src = 'https://placehold.co/80x80?text=Error'}
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+            
+            {modalType === 'color' && (
+              <>
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input 
+                    id="name" 
+                    value={modalData.name || ''} 
+                    onChange={(e) => setModalData({...modalData, name: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="hexCode">Hex Color Code</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      id="hexCode" 
+                      value={modalData.hexCode || '#000000'} 
+                      onChange={(e) => setModalData({...modalData, hexCode: e.target.value})}
+                      placeholder="#000000"
+                      required
+                    />
+                    <input 
+                      type="color"
+                      value={modalData.hexCode || '#000000'}
+                      onChange={(e) => setModalData({...modalData, hexCode: e.target.value})}
+                      className="h-10 w-16 p-1 rounded-md border"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    id="isActive"
+                    checked={modalData.isActive !== false} // Default to true
+                    onCheckedChange={(checked) => setModalData({...modalData, isActive: checked})}
+                  />
+                  <Label htmlFor="isActive">Active</Label>
+                </div>
+              </>
+            )}
+            
+            {modalType === 'carBrand' && (
+              <>
+                <div>
+                  <Label htmlFor="name">Brand Name</Label>
+                  <Input 
+                    id="name" 
+                    value={modalData.name || ''} 
+                    onChange={(e) => setModalData({...modalData, name: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    id="isActive"
+                    checked={modalData.isActive !== false} // Default to true
+                    onCheckedChange={(checked) => setModalData({...modalData, isActive: checked})}
+                  />
+                  <Label htmlFor="isActive">Active</Label>
+                </div>
+              </>
+            )}
             
             <DialogFooter>
               <DialogClose asChild>
