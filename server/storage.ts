@@ -7,7 +7,11 @@ import {
   carBrands, type CarBrand, type InsertCarBrand,
   pricing, type Pricing, type InsertPricing,
   paymentMethods, type PaymentMethod, type InsertPaymentMethod,
-  orders, type Order, type InsertOrder
+  orders, type Order, type InsertOrder,
+  siteConfig, type SiteConfig, type InsertSiteConfig,
+  navigationItems, type NavigationItem, type InsertNavigationItem,
+  contentBlocks, type ContentBlock, type InsertContentBlock,
+  uploadedFiles, type UploadedFile, type InsertUploadedFile
 } from "@shared/schema";
 import { mockData } from "./mockData";
 import bcrypt from "bcryptjs";
@@ -18,9 +22,43 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  
+  // Site Configuration
+  getSiteConfigs(): Promise<SiteConfig[]>;
+  getSiteConfigByKey(key: string): Promise<SiteConfig | undefined>;
+  createSiteConfig(config: InsertSiteConfig): Promise<SiteConfig>;
+  updateSiteConfig(id: number, config: Partial<SiteConfig>): Promise<SiteConfig | undefined>;
+  upsertSiteConfig(key: string, value: string, type: string, description?: string): Promise<SiteConfig>;
+  
+  // Navigation Items
+  getNavigationItems(): Promise<NavigationItem[]>;
+  getActiveNavigationItems(): Promise<NavigationItem[]>; 
+  getNavigationItem(id: number): Promise<NavigationItem | undefined>;
+  createNavigationItem(item: InsertNavigationItem): Promise<NavigationItem>;
+  updateNavigationItem(id: number, item: Partial<NavigationItem>): Promise<NavigationItem | undefined>;
+  deleteNavigationItem(id: number): Promise<boolean>;
+  
+  // Content Blocks
+  getContentBlocks(): Promise<ContentBlock[]>;
+  getActiveContentBlocks(): Promise<ContentBlock[]>;
+  getContentBlockByIdentifier(identifier: string): Promise<ContentBlock | undefined>;
+  createContentBlock(block: InsertContentBlock): Promise<ContentBlock>;
+  updateContentBlock(id: number, block: Partial<ContentBlock>): Promise<ContentBlock | undefined>;
+  upsertContentBlock(identifier: string, title: string, content: string, location: string): Promise<ContentBlock>;
+  
+  // File Uploads
+  getUploadedFiles(): Promise<UploadedFile[]>;
+  getUploadedFile(id: number): Promise<UploadedFile | undefined>;
+  getUploadedFileByFilename(filename: string): Promise<UploadedFile | undefined>;
+  getUploadedFilesByType(fileType: string): Promise<UploadedFile[]>;
+  createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile>;
+  updateUploadedFile(id: number, file: Partial<UploadedFile>): Promise<UploadedFile | undefined>;
+  deleteUploadedFile(id: number): Promise<boolean>;
   
   // Plate Sizes
   getPlateSizes(): Promise<PlateSize[]>;
+  getActivePlateSizes(): Promise<PlateSize[]>; // Get only active items
   getPlateSize(id: number): Promise<PlateSize | undefined>;
   createPlateSize(size: InsertPlateSize): Promise<PlateSize>;
   updatePlateSize(id: number, size: Partial<PlateSize>): Promise<PlateSize | undefined>;
@@ -28,6 +66,7 @@ export interface IStorage {
   
   // Text Styles
   getTextStyles(): Promise<TextStyle[]>;
+  getActiveTextStyles(): Promise<TextStyle[]>; // Get only active items
   getTextStyle(id: number): Promise<TextStyle | undefined>;
   createTextStyle(style: InsertTextStyle): Promise<TextStyle>;
   updateTextStyle(id: number, style: Partial<TextStyle>): Promise<TextStyle | undefined>;
@@ -35,6 +74,7 @@ export interface IStorage {
   
   // Badges
   getBadges(): Promise<Badge[]>;
+  getActiveBadges(): Promise<Badge[]>; // Get only active items
   getBadge(id: number): Promise<Badge | undefined>;
   createBadge(badge: InsertBadge): Promise<Badge>;
   updateBadge(id: number, badge: Partial<Badge>): Promise<Badge | undefined>;
@@ -42,6 +82,7 @@ export interface IStorage {
   
   // Colors
   getColors(): Promise<Color[]>;
+  getActiveColors(): Promise<Color[]>; // Get only active items
   getColor(id: number): Promise<Color | undefined>;
   createColor(color: InsertColor): Promise<Color>;
   updateColor(id: number, color: Partial<Color>): Promise<Color | undefined>;
@@ -49,6 +90,7 @@ export interface IStorage {
   
   // Car Brands
   getCarBrands(): Promise<CarBrand[]>;
+  getActiveCarBrands(): Promise<CarBrand[]>; // Get only active items
   getCarBrand(id: number): Promise<CarBrand | undefined>;
   createCarBrand(brand: InsertCarBrand): Promise<CarBrand>;
   updateCarBrand(id: number, brand: Partial<CarBrand>): Promise<CarBrand | undefined>;
@@ -60,6 +102,7 @@ export interface IStorage {
   
   // Payment Methods
   getPaymentMethods(): Promise<PaymentMethod[]>;
+  getActivePaymentMethods(): Promise<PaymentMethod[]>; // Get only active items
   getPaymentMethod(id: number): Promise<PaymentMethod | undefined>;
   createPaymentMethod(method: InsertPaymentMethod): Promise<PaymentMethod>;
   updatePaymentMethod(id: number, method: Partial<PaymentMethod>): Promise<PaymentMethod | undefined>;
@@ -85,6 +128,10 @@ export class MemStorage implements IStorage {
   private pricingMap: Map<number, Pricing>;
   private paymentMethodsMap: Map<number, PaymentMethod>;
   private ordersMap: Map<number, Order>;
+  private siteConfigMap: Map<number, SiteConfig>;
+  private navigationItemsMap: Map<number, NavigationItem>;
+  private contentBlocksMap: Map<number, ContentBlock>;
+  private uploadedFilesMap: Map<number, UploadedFile>;
   
   // Auto-increment IDs
   private userIdCounter: number;
@@ -96,6 +143,10 @@ export class MemStorage implements IStorage {
   private pricingIdCounter: number;
   private paymentMethodIdCounter: number;
   private orderIdCounter: number;
+  private siteConfigIdCounter: number;
+  private navigationItemIdCounter: number;
+  private contentBlockIdCounter: number;
+  private uploadedFileIdCounter: number;
 
   constructor() {
     // Initialize maps
@@ -108,6 +159,10 @@ export class MemStorage implements IStorage {
     this.pricingMap = new Map();
     this.paymentMethodsMap = new Map();
     this.ordersMap = new Map();
+    this.siteConfigMap = new Map();
+    this.navigationItemsMap = new Map();
+    this.contentBlocksMap = new Map();
+    this.uploadedFilesMap = new Map();
     
     // Initialize counters
     this.userIdCounter = 1;
@@ -119,6 +174,10 @@ export class MemStorage implements IStorage {
     this.pricingIdCounter = 1;
     this.paymentMethodIdCounter = 1;
     this.orderIdCounter = 1;
+    this.siteConfigIdCounter = 1;
+    this.navigationItemIdCounter = 1;
+    this.contentBlockIdCounter = 1;
+    this.uploadedFileIdCounter = 1;
     
     // Initialize with mock data
     this.initializeData();
@@ -168,15 +227,32 @@ export class MemStorage implements IStorage {
     const newUser: User = { 
       ...user, 
       id, 
-      isAdmin: user.isAdmin === undefined ? false : user.isAdmin
+      isAdmin: user.isAdmin === undefined ? false : user.isAdmin,
+      createdAt: new Date(),
+      lastLogin: null
     };
     this.users.set(id, newUser);
     return newUser;
   }
 
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const existingUser = this.users.get(id);
+    if (!existingUser) return undefined;
+    
+    const updatedUser: User = { ...existingUser, ...updates };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
   // Plate Size methods
   async getPlateSizes(): Promise<PlateSize[]> {
     return Array.from(this.plateSizesMap.values());
+  }
+  
+  async getActivePlateSizes(): Promise<PlateSize[]> {
+    return Array.from(this.plateSizesMap.values()).filter(
+      (size) => size.isActive === true
+    );
   }
 
   async getPlateSize(id: number): Promise<PlateSize | undefined> {
@@ -211,6 +287,12 @@ export class MemStorage implements IStorage {
   async getTextStyles(): Promise<TextStyle[]> {
     return Array.from(this.textStylesMap.values());
   }
+  
+  async getActiveTextStyles(): Promise<TextStyle[]> {
+    return Array.from(this.textStylesMap.values()).filter(
+      (style) => style.isActive === true
+    );
+  }
 
   async getTextStyle(id: number): Promise<TextStyle | undefined> {
     return this.textStylesMap.get(id);
@@ -244,6 +326,12 @@ export class MemStorage implements IStorage {
   // Badge methods
   async getBadges(): Promise<Badge[]> {
     return Array.from(this.badgesMap.values());
+  }
+  
+  async getActiveBadges(): Promise<Badge[]> {
+    return Array.from(this.badgesMap.values()).filter(
+      (badge) => badge.isActive === true
+    );
   }
 
   async getBadge(id: number): Promise<Badge | undefined> {
@@ -439,6 +527,68 @@ export class MemStorage implements IStorage {
     return Array.from(this.ordersMap.values())
       .reduce((total, order) => total + Number(order.totalPrice), 0);
   }
+  
+  // Site Configuration methods
+  async getSiteConfigs(): Promise<SiteConfig[]> {
+    return Array.from(this.siteConfigMap.values());
+  }
+
+  async getSiteConfigByKey(key: string): Promise<SiteConfig | undefined> {
+    return Array.from(this.siteConfigMap.values()).find(
+      (config) => config.key === key
+    );
+  }
+
+  async createSiteConfig(config: InsertSiteConfig): Promise<SiteConfig> {
+    const id = this.siteConfigIdCounter++;
+    const newConfig: SiteConfig = { 
+      ...config, 
+      id,
+      updatedAt: new Date()
+    };
+    this.siteConfigMap.set(id, newConfig);
+    return newConfig;
+  }
+
+  async updateSiteConfig(id: number, config: Partial<SiteConfig>): Promise<SiteConfig | undefined> {
+    const existingConfig = this.siteConfigMap.get(id);
+    if (!existingConfig) return undefined;
+    
+    const updatedConfig: SiteConfig = { 
+      ...existingConfig, 
+      ...config,
+      updatedAt: new Date()
+    };
+    this.siteConfigMap.set(id, updatedConfig);
+    return updatedConfig;
+  }
+
+  async upsertSiteConfig(key: string, value: string, type: string, description?: string): Promise<SiteConfig> {
+    const existingConfig = await this.getSiteConfigByKey(key);
+    
+    if (existingConfig) {
+      return this.updateSiteConfig(existingConfig.id, { 
+        value, 
+        updatedAt: new Date() 
+      }) as Promise<SiteConfig>;
+    } else {
+      return this.createSiteConfig({ 
+        key, 
+        value, 
+        type,
+        description: description || null
+      });
+    }
+  }
+
+  async deleteSiteConfig(id: number): Promise<boolean> {
+    return this.siteConfigMap.delete(id);
+  }
 }
 
+// DatabaseStorage is implemented separately to avoid circular imports
+// Import it from dbStorage.ts for actual database operations
+export { DatabaseStorage } from './dbStorage';
+
+// For now, use the MemStorage implementation
 export const storage = new MemStorage();
