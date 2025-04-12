@@ -1,0 +1,161 @@
+I want to build a number plate customizer and ordering web application for UK-style plates. The app should allow users to fully customize their number plates, preview them live, and place orders with payment and shipping details. Admin panel will control pricing, options, and order management.
+
+🎨 Frontend Features
+🔹 Left Panel Layout
+Includes two tabs:
+
+Road Legal Plates
+
+Show Plates
+(Both tabs have the same features)
+
+🔧 Step-by-Step Plate Customization
+1. Select Your Options
+Instructional text:
+
+"Build your number plate below by choosing from the options and clicking 'Buy Now' to add to basket."
+
+Options:
+
+Both Plates – Shows front (white) + rear (yellow) plates in preview.
+
+Front Plate – Shows only front (white background).
+
+Rear Plate – Shows only rear (yellow background).
+
+🔸 Prices for front and rear are set from the admin panel, e.g. £15 each.
+
+2. Your Registration
+User enters number/text for the plate.
+
+✅ Live Preview: The text should update in real-time on the plate preview, just like Demon Plates.
+
+3. Plate Size (Dropdown)
+Dropdown populated via admin panel, each option includes:
+
+Name
+
+Size
+
+Additional Price
+
+💰 When a size is selected, its price is added dynamically to the base price (set by admin). Updated total should reflect instantly.
+
+4. Text Style (Dropdown)
+On selecting a style:
+
+A popup/modal should appear showing:
+
+Image of text style
+
+Description
+
+📸 Images + descriptions are managed via admin panel.
+
+5. Badges & Colours
+Color options (e.g., red, green, blue) will be set by admin via HEX codes.
+
+Badges (e.g., UK, GB flags) will be uploaded by admin as images.
+
+User can pick both color and badge. These apply to the plate preview live.
+
+6. Border
+User chooses the plate border color (admin provides color options via HEX).
+
+7. Plate Surround
+User can select from a dropdown of car brands (e.g., Ford, BMW, Mercedes).
+
+🔧 Admin will configure:
+
+Brand name
+
+Dropdown options
+
+8. Reset Design
+A button outside the frame that clears:
+
+All selections
+
+Entered text
+
+Returns UI to default state
+
+🛒 Buy Now / Checkout System
+When the user clicks Buy Now, they’re taken through a checkout process.
+
+Customer fills in:
+Name
+
+Email
+
+Phone number
+
+Shipping address
+
+Payment Options:
+Admin can enable one or more of:
+
+Bank Transfer
+
+PayPal
+
+Stripe
+
+Cash on Delivery (COD)
+
+🛠 Admin chooses which payment methods are available.
+
+🛍 Order Placement
+Once the user completes checkout:
+
+Order is saved
+
+Confirmation message is shown
+
+Optionally, send confirmation email to user (optional feature)
+
+🔐 Admin Panel Features
+1. Product Controls
+Admin can:
+
+Set base prices for front/rear plates
+
+Add/edit plate sizes with names, dimensions, and additional prices
+
+Add text styles with images + descriptions
+
+Add colors via HEX
+
+Upload badge images
+
+Set border color options
+
+Add car brands for plate surrounds
+
+2. Order Management
+Admin can view all incoming orders with:
+
+Unique Order ID
+
+Customer name
+
+Address
+
+Selected options
+
+Final total price
+
+Plate preview (optional thumbnail)
+
+Payment status (based on selected method)
+
+Option to filter by payment type (Bank, PayPal, Stripe, COD)
+
+📝 Tech Notes / Suggestions
+Plate preview should be dynamically rendered (SVG or Canvas recommended)
+
+All prices and assets should be loaded dynamically via API or CMS
+
+Admin panel can be built using a custom backend or a headless CMS
+
+Checkout can integrate with Stripe/PayPal SDKs
