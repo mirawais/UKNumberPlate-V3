@@ -206,7 +206,8 @@ export class MemStorage implements IStorage {
       frontPlatePrice: "15",
       rearPlatePrice: "15",
       bothPlatesDiscount: "5",
-      taxRate: "20"
+      taxRate: "20",
+      updatedAt: new Date()
     });
   }
 
@@ -366,6 +367,12 @@ export class MemStorage implements IStorage {
   async getColors(): Promise<Color[]> {
     return Array.from(this.colorsMap.values());
   }
+  
+  async getActiveColors(): Promise<Color[]> {
+    return Array.from(this.colorsMap.values()).filter(
+      (color) => color.isActive === true
+    );
+  }
 
   async getColor(id: number): Promise<Color | undefined> {
     return this.colorsMap.get(id);
@@ -398,6 +405,12 @@ export class MemStorage implements IStorage {
   // Car Brand methods
   async getCarBrands(): Promise<CarBrand[]> {
     return Array.from(this.carBrandsMap.values());
+  }
+  
+  async getActiveCarBrands(): Promise<CarBrand[]> {
+    return Array.from(this.carBrandsMap.values()).filter(
+      (brand) => brand.isActive === true
+    );
   }
 
   async getCarBrand(id: number): Promise<CarBrand | undefined> {
@@ -445,6 +458,12 @@ export class MemStorage implements IStorage {
   // Payment Method methods
   async getPaymentMethods(): Promise<PaymentMethod[]> {
     return Array.from(this.paymentMethodsMap.values());
+  }
+  
+  async getActivePaymentMethods(): Promise<PaymentMethod[]> {
+    return Array.from(this.paymentMethodsMap.values()).filter(
+      (method) => method.isActive === true
+    );
   }
 
   async getPaymentMethod(id: number): Promise<PaymentMethod | undefined> {
@@ -496,10 +515,12 @@ export class MemStorage implements IStorage {
       ...order, 
       id, 
       createdAt: new Date(),
+      updatedAt: new Date(),
       stripePaymentIntentId: null,
       // Ensure these required fields have defaults if not provided
       paymentStatus: order.paymentStatus || 'pending',
-      orderStatus: order.orderStatus || 'pending'
+      orderStatus: order.orderStatus || 'pending',
+      notes: order.notes || null
     };
     this.ordersMap.set(id, newOrder);
     return newOrder;
@@ -526,6 +547,111 @@ export class MemStorage implements IStorage {
   async getTotalSales(): Promise<number> {
     return Array.from(this.ordersMap.values())
       .reduce((total, order) => total + Number(order.totalPrice), 0);
+  }
+  
+  // Navigation Items methods
+  async getNavigationItems(): Promise<NavigationItem[]> {
+    return Array.from(this.navigationItemsMap.values());
+  }
+  
+  async getActiveNavigationItems(): Promise<NavigationItem[]> {
+    return Array.from(this.navigationItemsMap.values()).filter(
+      (item) => item.isActive === true
+    );
+  }
+  
+  async getNavigationItem(id: number): Promise<NavigationItem | undefined> {
+    return this.navigationItemsMap.get(id);
+  }
+  
+  async createNavigationItem(item: InsertNavigationItem): Promise<NavigationItem> {
+    const id = this.navigationItemIdCounter++;
+    const newItem: NavigationItem = {
+      ...item,
+      id,
+      isActive: item.isActive === undefined ? true : item.isActive,
+      parentId: item.parentId || null,
+      icon: item.icon || null,
+      displayOrder: item.displayOrder || null
+    };
+    this.navigationItemsMap.set(id, newItem);
+    return newItem;
+  }
+  
+  async updateNavigationItem(id: number, item: Partial<NavigationItem>): Promise<NavigationItem | undefined> {
+    const existingItem = this.navigationItemsMap.get(id);
+    if (!existingItem) return undefined;
+    
+    const updatedItem: NavigationItem = { ...existingItem, ...item };
+    this.navigationItemsMap.set(id, updatedItem);
+    return updatedItem;
+  }
+  
+  async deleteNavigationItem(id: number): Promise<boolean> {
+    return this.navigationItemsMap.delete(id);
+  }
+  
+  // Content Blocks methods
+  async getContentBlocks(): Promise<ContentBlock[]> {
+    return Array.from(this.contentBlocksMap.values());
+  }
+  
+  async getActiveContentBlocks(): Promise<ContentBlock[]> {
+    return Array.from(this.contentBlocksMap.values()).filter(
+      (block) => block.isActive === true
+    );
+  }
+  
+  async getContentBlockByIdentifier(identifier: string): Promise<ContentBlock | undefined> {
+    return Array.from(this.contentBlocksMap.values()).find(
+      (block) => block.identifier === identifier
+    );
+  }
+  
+  async createContentBlock(block: InsertContentBlock): Promise<ContentBlock> {
+    const id = this.contentBlockIdCounter++;
+    const newBlock: ContentBlock = {
+      ...block,
+      id,
+      isActive: block.isActive === undefined ? true : block.isActive,
+      updatedAt: new Date()
+    };
+    this.contentBlocksMap.set(id, newBlock);
+    return newBlock;
+  }
+  
+  async updateContentBlock(id: number, block: Partial<ContentBlock>): Promise<ContentBlock | undefined> {
+    const existingBlock = this.contentBlocksMap.get(id);
+    if (!existingBlock) return undefined;
+    
+    const updatedBlock: ContentBlock = { 
+      ...existingBlock, 
+      ...block,
+      updatedAt: new Date()
+    };
+    this.contentBlocksMap.set(id, updatedBlock);
+    return updatedBlock;
+  }
+  
+  async upsertContentBlock(identifier: string, title: string, content: string, location: string): Promise<ContentBlock> {
+    const existingBlock = await this.getContentBlockByIdentifier(identifier);
+    
+    if (existingBlock) {
+      return this.updateContentBlock(existingBlock.id, {
+        title,
+        content,
+        location,
+        updatedAt: new Date()
+      }) as Promise<ContentBlock>;
+    } else {
+      return this.createContentBlock({
+        identifier,
+        title,
+        content,
+        location,
+        isActive: true
+      });
+    }
   }
   
   // Site Configuration methods
@@ -583,6 +709,52 @@ export class MemStorage implements IStorage {
 
   async deleteSiteConfig(id: number): Promise<boolean> {
     return this.siteConfigMap.delete(id);
+  }
+  
+  // File Upload methods
+  async getUploadedFiles(): Promise<UploadedFile[]> {
+    return Array.from(this.uploadedFilesMap.values());
+  }
+  
+  async getUploadedFile(id: number): Promise<UploadedFile | undefined> {
+    return this.uploadedFilesMap.get(id);
+  }
+  
+  async getUploadedFileByFilename(filename: string): Promise<UploadedFile | undefined> {
+    return Array.from(this.uploadedFilesMap.values()).find(
+      (file) => file.filename === filename
+    );
+  }
+  
+  async getUploadedFilesByType(fileType: string): Promise<UploadedFile[]> {
+    return Array.from(this.uploadedFilesMap.values()).filter(
+      (file) => file.fileType === fileType
+    );
+  }
+  
+  async createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile> {
+    const id = this.uploadedFileIdCounter++;
+    const newFile: UploadedFile = {
+      ...file,
+      id,
+      createdAt: new Date(),
+      fileSize: file.fileSize || 0
+    };
+    this.uploadedFilesMap.set(id, newFile);
+    return newFile;
+  }
+  
+  async updateUploadedFile(id: number, file: Partial<UploadedFile>): Promise<UploadedFile | undefined> {
+    const existingFile = this.uploadedFilesMap.get(id);
+    if (!existingFile) return undefined;
+    
+    const updatedFile: UploadedFile = { ...existingFile, ...file };
+    this.uploadedFilesMap.set(id, updatedFile);
+    return updatedFile;
+  }
+  
+  async deleteUploadedFile(id: number): Promise<boolean> {
+    return this.uploadedFilesMap.delete(id);
   }
 }
 
