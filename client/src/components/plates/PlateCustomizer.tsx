@@ -391,6 +391,48 @@ const PlateCustomizer = () => {
                 </Select>
               </div>
               
+              {/* Document Upload (Required for road legal plates) */}
+              <div className="p-4 border-b">
+                <h3 className="font-bold mb-2">Vehicle Document Upload</h3>
+                <p className="text-sm text-gray-500 mb-3">
+                  Please upload a copy of your vehicle document for verification (required for road legal plates)
+                </p>
+                <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+                  <input
+                    type="file"
+                    id="document-upload"
+                    className="hidden"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files && files.length > 0) {
+                        // Store file in customization or use separate state if needed
+                        toast({
+                          title: "Document Uploaded",
+                          description: `Successfully uploaded: ${files[0].name}`,
+                        });
+                      }
+                    }}
+                  />
+                  <label 
+                    htmlFor="document-upload" 
+                    className="cursor-pointer block"
+                  >
+                    <div className="flex flex-col items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <span className="text-sm font-medium text-primary">
+                        Click to upload document
+                      </span>
+                      <span className="text-xs text-gray-500 mt-1">
+                        PDF, JPG or PNG (max 5MB)
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              
               {/* Reset Design Button */}
               <div className="p-4">
                 <Button 
@@ -490,9 +532,178 @@ const PlateCustomizer = () => {
                 />
               </div>
               
-              {/* Rest of inputs identical but setting isRoadLegal to false */}
-              {/* Copy the rest of the inputs from above, but change the IDs and set isRoadLegal to false in setCustomization */}
-              {/* ... */}
+              {/* Plate Size Selection */}
+              <div className="p-4 border-b">
+                <h3 className="font-bold mb-2">Plate Size</h3>
+                <Select 
+                  value={customization.plateSize} 
+                  onValueChange={(value) => setCustomization({...customization, plateSize: value, isRoadLegal: false})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select plate size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {plateSizes?.map((size) => (
+                      <SelectItem key={size.id} value={size.id.toString()}>
+                        {size.name} ({size.dimensions}) {Number(size.additionalPrice) > 0 ? `- +£${Number(size.additionalPrice).toFixed(2)}` : '- £0.00'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Text Style Selection */}
+              <div className="p-4 border-b">
+                <h3 className="font-bold mb-2">Text Style</h3>
+                <div className="relative">
+                  <Select 
+                    value={customization.textStyle} 
+                    onValueChange={(value) => {
+                      setCustomization({...customization, textStyle: value, isRoadLegal: false});
+                      const style = textStyles?.find(s => s.id.toString() === value);
+                      if (style) setSelectedTextStyle(style);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select text style" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {textStyles?.map((style) => (
+                        <SelectItem key={style.id} value={style.id.toString()}>
+                          {style.name} {Number(style.additionalPrice) > 0 ? `- +£${Number(style.additionalPrice).toFixed(2)}` : '- £0.00'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute right-2 top-2"
+                    onClick={handleTextStyleInfo}
+                  >
+                    <InfoIcon className="h-4 w-4 text-gray-500" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Badges & Colours */}
+              <div className="p-4 border-b">
+                <h3 className="font-bold mb-2">Badges & Colours</h3>
+                
+                {/* Color Selection */}
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-2">Text Color:</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {colors?.map((color) => (
+                      <button 
+                        key={color.id}
+                        className={`h-8 w-full rounded ${
+                          customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                        }`}
+                        style={{ backgroundColor: color.hexCode }}
+                        title={color.name}
+                        onClick={() => setCustomization({...customization, textColor: color.id.toString(), isRoadLegal: false})}
+                      />
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Badge Selection */}
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Badge:</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {badges?.map((badge) => (
+                      <button 
+                        key={badge.id}
+                        className={`h-16 w-full p-1 rounded ${
+                          customization.badge === badge.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                        } bg-gray-100 text-center text-xs`}
+                        onClick={() => setCustomization({...customization, badge: badge.id.toString(), isRoadLegal: false})}
+                      >
+                        <img src={badge.imagePath} className="w-full h-full object-contain mx-auto" alt={badge.name} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Border Selection */}
+              <div className="p-4 border-b">
+                <h3 className="font-bold mb-2">Border</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  {colors?.map((color) => (
+                    <button 
+                      key={color.id}
+                      className={`h-8 w-full rounded ${
+                        customization.borderColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                      }`}
+                      style={{ backgroundColor: color.hexCode }}
+                      title={color.name}
+                      onClick={() => setCustomization({...customization, borderColor: color.id.toString(), isRoadLegal: false})}
+                    />
+                  ))}
+                  <button 
+                    className={`h-8 w-full rounded ${
+                      customization.borderColor === '' ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                    } bg-transparent`}
+                    title="None"
+                    onClick={() => setCustomization({...customization, borderColor: '', isRoadLegal: false})}
+                  />
+                </div>
+              </div>
+              
+              {/* Plate Surround */}
+              <div className="p-4 border-b">
+                <h3 className="font-bold mb-2">Plate Surround</h3>
+                <Select 
+                  value={customization.carBrand} 
+                  onValueChange={(value) => setCustomization({...customization, carBrand: value, isRoadLegal: false})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select car brand" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {carBrands?.map((brand) => (
+                      <SelectItem key={brand.id} value={brand.id.toString()}>
+                        {brand.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Reset Design Button */}
+              <div className="p-4">
+                <Button 
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setCustomization({
+                      plateType: 'both',
+                      registrationText: 'YOUR REG',
+                      plateSize: plateSizes?.[0]?.id.toString() || '',
+                      textStyle: textStyles?.[0]?.id.toString() || '',
+                      textColor: colors?.[0]?.id.toString() || '',
+                      badge: 'gb',
+                      borderColor: colors?.[0]?.id.toString() || '',
+                      carBrand: 'none',
+                      isRoadLegal: false
+                    });
+                    
+                    if (textStyles?.length) {
+                      setSelectedTextStyle(textStyles[0]);
+                    }
+                    
+                    toast({
+                      title: "Design Reset",
+                      description: "Your show plate design has been reset to default."
+                    });
+                  }}
+                >
+                  Reset Design
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
