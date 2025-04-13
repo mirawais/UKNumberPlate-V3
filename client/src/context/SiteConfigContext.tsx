@@ -12,6 +12,7 @@ interface SiteConfig {
 
 interface SiteFeatures {
   showBadges: boolean;
+  showTextColors: boolean;
   showBorders: boolean;
   showCarBrands: boolean;
   roadLegalPlates: boolean;
@@ -37,6 +38,7 @@ interface SiteConfigContextType {
 
 const defaultFeatures: SiteFeatures = {
   showBadges: true,
+  showTextColors: true,
   showBorders: true,
   showCarBrands: true,
   roadLegalPlates: true,
@@ -83,6 +85,7 @@ export const SiteConfigProvider = ({ children }: { children: ReactNode }) => {
       // Update features based on config
       setFeatures({
         showBadges: featureMap['showBadges'] === 'true',
+        showTextColors: featureMap['showTextColors'] === 'true',
         showBorders: featureMap['showBorders'] === 'true',
         showCarBrands: featureMap['showCarBrands'] === 'true',
         roadLegalPlates: featureMap['roadLegalPlates'] === 'true',

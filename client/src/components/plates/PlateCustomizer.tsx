@@ -314,23 +314,25 @@ const PlateCustomizer = () => {
               <div className="p-4 border-b">
                 <h3 className="font-bold mb-2">Badges & Colours</h3>
                 
-                {/* Color Selection */}
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600 mb-2">Text Color:</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {colors?.map((color) => (
-                      <button 
-                        key={color.id}
-                        className={`h-8 w-full rounded ${
-                          customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                        }`}
-                        style={{ backgroundColor: color.hexCode }}
-                        title={color.name}
-                        onClick={() => setCustomization({...customization, textColor: color.id.toString()})}
-                      />
-                    ))}
+                {/* Color Selection - Conditionally show text colors based on feature toggle */}
+                {features.showTextColors && (
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600 mb-2">Text Color:</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {colors?.map((color) => (
+                        <button 
+                          key={color.id}
+                          className={`h-8 w-full rounded ${
+                            customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                          }`}
+                          style={{ backgroundColor: color.hexCode }}
+                          title={color.name}
+                          onClick={() => setCustomization({...customization, textColor: color.id.toString()})}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 {/* Badge Selection - Conditionally show badges based on feature toggle */}
                 {features.showBadges && (
@@ -602,23 +604,25 @@ const PlateCustomizer = () => {
               <div className="p-4 border-b">
                 <h3 className="font-bold mb-2">Badges & Colours</h3>
                 
-                {/* Color Selection */}
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600 mb-2">Text Color:</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {colors?.map((color) => (
-                      <button 
-                        key={color.id}
-                        className={`h-8 w-full rounded ${
-                          customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                        }`}
-                        style={{ backgroundColor: color.hexCode }}
-                        title={color.name}
-                        onClick={() => setCustomization({...customization, textColor: color.id.toString(), isRoadLegal: false})}
-                      />
-                    ))}
+                {/* Color Selection - Conditionally show text colors based on feature toggle */}
+                {features.showTextColors && (
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600 mb-2">Text Color:</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {colors?.map((color) => (
+                        <button 
+                          key={color.id}
+                          className={`h-8 w-full rounded ${
+                            customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                          }`}
+                          style={{ backgroundColor: color.hexCode }}
+                          title={color.name}
+                          onClick={() => setCustomization({...customization, textColor: color.id.toString(), isRoadLegal: false})}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 {/* Badge Selection */}
                 <div>
