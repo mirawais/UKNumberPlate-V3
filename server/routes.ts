@@ -5,6 +5,35 @@ import { auth, requireAuth, requireAdmin } from "./auth";
 import Stripe from "stripe";
 import { type SessionData } from "express-session";
 import bodyParser from "body-parser";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Configure multer for file uploads
+// For Windows or Unix paths
+const currentDir = process.cwd();
+const uploadsDir = path.join(currentDir, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage_config = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({
+  storage: storage_config,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+});
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -783,6 +812,328 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Unhandled event type ${event.type}`);
     }
   }
+  
+  // File Upload routes
+  app.post('/api/uploads', requireAdmin, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+      
+      const fileData = {
+        filename: req.file.filename,
+        originalFilename: req.file.originalname,
+        filePath: req.file.path,
+        fileType: path.extname(req.file.originalname).substring(1),
+        fileSize: req.file.size.toString(),
+        mimeType: req.file.mimetype,
+        isActive: true,
+      };
+      
+      const file = await storage.createUploadedFile(fileData);
+      res.status(201).json(file);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to upload file',
+        error: error.message,
+      });
+    }
+  });
+
+  app.get('/api/uploads', requireAdmin, async (req, res) => {
+    try {
+      const files = await storage.getUploadedFiles();
+      res.json(files);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get uploaded files',
+        error: error.message,
+      });
+    }
+  });
+
+  app.get('/api/uploads/:id', async (req, res) => {
+    try {
+      const file = await storage.getUploadedFile(parseInt(req.params.id));
+      if (!file) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+      
+      // Send the file
+      res.sendFile(file.filePath);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get file',
+        error: error.message,
+      });
+    }
+  });
+
+  app.delete('/api/uploads/:id', requireAdmin, async (req, res) => {
+    try {
+      const file = await storage.getUploadedFile(parseInt(req.params.id));
+      if (!file) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+      
+      // Remove the file from storage
+      try {
+        fs.unlinkSync(file.path);
+      } catch (err) {
+        console.error('Error deleting file:', err);
+      }
+      
+      const success = await storage.deleteUploadedFile(file.id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(500).json({ message: 'Failed to delete file record' });
+      }
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to delete file',
+        error: error.message,
+      });
+    }
+  });
+
+  // Navigation Items routes
+  app.get('/api/navigation-items', async (req, res) => {
+    try {
+      const items = await storage.getNavigationItems();
+      res.json(items);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get navigation items',
+        error: error.message,
+      });
+    }
+  });
+
+  app.get('/api/navigation-items/active', async (req, res) => {
+    try {
+      const items = await storage.getActiveNavigationItems();
+      res.json(items);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get active navigation items',
+        error: error.message,
+      });
+    }
+  });
+
+  app.post('/api/navigation-items', requireAdmin, async (req, res) => {
+    try {
+      const item = await storage.createNavigationItem(req.body);
+      res.status(201).json(item);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to create navigation item',
+        error: error.message,
+      });
+    }
+  });
+
+  app.put('/api/navigation-items/:id', requireAdmin, async (req, res) => {
+    try {
+      const item = await storage.updateNavigationItem(parseInt(req.params.id), req.body);
+      if (!item) {
+        return res.status(404).json({ message: 'Navigation item not found' });
+      }
+      res.json(item);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to update navigation item',
+        error: error.message,
+      });
+    }
+  });
+
+  app.delete('/api/navigation-items/:id', requireAdmin, async (req, res) => {
+    try {
+      const success = await storage.deleteNavigationItem(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ message: 'Navigation item not found' });
+      }
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to delete navigation item',
+        error: error.message,
+      });
+    }
+  });
+
+  // Content Blocks routes
+  app.get('/api/content-blocks', async (req, res) => {
+    try {
+      const blocks = await storage.getContentBlocks();
+      res.json(blocks);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get content blocks',
+        error: error.message,
+      });
+    }
+  });
+
+  app.get('/api/content-blocks/active', async (req, res) => {
+    try {
+      const blocks = await storage.getActiveContentBlocks();
+      res.json(blocks);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get active content blocks',
+        error: error.message,
+      });
+    }
+  });
+
+  app.get('/api/content-blocks/:identifier', async (req, res) => {
+    try {
+      const block = await storage.getContentBlockByIdentifier(req.params.identifier);
+      if (!block) {
+        return res.status(404).json({ message: 'Content block not found' });
+      }
+      res.json(block);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get content block',
+        error: error.message,
+      });
+    }
+  });
+
+  app.post('/api/content-blocks', requireAdmin, async (req, res) => {
+    try {
+      const block = await storage.createContentBlock(req.body);
+      res.status(201).json(block);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to create content block',
+        error: error.message,
+      });
+    }
+  });
+
+  app.put('/api/content-blocks/:id', requireAdmin, async (req, res) => {
+    try {
+      const block = await storage.updateContentBlock(parseInt(req.params.id), req.body);
+      if (!block) {
+        return res.status(404).json({ message: 'Content block not found' });
+      }
+      res.json(block);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to update content block',
+        error: error.message,
+      });
+    }
+  });
+
+  app.delete('/api/content-blocks/:id', requireAdmin, async (req, res) => {
+    try {
+      const success = await storage.deleteContentBlock(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ message: 'Content block not found' });
+      }
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to delete content block',
+        error: error.message,
+      });
+    }
+  });
+
+  app.post('/api/content-blocks/upsert', requireAdmin, async (req, res) => {
+    try {
+      const { identifier, title, content, location } = req.body;
+      if (!identifier || !title || !content || !location) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+      
+      const block = await storage.upsertContentBlock(identifier, title, content, location);
+      res.json(block);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to upsert content block',
+        error: error.message,
+      });
+    }
+  });
+
+  // Site Configuration routes
+  app.get('/api/site-configs', async (req, res) => {
+    try {
+      const configs = await storage.getSiteConfigs();
+      res.json(configs);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get site configs',
+        error: error.message,
+      });
+    }
+  });
+
+  app.get('/api/site-configs/:key', async (req, res) => {
+    try {
+      const config = await storage.getSiteConfigByKey(req.params.key);
+      if (!config) {
+        return res.status(404).json({ message: 'Site config not found' });
+      }
+      res.json(config);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to get site config',
+        error: error.message,
+      });
+    }
+  });
+
+  app.post('/api/site-configs', requireAdmin, async (req, res) => {
+    try {
+      const config = await storage.createSiteConfig(req.body);
+      res.status(201).json(config);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to create site config',
+        error: error.message,
+      });
+    }
+  });
+
+  app.put('/api/site-configs/:id', requireAdmin, async (req, res) => {
+    try {
+      const config = await storage.updateSiteConfig(parseInt(req.params.id), req.body);
+      if (!config) {
+        return res.status(404).json({ message: 'Site config not found' });
+      }
+      res.json(config);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to update site config',
+        error: error.message,
+      });
+    }
+  });
+
+  app.post('/api/site-configs/upsert', requireAdmin, async (req, res) => {
+    try {
+      const { key, value, type, description } = req.body;
+      if (!key || !value || !type) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+      
+      const config = await storage.upsertSiteConfig(key, value, type, description);
+      res.json(config);
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Failed to upsert site config',
+        error: error.message,
+      });
+    }
+  });
 
   const httpServer = createServer(app);
 
