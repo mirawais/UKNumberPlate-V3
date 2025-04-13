@@ -11,6 +11,7 @@ import TextStyleModal from './TextStyleModal';
 import CheckoutModal from '../checkout/CheckoutModal';
 import { useToast } from '@/hooks/use-toast';
 import { InfoIcon } from 'lucide-react';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import type { 
   PlateSize, TextStyle, Badge, Color, CarBrand, 
   Pricing, PlateCustomization 

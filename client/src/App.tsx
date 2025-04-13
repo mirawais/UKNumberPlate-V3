@@ -8,6 +8,7 @@ import AdminLogin from "@/pages/AdminLogin";
 import Admin from "@/pages/Admin";
 import Checkout from "@/pages/Checkout";
 import Confirmation from "@/pages/Confirmation";
+import { SiteConfigProvider } from "./context/SiteConfigContext";
 
 function Router() {
   return (
@@ -25,8 +26,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <SiteConfigProvider>
+        <Router />
+        <Toaster />
+      </SiteConfigProvider>
     </QueryClientProvider>
   );
 }
