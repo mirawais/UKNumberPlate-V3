@@ -55,11 +55,58 @@ export class DatabaseStorage implements IStorage {
   // For now, these will throw errors when used
   
   // Site Configuration
-  async getSiteConfigs(): Promise<SiteConfig[]> { throw new Error("Not implemented"); }
-  async getSiteConfigByKey(key: string): Promise<SiteConfig | undefined> { throw new Error("Not implemented"); }
-  async createSiteConfig(config: InsertSiteConfig): Promise<SiteConfig> { throw new Error("Not implemented"); }
-  async updateSiteConfig(id: number, config: Partial<SiteConfig>): Promise<SiteConfig | undefined> { throw new Error("Not implemented"); }
-  async upsertSiteConfig(key: string, value: string, type: string, description?: string): Promise<SiteConfig> { throw new Error("Not implemented"); }
+  async getSiteConfigs(): Promise<SiteConfig[]> {
+    return db.select().from(siteConfig);
+  }
+
+  async getSiteConfigByKey(key: string): Promise<SiteConfig | undefined> {
+    const [config] = await db.select().from(siteConfig).where(eq(siteConfig.configKey, key));
+    return config;
+  }
+
+  async createSiteConfig(config: InsertSiteConfig): Promise<SiteConfig> {
+    const [newConfig] = await db.insert(siteConfig).values({
+      ...config,
+      updatedAt: new Date()
+    }).returning();
+    return newConfig;
+  }
+
+  async updateSiteConfig(id: number, config: Partial<SiteConfig>): Promise<SiteConfig | undefined> {
+    const [updatedConfig] = await db.update(siteConfig)
+      .set({
+        ...config,
+        updatedAt: new Date()
+      })
+      .where(eq(siteConfig.id, id))
+      .returning();
+    return updatedConfig;
+  }
+
+  async upsertSiteConfig(key: string, value: string, type: string, description?: string): Promise<SiteConfig> {
+    const existingConfig = await this.getSiteConfigByKey(key);
+    
+    if (existingConfig) {
+      const [updated] = await db.update(siteConfig)
+        .set({
+          configValue: value,
+          updatedAt: new Date()
+        })
+        .where(eq(siteConfig.id, existingConfig.id))
+        .returning();
+      return updated;
+    }
+
+    const [newConfig] = await db.insert(siteConfig).values({
+      configKey: key,
+      configValue: value,
+      configType: type,
+      description: description || null,
+      updatedAt: new Date()
+    }).returning();
+    
+    return newConfig;
+  }
   
   // Navigation Items
   async getNavigationItems(): Promise<NavigationItem[]> { throw new Error("Not implemented"); }
