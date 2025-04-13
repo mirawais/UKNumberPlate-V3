@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 
 interface SiteConfig {
   id: number;
-  key: string;
-  value: string;
-  type: string;
+  configKey: string;
+  configValue: string;
+  configType: string;
   description: string | null;
   updatedAt: Date;
 }
@@ -73,10 +73,10 @@ export const SiteConfigProvider = ({ children }: { children: ReactNode }) => {
       // Process features
       const featureMap: Record<string, string> = {};
       siteConfigs.forEach(config => {
-        if (config.type === 'feature') {
+        if (config.configType === 'feature') {
           // Extract feature name from config key (e.g., "feature.showBadges" -> "showBadges")
-          const featureName = config.key.split('.')[1];
-          featureMap[featureName] = config.value;
+          const featureName = config.configKey.split('.')[1];
+          featureMap[featureName] = config.configValue;
         }
       });
       
@@ -93,12 +93,12 @@ export const SiteConfigProvider = ({ children }: { children: ReactNode }) => {
       
       // Update site info
       setSiteInfo({
-        siteName: siteConfigs.find(c => c.key === 'site.name')?.value || defaultSiteInfo.siteName,
-        tagline: siteConfigs.find(c => c.key === 'site.tagline')?.value || defaultSiteInfo.tagline,
-        contactEmail: siteConfigs.find(c => c.key === 'site.contactEmail')?.value || defaultSiteInfo.contactEmail,
-        contactPhone: siteConfigs.find(c => c.key === 'site.contactPhone')?.value || defaultSiteInfo.contactPhone,
-        primaryColor: siteConfigs.find(c => c.key === 'site.primaryColor')?.value || defaultSiteInfo.primaryColor,
-        logoUrl: siteConfigs.find(c => c.key === 'site.logoUrl')?.value || defaultSiteInfo.logoUrl,
+        siteName: siteConfigs.find(c => c.configKey === 'site.name')?.configValue || defaultSiteInfo.siteName,
+        tagline: siteConfigs.find(c => c.configKey === 'site.tagline')?.configValue || defaultSiteInfo.tagline,
+        contactEmail: siteConfigs.find(c => c.configKey === 'site.contactEmail')?.configValue || defaultSiteInfo.contactEmail,
+        contactPhone: siteConfigs.find(c => c.configKey === 'site.contactPhone')?.configValue || defaultSiteInfo.contactPhone,
+        primaryColor: siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || defaultSiteInfo.primaryColor,
+        logoUrl: siteConfigs.find(c => c.configKey === 'site.logoUrl')?.configValue || defaultSiteInfo.logoUrl,
       });
     }
   }, [siteConfigs]);

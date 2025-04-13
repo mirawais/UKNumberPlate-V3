@@ -666,7 +666,7 @@ export class MemStorage implements IStorage {
 
   async getSiteConfigByKey(key: string): Promise<SiteConfig | undefined> {
     return Array.from(this.siteConfigMap.values()).find(
-      (config) => config.key === key
+      (config) => config.configKey === key
     );
   }
 
