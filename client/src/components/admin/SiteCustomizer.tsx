@@ -132,6 +132,15 @@ export default function SiteCustomizer() {
     queryKey: ['/api/uploads'],
   });
   
+  // General settings state
+  const [generalSettings, setGeneralSettings] = useState({
+    siteName: '',
+    tagline: '',
+    contactEmail: '',
+    contactPhone: '',
+    primaryColor: '#0070f3',
+  });
+  
   // Feature toggle states
   const [features, setFeatures] = useState({
     showBadges: true,
@@ -142,6 +151,19 @@ export default function SiteCustomizer() {
     useStripeCheckout: true,
     allowDocumentUpload: true,
   });
+  
+  // Load general settings from site config
+  useEffect(() => {
+    if (siteConfigs) {
+      setGeneralSettings({
+        siteName: siteConfigs.find(c => c.configKey === 'site.name')?.configValue || '',
+        tagline: siteConfigs.find(c => c.configKey === 'site.tagline')?.configValue || '',
+        contactEmail: siteConfigs.find(c => c.configKey === 'site.contactEmail')?.configValue || '',
+        contactPhone: siteConfigs.find(c => c.configKey === 'site.contactPhone')?.configValue || '',
+        primaryColor: siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3',
+      });
+    }
+  }, [siteConfigs]);
   
   // Load feature toggles from site config
   useEffect(() => {
@@ -293,6 +315,64 @@ export default function SiteCustomizer() {
     setFeatures({ ...features, [feature]: value });
   };
   
+  // Save all general settings at once 
+  const saveGeneralSettings = () => {
+    // Create an array of general settings to update
+    const settings = [
+      {
+        key: 'site.name',
+        value: generalSettings.siteName || '',
+        type: 'text',
+        description: 'Website name displayed in header and title'
+      },
+      {
+        key: 'site.tagline',
+        value: generalSettings.tagline || '',
+        type: 'text',
+        description: 'Short tagline displayed in the header'
+      },
+      {
+        key: 'site.contactEmail',
+        value: generalSettings.contactEmail || '',
+        type: 'text',
+        description: 'Contact email for customer inquiries'
+      },
+      {
+        key: 'site.contactPhone',
+        value: generalSettings.contactPhone || '',
+        type: 'text',
+        description: 'Contact phone for customer inquiries'
+      },
+      {
+        key: 'site.primaryColor',
+        value: generalSettings.primaryColor || '#0070f3',
+        type: 'color',
+        description: 'Primary color used throughout the site'
+      }
+    ];
+
+    // Update all settings in parallel
+    Promise.all(
+      settings.map(config => 
+        apiRequest('POST', '/api/site-configs/upsert', config)
+      )
+    )
+    .then(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
+      toast({
+        title: 'General settings updated',
+        description: 'Your site settings have been saved successfully.',
+      });
+    })
+    .catch(error => {
+      toast({
+        title: 'Error updating settings',
+        description: error.message || 'Failed to save general settings',
+        variant: 'destructive',
+      });
+    });
+  };
+
   // Save all feature toggles at once
   const saveFeatureToggles = () => {
     // Create an array of all the feature toggle changes to save
@@ -378,106 +458,106 @@ export default function SiteCustomizer() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="site-name">Site Name</Label>
+                    <Input 
+                      id="site-name" 
+                      placeholder="My Number Plate Company" 
+                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.name')?.configValue || ''}
+                      onChange={(e) => {
+                        setGeneralSettings(prev => ({
+                          ...prev,
+                          siteName: e.target.value
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="site-tagline">Tagline</Label>
+                    <Input 
+                      id="site-tagline" 
+                      placeholder="The best UK number plates" 
+                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.tagline')?.configValue || ''}
+                      onChange={(e) => {
+                        setGeneralSettings(prev => ({
+                          ...prev,
+                          tagline: e.target.value
+                        }));
+                      }}
+                    />
+                  </div>
+                </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="site-name">Site Name</Label>
+                  <Label htmlFor="contact-email">Contact Email</Label>
                   <Input 
-                    id="site-name" 
-                    placeholder="My Number Plate Company" 
-                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.name')?.configValue || ''}
+                    id="contact-email" 
+                    type="email" 
+                    placeholder="contact@example.com" 
+                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactEmail')?.configValue || ''}
                     onChange={(e) => {
-                      upsertConfigMutation.mutate({
-                        key: 'site.name',
-                        value: e.target.value,
-                        type: 'text',
-                        description: 'Website name displayed in header and title',
-                      });
+                      setGeneralSettings(prev => ({
+                        ...prev,
+                        contactEmail: e.target.value
+                      }));
                     }}
                   />
                 </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="site-tagline">Tagline</Label>
+                  <Label htmlFor="contact-phone">Contact Phone</Label>
                   <Input 
-                    id="site-tagline" 
-                    placeholder="The best UK number plates" 
-                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.tagline')?.configValue || ''}
+                    id="contact-phone" 
+                    placeholder="+44 123 456789" 
+                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactPhone')?.configValue || ''}
                     onChange={(e) => {
-                      upsertConfigMutation.mutate({
-                        key: 'site.tagline',
-                        value: e.target.value,
-                        type: 'text',
-                        description: 'Short tagline displayed in the header',
-                      });
+                      setGeneralSettings(prev => ({
+                        ...prev,
+                        contactPhone: e.target.value
+                      }));
                     }}
                   />
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="contact-email">Contact Email</Label>
-                <Input 
-                  id="contact-email" 
-                  type="email" 
-                  placeholder="contact@example.com" 
-                  defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactEmail')?.configValue || ''}
-                  onChange={(e) => {
-                    upsertConfigMutation.mutate({
-                      key: 'site.contactEmail',
-                      value: e.target.value,
-                      type: 'text',
-                      description: 'Contact email for customer inquiries',
-                    });
-                  }}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="contact-phone">Contact Phone</Label>
-                <Input 
-                  id="contact-phone" 
-                  placeholder="+44 123 456789" 
-                  defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactPhone')?.configValue || ''}
-                  onChange={(e) => {
-                    upsertConfigMutation.mutate({
-                      key: 'site.contactPhone',
-                      value: e.target.value,
-                      type: 'text',
-                      description: 'Contact phone for customer inquiries',
-                    });
-                  }}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="primary-color">Primary Color</Label>
-                <div className="flex items-center space-x-2">
-                  <Input 
-                    id="primary-color" 
-                    type="color" 
-                    className="w-12 h-10" 
-                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
-                    onChange={(e) => {
-                      upsertConfigMutation.mutate({
-                        key: 'site.primaryColor',
-                        value: e.target.value,
-                        type: 'color',
-                        description: 'Primary color used throughout the site',
-                      });
-                    }}
-                  />
-                  <Input 
-                    type="text" 
-                    className="flex-1" 
-                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
-                    onChange={(e) => {
-                      upsertConfigMutation.mutate({
-                        key: 'site.primaryColor',
-                        value: e.target.value,
-                        type: 'color',
-                        description: 'Primary color used throughout the site',
-                      });
-                    }}
-                  />
+                
+                <div className="space-y-2">
+                  <Label htmlFor="primary-color">Primary Color</Label>
+                  <div className="flex items-center space-x-2">
+                    <Input 
+                      id="primary-color" 
+                      type="color" 
+                      className="w-12 h-10" 
+                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
+                      onChange={(e) => {
+                        setGeneralSettings(prev => ({
+                          ...prev,
+                          primaryColor: e.target.value
+                        }));
+                      }}
+                    />
+                    <Input 
+                      type="text" 
+                      className="flex-1" 
+                      value={generalSettings.primaryColor || siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
+                      onChange={(e) => {
+                        setGeneralSettings(prev => ({
+                          ...prev,
+                          primaryColor: e.target.value
+                        }));
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                <div className="mt-6">
+                  <Button 
+                    type="button" 
+                    onClick={saveGeneralSettings}
+                    className="w-full"
+                  >
+                    Save General Settings
+                  </Button>
                 </div>
               </div>
             </CardContent>

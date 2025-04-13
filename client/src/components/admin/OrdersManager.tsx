@@ -390,19 +390,58 @@ export default function OrdersManager() {
                               <h3 className="font-semibold text-lg">Order Details</h3>
                               <div className="mt-2 space-y-2">
                                 <div className="border rounded-md p-3">
-                                  <div className="font-medium">
+                                  <div className="font-medium text-lg mb-2">
                                     {selectedOrder.plateDetails?.registrationNumber || "Custom Plate"}
                                   </div>
-                                  <div className="text-sm text-muted-foreground space-y-1">
-                                    <div>Size: {selectedOrder.plateDetails?.size || "Standard"}</div>
-                                    <div>Style: {selectedOrder.plateDetails?.style || "Standard"}</div>
-                                    {selectedOrder.plateDetails?.badge && (
-                                      <div>Badge: {selectedOrder.plateDetails.badge}</div>
-                                    )}
-                                    {selectedOrder.plateDetails?.border && (
-                                      <div>Border: {selectedOrder.plateDetails.border}</div>
-                                    )}
+                                  
+                                  <div className="bg-muted/30 p-2 rounded-md mb-3">
+                                    <div className="text-sm font-medium mb-1">Plate Type:</div>
+                                    <div className="text-sm">
+                                      {selectedOrder.plateDetails?.plateType === 'road-legal' ? 'Road Legal Plate' : 'Show Plate'}
+                                    </div>
                                   </div>
+                                  
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-muted/30 p-2 rounded-md">
+                                      <div className="text-sm font-medium mb-1">Plate Details:</div>
+                                      <div className="text-sm text-muted-foreground space-y-1">
+                                        <div>Size: {selectedOrder.plateDetails?.size || "Standard"}</div>
+                                        <div>Style: {selectedOrder.plateDetails?.style || "Standard"}</div>
+                                        <div>Material: {selectedOrder.plateDetails?.material || "Standard"}</div>
+                                        <div>Layout: {selectedOrder.plateDetails?.layout || "Standard"}</div>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="bg-muted/30 p-2 rounded-md">
+                                      <div className="text-sm font-medium mb-1">Customization:</div>
+                                      <div className="text-sm text-muted-foreground space-y-1">
+                                        {selectedOrder.plateDetails?.badge && (
+                                          <div>Badge: {selectedOrder.plateDetails.badge}</div>
+                                        )}
+                                        {selectedOrder.plateDetails?.border && (
+                                          <div>Border: {selectedOrder.plateDetails.border}</div>
+                                        )}
+                                        {selectedOrder.plateDetails?.textColor && (
+                                          <div>Text Color: {selectedOrder.plateDetails.textColor}</div>
+                                        )}
+                                        {selectedOrder.plateDetails?.backgroundType && (
+                                          <div>Background: {selectedOrder.plateDetails.backgroundType}</div>
+                                        )}
+                                        {selectedOrder.plateDetails?.carBrand && (
+                                          <div>Car Brand: {selectedOrder.plateDetails.carBrand}</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  {selectedOrder.plateDetails?.specialInstructions && (
+                                    <div className="mt-3 bg-muted/30 p-2 rounded-md">
+                                      <div className="text-sm font-medium mb-1">Special Instructions:</div>
+                                      <div className="text-sm text-muted-foreground">
+                                        {selectedOrder.plateDetails.specialInstructions}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
