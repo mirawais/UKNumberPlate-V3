@@ -169,7 +169,7 @@ export default function SiteCustomizer() {
   
   // Load feature toggles from site config
   useEffect(() => {
-    if (siteConfigs) {
+    if (siteConfigs && !Object.keys(features).length) {
       const featureMap: Record<string, string> = {};
       siteConfigs.forEach(config => {
         if (config.configType === 'feature') {
@@ -190,11 +190,11 @@ export default function SiteCustomizer() {
         allowDocumentUpload: featureMap['allowDocumentUpload'] !== 'false',
       };
       
-      // Set the updated features
-      console.log('Updating features:', updatedFeatures);
+      // Set the updated features only if we don't have any features set
+      console.log('Initial features load:', updatedFeatures);
       setFeatures(updatedFeatures);
     }
-  }, [siteConfigs]);
+  }, [siteConfigs, features]);
   
   // Form setup for content blocks
   const contentForm = useForm({
