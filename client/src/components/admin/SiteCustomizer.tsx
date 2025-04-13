@@ -225,7 +225,15 @@ export default function SiteCustomizer() {
   // Mutations
   const upsertConfigMutation = useMutation({
     mutationFn: (config: { key: string; value: string; type: string; description?: string }) => {
-      return apiRequest('POST', '/api/site-configs/upsert', config);
+      // Map the old property names to the new ones that the backend expects
+      const mappedConfig = {
+        configKey: config.key,
+        configValue: config.value,
+        configType: config.type,
+        description: config.description
+      };
+      console.log('Sending config with updated property names:', mappedConfig);
+      return apiRequest('POST', '/api/site-configs/upsert', mappedConfig);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
@@ -331,39 +339,39 @@ export default function SiteCustomizer() {
       // Create an array of general settings to update
       const settings = [
         {
-          key: 'site.name',
-          value: generalSettings.siteName || '',
-          type: 'text',
+          configKey: 'site.name',
+          configValue: generalSettings.siteName || '',
+          configType: 'text',
           description: 'Website name displayed in header and title'
         },
         {
-          key: 'site.tagline',
-          value: generalSettings.tagline || '',
-          type: 'text',
+          configKey: 'site.tagline',
+          configValue: generalSettings.tagline || '',
+          configType: 'text',
           description: 'Short tagline displayed in the header'
         },
         {
-          key: 'site.contactEmail',
-          value: generalSettings.contactEmail || '',
-          type: 'text',
+          configKey: 'site.contactEmail',
+          configValue: generalSettings.contactEmail || '',
+          configType: 'text',
           description: 'Contact email for customer inquiries'
         },
         {
-          key: 'site.contactPhone',
-          value: generalSettings.contactPhone || '',
-          type: 'text',
+          configKey: 'site.contactPhone',
+          configValue: generalSettings.contactPhone || '',
+          configType: 'text',
           description: 'Contact phone for customer inquiries'
         },
         {
-          key: 'site.primaryColor',
-          value: generalSettings.primaryColor || '#0070f3',
-          type: 'color',
+          configKey: 'site.primaryColor',
+          configValue: generalSettings.primaryColor || '#0070f3',
+          configType: 'color',
           description: 'Primary color used throughout the site'
         },
         {
-          key: 'site.logoUrl',
-          value: generalSettings.logoUrl || '',
-          type: 'text',
+          configKey: 'site.logoUrl',
+          configValue: generalSettings.logoUrl || '',
+          configType: 'text',
           description: 'URL or ID of the site logo image'
         }
       ];
@@ -373,18 +381,10 @@ export default function SiteCustomizer() {
       // Update settings one by one to ensure each succeeds
       for (const config of settings) {
         // Skip empty values to prevent "Missing required fields" error
-        if (!config.value && config.value !== '0') continue;
+        if (!config.configValue && config.configValue !== '0') continue;
         
-        // Fix configKey vs key discrepancy
-        const requestData = {
-          key: config.key,
-          value: config.value,
-          type: config.type,
-          description: config.description
-        };
-        
-        console.log('Saving config:', requestData);
-        await apiRequest('POST', '/api/site-configs/upsert', requestData);
+        console.log('Saving config:', config);
+        await apiRequest('POST', '/api/site-configs/upsert', config);
       }
 
       await queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
@@ -407,9 +407,9 @@ export default function SiteCustomizer() {
     try {
       // Create an array of all the feature toggle changes to save
       const featureUpdates = Object.entries(features).map(([feature, value]) => ({
-        key: `feature.${feature}`,
-        value: value.toString(), // Make sure boolean is converted to string
-        type: 'feature',
+        configKey: `feature.${feature}`,
+        configValue: value.toString(), // Make sure boolean is converted to string
+        configType: 'feature',
         description: `Toggle for ${feature} feature`,
       }));
       
@@ -511,7 +511,7 @@ export default function SiteCustomizer() {
                     <Input 
                       id="site-tagline" 
                       placeholder="The best UK number plates" 
-                      defaultValue={siteConfigs?.find(c => c.key === 'site.tagline')?.value || ''}
+                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.tagline')?.configValue || ''}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
@@ -528,7 +528,7 @@ export default function SiteCustomizer() {
                     id="contact-email" 
                     type="email" 
                     placeholder="contact@example.com" 
-                    defaultValue={siteConfigs?.find(c => c.key === 'site.contactEmail')?.value || ''}
+                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactEmail')?.configValue || ''}
                     onChange={(e) => {
                       setGeneralSettings(prev => ({
                         ...prev,
@@ -543,7 +543,7 @@ export default function SiteCustomizer() {
                   <Input 
                     id="contact-phone" 
                     placeholder="+44 123 456789" 
-                    defaultValue={siteConfigs?.find(c => c.key === 'site.contactPhone')?.value || ''}
+                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactPhone')?.configValue || ''}
                     onChange={(e) => {
                       setGeneralSettings(prev => ({
                         ...prev,
@@ -560,7 +560,7 @@ export default function SiteCustomizer() {
                       id="primary-color" 
                       type="color" 
                       className="w-12 h-10" 
-                      defaultValue={siteConfigs?.find(c => c.key === 'site.primaryColor')?.value || '#0070f3'}
+                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
@@ -571,7 +571,7 @@ export default function SiteCustomizer() {
                     <Input 
                       type="text" 
                       className="flex-1" 
-                      value={generalSettings.primaryColor || siteConfigs?.find(c => c.key === 'site.primaryColor')?.value || '#0070f3'}
+                      value={generalSettings.primaryColor || siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
@@ -589,7 +589,7 @@ export default function SiteCustomizer() {
                       id="site-logo" 
                       type="text" 
                       placeholder="URL to your logo image or upload ID"
-                      defaultValue={siteConfigs?.find(c => c.key === 'site.logoUrl')?.value || ''}
+                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.logoUrl')?.configValue || ''}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
