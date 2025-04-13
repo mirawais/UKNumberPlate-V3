@@ -9,13 +9,16 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Configure multer for file uploads
+// Configure directories
 // For Windows or Unix paths
 const currentDir = process.cwd();
 const uploadsDir = path.join(currentDir, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+
+// Font file directory handling
+const fontsDir = path.join(currentDir, 'attached_assets');
 
 const storage_config = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -45,6 +48,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Custom font access
+  app.get('/fonts/:fontName', (req, res) => {
+    const fontPath = path.join(fontsDir, req.params.fontName);
+    
+    if (fs.existsSync(fontPath)) {
+      res.sendFile(fontPath);
+    } else {
+      res.status(404).send('Font not found');
+    }
+  });
+
   // Auth routes
   app.post("/api/auth/login", auth.login);
   app.post("/api/auth/logout", auth.logout);
@@ -878,7 +892,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Remove the file from storage
       try {
-        fs.unlinkSync(file.path);
+        fs.unlinkSync(file.filePath);
       } catch (err) {
         console.error('Error deleting file:', err);
       }

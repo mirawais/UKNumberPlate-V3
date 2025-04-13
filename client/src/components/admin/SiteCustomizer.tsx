@@ -1,27 +1,55 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Button } from '@/components/ui/button';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { 
+  Form, 
+  FormControl, 
+  FormDescription, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from '@/components/ui/form';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Upload, ImagePlus, Trash2, RefreshCw, Check, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { Loader2, Upload } from 'lucide-react';
 
 interface UploadedFile {
   id: number;
   filename: string;
-  originalName: string;
-  path: string;
+  originalFilename: string;
+  filePath: string;
   fileType: string;
-  fileSize: number;
+  fileSize: string;
   mimeType: string;
-  createdAt: Date;
+  isActive: boolean;
+  fileData: string | null;
+  uploadedAt: Date;
 }
 
 interface SiteConfig {
@@ -59,12 +87,14 @@ interface FeatureToggleProps {
   onChange: (value: boolean) => void;
 }
 
-const FeatureToggle: React.FC<FeatureToggleProps> = ({ label, description, value, onChange }) => {
+function FeatureToggle({ label, description, value, onChange }: FeatureToggleProps) {
   return (
-    <div className="flex items-center justify-between space-x-2 rounded-md border p-4">
+    <div className="flex items-center justify-between space-x-2 py-4">
       <div className="space-y-0.5">
         <Label htmlFor={`toggle-${label}`}>{label}</Label>
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        {description && (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        )}
       </div>
       <Switch
         id={`toggle-${label}`}
@@ -72,74 +102,115 @@ const FeatureToggle: React.FC<FeatureToggleProps> = ({ label, description, value
         onCheckedChange={onChange}
       />
     </div>
-  )
+  );
 }
 
-const SiteCustomizer: React.FC = () => {
+export default function SiteCustomizer() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("general");
-  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
-  const [uploadType, setUploadType] = useState<string>("logo");
+  const [activeTab, setActiveTab] = useState('general');
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
-  // Fetch site configuration
-  const { data: siteConfigs, isLoading: isLoadingConfigs } = useQuery({
+  // Site Configuration
+  const { data: siteConfigs, isLoading: loadingConfigs } = useQuery<SiteConfig[]>({
     queryKey: ['/api/site-configs'],
-    select: (data: SiteConfig[]) => {
-      // Group configs by key for easier access
-      const configs: Record<string, SiteConfig> = {};
-      data.forEach(config => {
-        configs[config.configKey] = config;
-      });
-      return configs;
-    }
   });
   
-  // Fetch uploaded files
-  const { data: uploadedFiles, isLoading: isLoadingFiles } = useQuery({
+  // Content Blocks
+  const { data: contentBlocks, isLoading: loadingBlocks } = useQuery<ContentBlock[]>({
+    queryKey: ['/api/content-blocks'],
+  });
+  
+  // Navigation Items
+  const { data: navigationItems, isLoading: loadingNavigation } = useQuery<NavigationItem[]>({
+    queryKey: ['/api/navigation-items'],
+  });
+  
+  // Uploaded Files
+  const { data: uploadedFiles, isLoading: loadingFiles } = useQuery<UploadedFile[]>({
     queryKey: ['/api/uploads'],
-    select: (data: UploadedFile[]) => {
-      return data.filter(file => file.fileType.match(/^(jpg|jpeg|png|gif|svg)$/i));
-    }
   });
   
-  // Get feature toggles state
-  const useBadges = siteConfigs?.['feature.badges']?.configValue === 'true';
-  const useColors = siteConfigs?.['feature.colors']?.configValue === 'true';
-  const useBorders = siteConfigs?.['feature.borders']?.configValue === 'true';
-  const useCarBrands = siteConfigs?.['feature.car_brands']?.configValue === 'true';
+  // Feature toggle states
+  const [features, setFeatures] = useState({
+    showBadges: true,
+    showBorders: true,
+    showCarBrands: true,
+    roadLegalPlates: true,
+    showPlates: true,
+    useStripeCheckout: true,
+    allowDocumentUpload: true,
+  });
   
-  // Get color scheme
-  const primaryColor = siteConfigs?.['theme.primary_color']?.configValue || '#1e40af';
-  const secondaryColor = siteConfigs?.['theme.secondary_color']?.configValue || '#6b7280';
-  const logoUrl = siteConfigs?.['site.logo_url']?.configValue;
-  const siteTitle = siteConfigs?.['site.title']?.configValue || 'UK Number Plate Customizer';
+  // Load feature toggles from site config
+  useEffect(() => {
+    if (siteConfigs) {
+      const featureMap: Record<string, string> = {};
+      siteConfigs.forEach(config => {
+        if (config.configType === 'feature') {
+          featureMap[config.configKey] = config.configValue;
+        }
+      });
+      
+      setFeatures({
+        showBadges: featureMap['feature.showBadges'] === 'true',
+        showBorders: featureMap['feature.showBorders'] === 'true',
+        showCarBrands: featureMap['feature.showCarBrands'] === 'true',
+        roadLegalPlates: featureMap['feature.roadLegalPlates'] === 'true',
+        showPlates: featureMap['feature.showPlates'] === 'true',
+        useStripeCheckout: featureMap['feature.useStripeCheckout'] === 'true',
+        allowDocumentUpload: featureMap['feature.allowDocumentUpload'] === 'true',
+      });
+    }
+  }, [siteConfigs]);
   
-  // Update site config mutation
-  const updateConfigMutation = useMutation({
-    mutationFn: async ({ key, value, type, description }: { key: string, value: string, type: string, description?: string }) => {
-      const response = await apiRequest('POST', '/api/site-configs/upsert', { key, value, type, description });
-      return response.json();
+  // Form setup for content blocks
+  const contentForm = useForm({
+    defaultValues: {
+      identifier: '',
+      title: '',
+      content: '',
+      location: 'home',
+      isActive: true,
+    },
+  });
+  
+  // Form setup for navigation items
+  const navigationForm = useForm({
+    defaultValues: {
+      label: '',
+      url: '',
+      orderIndex: '0',
+      isActive: true,
+      parentId: null,
+    },
+  });
+  
+  // Mutations
+  const upsertConfigMutation = useMutation({
+    mutationFn: (config: { key: string; value: string; type: string; description?: string }) => {
+      return apiRequest('POST', '/api/site-configs/upsert', config);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
       toast({
-        title: "Settings updated",
-        description: "Your site configuration has been updated successfully.",
+        title: 'Configuration updated',
+        description: 'Your site settings have been saved.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating settings",
-        description: error.message || "There was an error updating the site configuration.",
-        variant: "destructive",
+        title: 'Error updating configuration',
+        description: error.message,
+        variant: 'destructive',
       });
     }
   });
   
-  // File upload mutation
   const uploadFileMutation = useMutation({
     mutationFn: async (file: File) => {
+      setIsUploading(true);
       const formData = new FormData();
       formData.append('file', file);
       
@@ -149,288 +220,239 @@ const SiteCustomizer: React.FC = () => {
       });
       
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to upload file');
+        throw new Error('Failed to upload file');
       }
       
       return response.json();
     },
     onSuccess: (data: UploadedFile) => {
       queryClient.invalidateQueries({ queryKey: ['/api/uploads'] });
-      
-      // Update appropriate config based on uploadType
-      if (uploadType === 'logo') {
-        updateConfigMutation.mutate({
-          key: 'site.logo_url', 
-          value: `/api/uploads/${data.id}`, 
-          type: 'string',
-          description: 'Site logo URL'
-        });
-      }
-      
-      setFileToUpload(null);
       toast({
-        title: "File uploaded",
-        description: "The file was uploaded successfully.",
+        title: 'File Uploaded',
+        description: `${data.originalFilename} has been uploaded successfully.`,
+      });
+      setIsUploading(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Upload Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+      setIsUploading(false);
+    }
+  });
+  
+  const createContentBlockMutation = useMutation({
+    mutationFn: (block: any) => {
+      return apiRequest('POST', '/api/content-blocks', block);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/content-blocks'] });
+      contentForm.reset();
+      toast({
+        title: 'Content block created',
+        description: 'The content block has been added successfully.',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error uploading file",
-        description: error.message || "There was an error uploading the file.",
-        variant: "destructive",
+        title: 'Error creating content block',
+        description: error.message,
+        variant: 'destructive',
       });
     }
   });
   
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFileToUpload(e.target.files[0]);
+  const createNavigationItemMutation = useMutation({
+    mutationFn: (item: any) => {
+      return apiRequest('POST', '/api/navigation-items', item);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/navigation-items'] });
+      navigationForm.reset();
+      toast({
+        title: 'Navigation item created',
+        description: 'The navigation item has been added successfully.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error creating navigation item',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
+  });
+  
+  // Handle feature toggle changes
+  const handleFeatureToggle = (feature: string, value: boolean) => {
+    setFeatures({ ...features, [feature]: value });
+    
+    // Update the config in the database
+    upsertConfigMutation.mutate({
+      key: `feature.${feature}`,
+      value: value.toString(),
+      type: 'feature',
+      description: `Toggle for ${feature} feature`,
+    });
   };
   
   // Handle file upload
-  const handleUpload = () => {
-    if (fileToUpload) {
-      uploadFileMutation.mutate(fileToUpload);
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadFileMutation.mutate(file);
     }
   };
   
-  // Handle feature toggle
-  const handleFeatureToggle = (feature: string, value: boolean) => {
-    updateConfigMutation.mutate({
-      key: `feature.${feature}`,
-      value: value.toString(),
-      type: 'boolean',
-      description: `Toggle for ${feature.replace('_', ' ')} feature`
-    });
+  // Handle content block submission
+  const onContentBlockSubmit = (data: any) => {
+    createContentBlockMutation.mutate(data);
   };
   
-  // Update color scheme
-  const handleColorChange = (colorType: string, value: string) => {
-    updateConfigMutation.mutate({
-      key: `theme.${colorType}_color`,
-      value,
-      type: 'string',
-      description: `${colorType.replace('_', ' ')} color for theme`
-    });
+  // Handle navigation item submission
+  const onNavigationItemSubmit = (data: any) => {
+    createNavigationItemMutation.mutate(data);
   };
   
-  // Update site title
-  const handleSiteTitleChange = (value: string) => {
-    updateConfigMutation.mutate({
-      key: 'site.title',
-      value,
-      type: 'string',
-      description: 'Site title'
-    });
-  };
-  
-  if (isLoadingConfigs || isLoadingFiles) {
+  if (loadingConfigs || loadingBlocks || loadingNavigation || loadingFiles) {
     return (
-      <div className="flex items-center justify-center h-48">
-        <RefreshCw className="w-6 h-6 animate-spin" />
-        <span className="ml-2">Loading site configuration...</span>
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
   
   return (
-    <div className="space-y-6 pb-8">
-      <div className="space-y-0.5">
-        <h2 className="text-2xl font-bold tracking-tight">Site Customizer</h2>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Site Customization</h2>
         <p className="text-muted-foreground">
-          Manage your site's appearance, features, and content.
+          Customize the appearance and functionality of your website.
         </p>
       </div>
       
       <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="features">Features</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="general">General Settings</TabsTrigger>
+          <TabsTrigger value="features">Feature Toggles</TabsTrigger>
+          <TabsTrigger value="content">Content Blocks</TabsTrigger>
+          <TabsTrigger value="navigation">Navigation</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="general" className="space-y-4 mt-4">
+        {/* General Settings */}
+        <TabsContent value="general" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Site Information</CardTitle>
+              <CardTitle>Site Configuration</CardTitle>
               <CardDescription>
-                Update basic information about your site.
+                Update your website's basic information and appearance
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="site-name">Site Name</Label>
+                  <Input 
+                    id="site-name" 
+                    placeholder="My Number Plate Company" 
+                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.name')?.configValue || ''}
+                    onChange={(e) => {
+                      upsertConfigMutation.mutate({
+                        key: 'site.name',
+                        value: e.target.value,
+                        type: 'text',
+                        description: 'Website name displayed in header and title',
+                      });
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="site-tagline">Tagline</Label>
+                  <Input 
+                    id="site-tagline" 
+                    placeholder="The best UK number plates" 
+                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.tagline')?.configValue || ''}
+                    onChange={(e) => {
+                      upsertConfigMutation.mutate({
+                        key: 'site.tagline',
+                        value: e.target.value,
+                        type: 'text',
+                        description: 'Short tagline displayed in the header',
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="site-title">Site Title</Label>
+                <Label htmlFor="contact-email">Contact Email</Label>
                 <Input 
-                  id="site-title" 
-                  value={siteTitle} 
-                  onChange={(e) => handleSiteTitleChange(e.target.value)}
+                  id="contact-email" 
+                  type="email" 
+                  placeholder="contact@example.com" 
+                  defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactEmail')?.configValue || ''}
+                  onChange={(e) => {
+                    upsertConfigMutation.mutate({
+                      key: 'site.contactEmail',
+                      value: e.target.value,
+                      type: 'text',
+                      description: 'Contact email for customer inquiries',
+                    });
+                  }}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label>Site Logo</Label>
-                <div className="flex flex-col items-center p-4 border rounded-md">
-                  {logoUrl && (
-                    <img 
-                      src={logoUrl} 
-                      alt="Site Logo" 
-                      className="h-16 object-contain mb-4" 
-                    />
-                  )}
-                  
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      className="max-w-sm"
-                    />
-                    <Button 
-                      onClick={handleUpload} 
-                      disabled={!fileToUpload || uploadFileMutation.isPending}
-                      size="sm"
-                    >
-                      {uploadFileMutation.isPending ? (
-                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Upload className="w-4 h-4 mr-2" />
-                      )}
-                      Upload
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="features" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Feature Toggles</CardTitle>
-              <CardDescription>
-                Enable or disable specific features on your site.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <FeatureToggle 
-                label="Badges" 
-                description="Allow customers to add badges to plates"
-                value={useBadges} 
-                onChange={(value) => handleFeatureToggle('badges', value)} 
-              />
-              
-              <FeatureToggle 
-                label="Text Colors" 
-                description="Allow customers to change text colors"
-                value={useColors} 
-                onChange={(value) => handleFeatureToggle('colors', value)} 
-              />
-              
-              <FeatureToggle 
-                label="Borders" 
-                description="Allow customers to add borders to plates"
-                value={useBorders} 
-                onChange={(value) => handleFeatureToggle('borders', value)} 
-              />
-              
-              <FeatureToggle 
-                label="Car Brands" 
-                description="Allow customers to select their car brand"
-                value={useCarBrands} 
-                onChange={(value) => handleFeatureToggle('car_brands', value)} 
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="appearance" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Color Scheme</CardTitle>
-              <CardDescription>
-                Customize your site's color scheme.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="primary-color">Primary Color</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      id="primary-color" 
-                      type="color" 
-                      value={primaryColor} 
-                      onChange={(e) => handleColorChange('primary', e.target.value)}
-                      className="w-12 h-10 p-1"
-                    />
-                    <Input 
-                      value={primaryColor} 
-                      onChange={(e) => handleColorChange('primary', e.target.value)}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="secondary-color">Secondary Color</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      id="secondary-color" 
-                      type="color" 
-                      value={secondaryColor} 
-                      onChange={(e) => handleColorChange('secondary', e.target.value)}
-                      className="w-12 h-10 p-1"
-                    />
-                    <Input 
-                      value={secondaryColor} 
-                      onChange={(e) => handleColorChange('secondary', e.target.value)}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
+                <Label htmlFor="contact-phone">Contact Phone</Label>
+                <Input 
+                  id="contact-phone" 
+                  placeholder="+44 123 456789" 
+                  defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactPhone')?.configValue || ''}
+                  onChange={(e) => {
+                    upsertConfigMutation.mutate({
+                      key: 'site.contactPhone',
+                      value: e.target.value,
+                      type: 'text',
+                      description: 'Contact phone for customer inquiries',
+                    });
+                  }}
+                />
               </div>
               
-              <div className="mt-6">
-                <h3 className="text-sm font-medium mb-2">Color Preview</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <div 
-                    className="h-16 rounded-md flex items-center justify-center text-white" 
-                    style={{ backgroundColor: primaryColor }}
-                  >
-                    Primary
-                  </div>
-                  <div 
-                    className="h-16 rounded-md flex items-center justify-center text-white" 
-                    style={{ backgroundColor: secondaryColor }}
-                  >
-                    Secondary
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="primary-color">Primary Color</Label>
+                <div className="flex items-center space-x-2">
+                  <Input 
+                    id="primary-color" 
+                    type="color" 
+                    className="w-12 h-10" 
+                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
+                    onChange={(e) => {
+                      upsertConfigMutation.mutate({
+                        key: 'site.primaryColor',
+                        value: e.target.value,
+                        type: 'color',
+                        description: 'Primary color used throughout the site',
+                      });
+                    }}
+                  />
+                  <Input 
+                    type="text" 
+                    className="flex-1" 
+                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
+                    onChange={(e) => {
+                      upsertConfigMutation.mutate({
+                        key: 'site.primaryColor',
+                        value: e.target.value,
+                        type: 'color',
+                        description: 'Primary color used throughout the site',
+                      });
+                    }}
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="content" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Blocks</CardTitle>
-              <CardDescription>
-                Manage content blocks that appear throughout your site.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Alert>
-                <AlertTitle>Coming Soon</AlertTitle>
-                <AlertDescription>
-                  Content blocks management is coming in a future update.
-                </AlertDescription>
-              </Alert>
             </CardContent>
           </Card>
           
@@ -438,57 +460,438 @@ const SiteCustomizer: React.FC = () => {
             <CardHeader>
               <CardTitle>Media Library</CardTitle>
               <CardDescription>
-                Manage images and other media files.
+                Upload and manage images for your website
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h4 className="font-medium">Upload New File</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Supported formats: JPG, PNG, GIF, SVG (Max 5MB)
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <Input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    accept="image/*"
+                  />
+                  <Button
+                    onClick={() => document.getElementById('file-upload')?.click()}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload File
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-2">
+                <h4 className="font-medium">Uploaded Files</h4>
+                {uploadedFiles && uploadedFiles.length > 0 ? (
+                  <div className="grid grid-cols-4 gap-4">
+                    {uploadedFiles.map((file) => (
+                      <div key={file.id} className="border rounded-md overflow-hidden">
+                        {file.mimeType.startsWith('image/') ? (
+                          <div className="aspect-square bg-slate-100 relative">
+                            <img
+                              src={`/api/uploads/${file.id}`}
+                              alt={file.originalFilename}
+                              className="object-contain w-full h-full p-2"
+                            />
+                          </div>
+                        ) : (
+                          <div className="aspect-square bg-slate-100 flex items-center justify-center">
+                            <div className="text-2xl font-bold uppercase">{file.fileType}</div>
+                          </div>
+                        )}
+                        <div className="p-2 bg-white">
+                          <div className="text-xs font-medium truncate" title={file.originalFilename}>
+                            {file.originalFilename}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {parseInt(file.fileSize) > 1024 * 1024
+                              ? `${(parseInt(file.fileSize) / (1024 * 1024)).toFixed(2)} MB`
+                              : `${(parseInt(file.fileSize) / 1024).toFixed(2)} KB`}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-4 border rounded-md bg-muted/10">
+                    <p className="text-muted-foreground">No files uploaded yet</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Feature Toggles */}
+        <TabsContent value="features" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Feature Toggles</CardTitle>
+              <CardDescription>
+                Enable or disable features on your website
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <Label>Upload New Image</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      className="max-w-sm"
+              <Accordion type="single" collapsible defaultValue="appearance">
+                <AccordionItem value="appearance">
+                  <AccordionTrigger>Appearance Features</AccordionTrigger>
+                  <AccordionContent className="space-y-2">
+                    <FeatureToggle
+                      label="Show Badge Options"
+                      description="Allow users to add badges to their number plates"
+                      value={features.showBadges}
+                      onChange={(value) => handleFeatureToggle('showBadges', value)}
                     />
-                    <Button 
-                      onClick={handleUpload} 
-                      disabled={!fileToUpload || uploadFileMutation.isPending}
-                      size="sm"
-                    >
-                      {uploadFileMutation.isPending ? (
-                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Upload className="w-4 h-4 mr-2" />
+                    <FeatureToggle
+                      label="Show Border Options"
+                      description="Allow users to add borders to their number plates"
+                      value={features.showBorders}
+                      onChange={(value) => handleFeatureToggle('showBorders', value)}
+                    />
+                    <FeatureToggle
+                      label="Show Car Brand Options"
+                      description="Allow users to select car brand surrounds"
+                      value={features.showCarBrands}
+                      onChange={(value) => handleFeatureToggle('showCarBrands', value)}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="products">
+                  <AccordionTrigger>Product Features</AccordionTrigger>
+                  <AccordionContent className="space-y-2">
+                    <FeatureToggle
+                      label="Road Legal Plates"
+                      description="Enable the Road Legal Plates section"
+                      value={features.roadLegalPlates}
+                      onChange={(value) => handleFeatureToggle('roadLegalPlates', value)}
+                    />
+                    <FeatureToggle
+                      label="Show Plates"
+                      description="Enable the Show Plates section"
+                      value={features.showPlates}
+                      onChange={(value) => handleFeatureToggle('showPlates', value)}
+                    />
+                    <FeatureToggle
+                      label="Allow Document Upload"
+                      description="Allow users to upload documents for road legal plates"
+                      value={features.allowDocumentUpload}
+                      onChange={(value) => handleFeatureToggle('allowDocumentUpload', value)}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="payment">
+                  <AccordionTrigger>Payment Features</AccordionTrigger>
+                  <AccordionContent className="space-y-2">
+                    <FeatureToggle
+                      label="Use Stripe Checkout"
+                      description="Process payments with Stripe"
+                      value={features.useStripeCheckout}
+                      onChange={(value) => handleFeatureToggle('useStripeCheckout', value)}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Content Blocks */}
+        <TabsContent value="content" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Content Blocks</CardTitle>
+              <CardDescription>
+                Manage the content displayed on your website
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Form {...contentForm}>
+                <form onSubmit={contentForm.handleSubmit(onContentBlockSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={contentForm.control}
+                      name="identifier"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Identifier</FormLabel>
+                          <FormControl>
+                            <Input placeholder="home-hero" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Unique identifier for this content block
+                          </FormDescription>
+                        </FormItem>
                       )}
-                      Upload
-                    </Button>
+                    />
+                    
+                    <FormField
+                      control={contentForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Home Page Hero" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Title for reference purposes
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {uploadedFiles && uploadedFiles.map((file) => (
-                    <div key={file.id} className="border rounded-md overflow-hidden">
-                      <div className="h-24 bg-slate-100 flex items-center justify-center">
-                        <img 
-                          src={`/api/uploads/${file.id}`} 
-                          alt={file.originalName}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-                      <div className="p-2 text-xs truncate">{file.originalName}</div>
-                    </div>
-                  ))}
                   
-                  {(!uploadedFiles || uploadedFiles.length === 0) && (
-                    <div className="col-span-full text-center py-8 text-muted-foreground">
-                      No images uploaded yet. Upload an image to see it here.
-                    </div>
-                  )}
-                </div>
+                  <FormField
+                    control={contentForm.control}
+                    name="content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Content</FormLabel>
+                        <FormControl>
+                          <textarea 
+                            className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Content goes here..." 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          HTML is allowed for formatting
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={contentForm.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location</FormLabel>
+                          <FormControl>
+                            <select
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              {...field}
+                            >
+                              <option value="home">Home Page</option>
+                              <option value="about">About Page</option>
+                              <option value="header">Header</option>
+                              <option value="footer">Footer</option>
+                              <option value="sidebar">Sidebar</option>
+                            </select>
+                          </FormControl>
+                          <FormDescription>
+                            Where this content will be displayed
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={contentForm.control}
+                      name="isActive"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-end space-x-2">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Active</FormLabel>
+                            <FormDescription>
+                              Display this content on the website
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">
+                    Add Content Block
+                  </Button>
+                </form>
+              </Form>
+              
+              <Separator />
+              
+              <div className="space-y-2">
+                <h4 className="font-medium">Existing Content Blocks</h4>
+                {contentBlocks && contentBlocks.length > 0 ? (
+                  <div className="space-y-2">
+                    {contentBlocks.map((block) => (
+                      <div key={block.id} className="border rounded-md p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h5 className="font-medium">{block.title}</h5>
+                            <div className="text-sm text-muted-foreground">
+                              ID: {block.identifier} | Location: {block.location}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch checked={block.isActive} />
+                            <Button variant="outline" size="sm">Edit</Button>
+                          </div>
+                        </div>
+                        <div className="text-sm bg-muted/20 rounded p-2 max-h-20 overflow-y-auto">
+                          {block.content}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-4 border rounded-md bg-muted/10">
+                    <p className="text-muted-foreground">No content blocks created yet</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Navigation */}
+        <TabsContent value="navigation" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Navigation Menu</CardTitle>
+              <CardDescription>
+                Customize the navigation menu of your website
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Form {...navigationForm}>
+                <form onSubmit={navigationForm.handleSubmit(onNavigationItemSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={navigationForm.control}
+                      name="label"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Menu Label</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Home" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Text displayed in the menu
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={navigationForm.control}
+                      name="url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="/" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Link destination (e.g., /about)
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={navigationForm.control}
+                      name="orderIndex"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Display Order</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="0" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Lower numbers appear first
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={navigationForm.control}
+                      name="isActive"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-end space-x-2">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Active</FormLabel>
+                            <FormDescription>
+                              Show this item in navigation
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">
+                    Add Navigation Item
+                  </Button>
+                </form>
+              </Form>
+              
+              <Separator />
+              
+              <div className="space-y-2">
+                <h4 className="font-medium">Navigation Structure</h4>
+                {navigationItems && navigationItems.length > 0 ? (
+                  <div className="space-y-2">
+                    {navigationItems
+                      .sort((a, b) => parseInt(a.orderIndex) - parseInt(b.orderIndex))
+                      .map((item) => (
+                        <div key={item.id} className="flex items-center justify-between border rounded-md p-3">
+                          <div>
+                            <div className="font-medium">{item.label}</div>
+                            <div className="text-sm text-muted-foreground">
+                              URL: {item.url} | Order: {item.orderIndex}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch checked={item.isActive} />
+                            <Button variant="outline" size="sm">Edit</Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-4 border rounded-md bg-muted/10">
+                    <p className="text-muted-foreground">No navigation items created yet</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -496,6 +899,4 @@ const SiteCustomizer: React.FC = () => {
       </Tabs>
     </div>
   );
-};
-
-export default SiteCustomizer;
+}

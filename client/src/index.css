@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('./lib/plates.css');
+
 @layer base {
   * {
     @apply border-border;
