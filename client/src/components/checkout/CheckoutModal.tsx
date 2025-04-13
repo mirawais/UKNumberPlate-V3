@@ -55,6 +55,8 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
         totalPrice,
         paymentMethod: method,
         orderStatus: method === 'stripe' ? 'pending_payment' : 'pending',
+        // Include document file ID if it exists (for road legal plates)
+        documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
       };
       
       if (method === 'stripe') {
@@ -63,7 +65,9 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
           ...customization,
           customerName: `${orderDetails.firstName} ${orderDetails.lastName}`,
           customerEmail: orderDetails.email,
-          shippingAddress: `${orderDetails.address1}, ${orderDetails.city}, ${orderDetails.postcode}`
+          customerPhone: orderDetails.phone,
+          shippingAddress: `${orderDetails.address1}, ${orderDetails.address2 ? orderDetails.address2 + ', ' : ''}${orderDetails.city}, ${orderDetails.postcode}`,
+          documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null
         }));
         localStorage.setItem('orderAmount', totalPrice.toString());
         

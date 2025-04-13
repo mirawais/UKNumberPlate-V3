@@ -111,6 +111,8 @@ export default function Checkout() {
         isRoadLegal: parsedDetails.isRoadLegal,
         plateType: parsedDetails.plateType
       },
+      // Include document file ID if it exists (for road legal plates)
+      documentFileId: parsedDetails.documentFileId || null,
       totalPrice: parseFloat(orderAmount),
       paymentMethod: 'stripe',
       orderStatus: 'pending_payment'

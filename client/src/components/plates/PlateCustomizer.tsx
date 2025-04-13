@@ -44,7 +44,9 @@ const PlateCustomizer = () => {
     badge: 'gb',  // Default to GB badge
     borderColor: '',
     carBrand: '',
-    isRoadLegal: true
+    isRoadLegal: true,
+    documentFile: null,
+    documentFileId: undefined
   });
   
   // Calculate the total price based on selected options
@@ -144,7 +146,9 @@ const PlateCustomizer = () => {
       badge: 'gb',
       borderColor: colors?.[0]?.id.toString() || '',
       carBrand: 'none',
-      isRoadLegal: true
+      isRoadLegal: true,
+      documentFile: null,
+      documentFileId: undefined
     });
     
     if (textStyles?.length) {
@@ -418,18 +422,51 @@ const PlateCustomizer = () => {
                       id="document-upload"
                       className="hidden"
                       accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const files = e.target.files;
                         if (files && files.length > 0) {
-                          // Store file in customization state
-                          setCustomization({
-                            ...customization,
-                            documentFile: files[0]
-                          });
-                          toast({
-                            title: "Document Uploaded",
-                            description: `Successfully uploaded: ${files[0].name}`,
-                          });
+                          try {
+                            // Upload the file to the server first
+                            const formData = new FormData();
+                            formData.append('file', files[0]);
+                            
+                            // Show loading state
+                            toast({
+                              title: "Uploading Document",
+                              description: "Please wait while we upload your document...",
+                            });
+                            
+                            // Make the upload request
+                            const response = await fetch('/api/uploads', {
+                              method: 'POST',
+                              body: formData,
+                            });
+                            
+                            if (!response.ok) {
+                              throw new Error('Failed to upload document');
+                            }
+                            
+                            const uploadedFile = await response.json();
+                            
+                            // Store both the file object and the uploaded file ID
+                            setCustomization({
+                              ...customization,
+                              documentFile: files[0],
+                              documentFileId: uploadedFile.id
+                            });
+                            
+                            toast({
+                              title: "Document Uploaded",
+                              description: `Successfully uploaded: ${files[0].name}`,
+                            });
+                          } catch (error) {
+                            console.error('Error uploading document:', error);
+                            toast({
+                              title: "Upload Failed",
+                              description: "There was a problem uploading your document. Please try again.",
+                              variant: "destructive"
+                            });
+                          }
                         }
                       }}
                     />
@@ -449,6 +486,18 @@ const PlateCustomizer = () => {
                         </span>
                       </div>
                     </label>
+                    
+                    {/* Display the uploaded file name */}
+                    {customization.documentFile && (
+                      <div className="mt-3 p-2 bg-green-50 text-green-700 rounded-md text-xs">
+                        <div className="flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>Uploaded: {customization.documentFile.name}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

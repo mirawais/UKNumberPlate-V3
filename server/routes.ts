@@ -828,7 +828,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
   
   // File Upload routes
-  app.post('/api/uploads', requireAdmin, upload.single('file'), async (req, res) => {
+  // Allow public access for document uploads (customers need to upload documents for road legal plates)
+  app.post('/api/uploads', upload.single('file'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });

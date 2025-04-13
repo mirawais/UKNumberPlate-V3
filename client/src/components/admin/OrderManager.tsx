@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { EyeIcon, SearchIcon } from 'lucide-react';
+import { EyeIcon, SearchIcon, DownloadIcon } from 'lucide-react';
 import type { Order, PlateCustomization, PlateSize, TextStyle, Color, Badge as BadgeType, CarBrand } from '@shared/schema';
 
 const OrderManager = () => {
@@ -168,6 +168,73 @@ const OrderManager = () => {
     } catch (error) {
       console.error('Date formatting error:', error);
       return 'Invalid date';
+    }
+  };
+  
+  // Function to handle invoice download
+  const handleDownloadInvoice = (order: Order & { plateDetails: PlateCustomization }) => {
+    try {
+      // Create invoice content
+      const invoiceContent = `
+INVOICE
+======================================
+Order #${order.id}
+Date: ${formatDate(order.createdAt)}
+--------------------------------------
+
+CUSTOMER INFORMATION:
+${order.customerName}
+${order.customerEmail}
+${order.customerPhone}
+${order.shippingAddress}
+
+ORDER DETAILS:
+Registration: ${order.plateDetails.registrationText}
+Type: ${order.plateDetails.plateType === 'both' 
+        ? 'Front & Rear' 
+        : order.plateDetails.plateType === 'front' 
+          ? 'Front Only' 
+          : 'Rear Only'}
+Road Legal: ${order.plateDetails.isRoadLegal ? 'Yes' : 'No (Show Plate)'}
+Size: ${getPlateSizeName(order.plateDetails.plateSize)}
+Style: ${getTextStyleName(order.plateDetails.textStyle)}
+${order.plateDetails.badge ? `Badge: ${getBadgeName(order.plateDetails.badge)}` : ''}
+${order.plateDetails.textColor ? `Text Color: ${getColorName(order.plateDetails.textColor)}` : ''}
+${order.plateDetails.borderColor ? `Border: ${getColorName(order.plateDetails.borderColor)}` : ''}
+${order.plateDetails.carBrand ? `Car Brand: ${getCarBrandName(order.plateDetails.carBrand)}` : ''}
+
+PAYMENT INFORMATION:
+Method: ${order.paymentMethod}
+Status: ${order.paymentStatus}
+TOTAL: £${Number(order.totalPrice).toFixed(2)}
+
+Thank you for your order!
+      `;
+      
+      // Create blob and download link
+      const blob = new Blob([invoiceContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-order-${order.id}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Invoice Downloaded",
+        description: "Your invoice has been downloaded successfully."
+      });
+    } catch (error) {
+      console.error('Invoice download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Could not generate invoice. Please try again.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -376,6 +443,17 @@ const OrderManager = () => {
                       <p><span className="font-semibold">Date:</span> {formatDate(selectedOrder.createdAt)}</p>
                       <p><span className="font-semibold">Payment Method:</span> {selectedOrder.paymentMethod}</p>
                       <p><span className="font-semibold">Total Amount:</span> £{Number(selectedOrder.totalPrice).toFixed(2)}</p>
+                      
+                      <div className="mt-4">
+                        <Button 
+                          variant="outline" 
+                          className="text-xs"
+                          onClick={() => handleDownloadInvoice(selectedOrder)}
+                        >
+                          <DownloadIcon className="h-4 w-4 mr-1" />
+                          Download Invoice
+                        </Button>
+                      </div>
                     </div>
                     
                     <h4 className="font-semibold mt-4 mb-2">Plate Details</h4>
@@ -412,6 +490,27 @@ const OrderManager = () => {
                           
                           {selectedOrder.plateDetails.carBrand && (
                             <p><span className="font-semibold">Car Brand:</span> {getCarBrandName(selectedOrder.plateDetails.carBrand)}</p>
+                          )}
+                          
+                          {/* Document information */}
+                          {selectedOrder.plateDetails.isRoadLegal && selectedOrder.documentFileId && (
+                            <div className="mt-2 border-t pt-2">
+                              <p className="font-semibold">Uploaded Document:</p>
+                              <div className="bg-green-50 p-2 mt-1 rounded-md text-sm flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>Document ID: {selectedOrder.documentFileId}</span>
+                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="mt-2"
+                                onClick={() => window.open(`/api/uploads/file/${selectedOrder.documentFileId}`, '_blank')}
+                              >
+                                View Document
+                              </Button>
+                            </div>
                           )}
                         </>
                       ) : (
