@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { EyeIcon, SearchIcon } from 'lucide-react';
-import type { Order, PlateCustomization } from '@shared/schema';
+import type { Order, PlateCustomization, PlateSize, TextStyle, Color, Badge as BadgeType, CarBrand } from '@shared/schema';
 
 const OrderManager = () => {
   const { toast } = useToast();
@@ -29,9 +29,34 @@ const OrderManager = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order & { plateDetails: PlateCustomization } | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
   
-  // Query for orders
+  // Query for orders and reference data
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'], 
+  });
+  
+  // Fetch plate sizes for name lookups
+  const { data: plateSizes } = useQuery<PlateSize[]>({
+    queryKey: ['/api/plate-sizes'],
+  });
+  
+  // Fetch text styles for name lookups
+  const { data: textStyles } = useQuery<TextStyle[]>({
+    queryKey: ['/api/text-styles'],
+  });
+  
+  // Fetch badges for name lookups
+  const { data: badges } = useQuery<BadgeType[]>({
+    queryKey: ['/api/badges'],
+  });
+  
+  // Fetch colors for name lookups
+  const { data: colors } = useQuery<Color[]>({
+    queryKey: ['/api/colors'],
+  });
+  
+  // Fetch car brands for name lookups
+  const { data: carBrands } = useQuery<CarBrand[]>({
+    queryKey: ['/api/car-brands'],
   });
   
   // Filtered orders based on status and search query
@@ -144,6 +169,37 @@ const OrderManager = () => {
       console.error('Date formatting error:', error);
       return 'Invalid date';
     }
+  };
+  
+  // Helper functions to get human-readable names from IDs
+  const getPlateSizeName = (id: string | number) => {
+    if (!plateSizes) return id;
+    const plateSize = plateSizes.find(size => size.id.toString() === id.toString());
+    return plateSize ? plateSize.name : id;
+  };
+  
+  const getTextStyleName = (id: string | number) => {
+    if (!textStyles) return id;
+    const textStyle = textStyles.find(style => style.id.toString() === id.toString());
+    return textStyle ? textStyle.name : id;
+  };
+  
+  const getBadgeName = (id: string | number) => {
+    if (!badges) return id;
+    const badge = badges.find(b => b.id.toString() === id.toString());
+    return badge ? badge.name : id;
+  };
+  
+  const getColorName = (id: string | number) => {
+    if (!colors) return id;
+    const color = colors.find(c => c.id.toString() === id.toString());
+    return color ? color.name : id;
+  };
+  
+  const getCarBrandName = (id: string | number) => {
+    if (!carBrands) return id;
+    const brand = carBrands.find(b => b.id.toString() === id.toString());
+    return brand ? brand.name : id;
   };
   
   return (
@@ -337,8 +393,26 @@ const OrderManager = () => {
                           <p><span className="font-semibold">Road Legal:</span> {
                             selectedOrder.plateDetails.isRoadLegal ? 'Yes' : 'No (Show Plate)'
                           }</p>
-                          <p><span className="font-semibold">Size:</span> {selectedOrder.plateDetails.plateSize}</p>
-                          <p><span className="font-semibold">Style:</span> {selectedOrder.plateDetails.textStyle}</p>
+                          <p><span className="font-semibold">Size:</span> {getPlateSizeName(selectedOrder.plateDetails.plateSize)}</p>
+                          <p><span className="font-semibold">Style:</span> {getTextStyleName(selectedOrder.plateDetails.textStyle)}</p>
+                          
+                          {selectedOrder.plateDetails.badge && (
+                            <p><span className="font-semibold">Badge:</span> {
+                              selectedOrder.plateDetails.badge === 'gb' ? 'GB' : getBadgeName(selectedOrder.plateDetails.badge)
+                            }</p>
+                          )}
+                          
+                          {selectedOrder.plateDetails.textColor && (
+                            <p><span className="font-semibold">Text Color:</span> {getColorName(selectedOrder.plateDetails.textColor)}</p>
+                          )}
+                          
+                          {selectedOrder.plateDetails.borderColor && (
+                            <p><span className="font-semibold">Border Color:</span> {getColorName(selectedOrder.plateDetails.borderColor)}</p>
+                          )}
+                          
+                          {selectedOrder.plateDetails.carBrand && (
+                            <p><span className="font-semibold">Car Brand:</span> {getCarBrandName(selectedOrder.plateDetails.carBrand)}</p>
+                          )}
                         </>
                       ) : (
                         <p className="text-sm text-gray-500 italic">No plate details available</p>
