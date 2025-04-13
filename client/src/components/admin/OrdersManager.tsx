@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -172,6 +172,21 @@ export default function OrdersManager() {
       status,
     });
   };
+  
+  // Parse plateDetails for selected order
+  const parsedPlateDetails = useMemo(() => {
+    if (!selectedOrder || !selectedOrder.plateDetails) return null;
+    
+    try {
+      if (typeof selectedOrder.plateDetails === 'string') {
+        return JSON.parse(selectedOrder.plateDetails);
+      }
+      return selectedOrder.plateDetails;
+    } catch (error) {
+      console.error('Error parsing plate details:', error);
+      return null;
+    }
+  }, [selectedOrder]);
   
   // Order counts by status
   const orderCounts = orders?.reduce((acc: Record<string, number>, order) => {
@@ -391,13 +406,13 @@ export default function OrdersManager() {
                               <div className="mt-2 space-y-2">
                                 <div className="border rounded-md p-3">
                                   <div className="font-medium text-lg mb-2">
-                                    {selectedOrder.plateDetails?.plateText || selectedOrder.plateDetails?.registrationNumber || "Custom Plate"}
+                                    {parsedPlateDetails?.registrationText || parsedPlateDetails?.plateText || parsedPlateDetails?.registrationNumber || "Custom Plate"}
                                   </div>
                                   
                                   <div className="bg-muted/30 p-2 rounded-md mb-3">
                                     <div className="text-sm font-medium mb-1">Plate Type:</div>
                                     <div className="text-sm">
-                                      {selectedOrder.plateDetails?.plateType === 'road-legal' ? 'Road Legal Plate' : 'Show Plate'}
+                                      {parsedPlateDetails?.isRoadLegal || parsedPlateDetails?.plateType === 'road-legal' ? 'Road Legal Plate' : 'Show Plate'}
                                     </div>
                                   </div>
                                   
@@ -405,40 +420,46 @@ export default function OrdersManager() {
                                     <div className="bg-muted/30 p-2 rounded-md">
                                       <div className="text-sm font-medium mb-1">Plate Details:</div>
                                       <div className="text-sm text-muted-foreground space-y-1">
-                                        <div>Size: {selectedOrder.plateDetails?.size || "Standard"}</div>
-                                        <div>Style: {selectedOrder.plateDetails?.style || "Standard"}</div>
-                                        <div>Material: {selectedOrder.plateDetails?.material || "Standard"}</div>
-                                        <div>Layout: {selectedOrder.plateDetails?.layout || "Standard"}</div>
+                                        <div>Size: {parsedPlateDetails?.plateSize || parsedPlateDetails?.size || "Standard"}</div>
+                                        <div>Style: {parsedPlateDetails?.textStyle || parsedPlateDetails?.style || "Standard"}</div>
+                                        <div>Material: {parsedPlateDetails?.material || "Standard"}</div>
+                                        <div>Layout: {parsedPlateDetails?.layout || "Standard"}</div>
                                       </div>
                                     </div>
                                     
                                     <div className="bg-muted/30 p-2 rounded-md">
                                       <div className="text-sm font-medium mb-1">Customization:</div>
                                       <div className="text-sm text-muted-foreground space-y-1">
-                                        {selectedOrder.plateDetails?.badge && (
-                                          <div>Badge: {selectedOrder.plateDetails.badge}</div>
+                                        {parsedPlateDetails?.badge && (
+                                          <div>Badge: {parsedPlateDetails.badge}</div>
                                         )}
-                                        {selectedOrder.plateDetails?.border && (
-                                          <div>Border: {selectedOrder.plateDetails.border}</div>
+                                        {parsedPlateDetails?.borderColor && (
+                                          <div>Border: {parsedPlateDetails.borderColor}</div>
                                         )}
-                                        {selectedOrder.plateDetails?.textColor && (
-                                          <div>Text Color: {selectedOrder.plateDetails.textColor}</div>
+                                        {parsedPlateDetails?.border && (
+                                          <div>Border: {parsedPlateDetails.border}</div>
                                         )}
-                                        {selectedOrder.plateDetails?.backgroundType && (
-                                          <div>Background: {selectedOrder.plateDetails.backgroundType}</div>
+                                        {parsedPlateDetails?.textColor && (
+                                          <div>Text Color: {parsedPlateDetails.textColor}</div>
                                         )}
-                                        {selectedOrder.plateDetails?.carBrand && (
-                                          <div>Car Brand: {selectedOrder.plateDetails.carBrand}</div>
+                                        {parsedPlateDetails?.backgroundType && (
+                                          <div>Background: {parsedPlateDetails.backgroundType}</div>
+                                        )}
+                                        {parsedPlateDetails?.carBrand && (
+                                          <div>Car Brand: {parsedPlateDetails.carBrand}</div>
+                                        )}
+                                        {parsedPlateDetails?.plateType && (
+                                          <div>Plate Type: {parsedPlateDetails.plateType}</div>
                                         )}
                                       </div>
                                     </div>
                                   </div>
                                   
-                                  {selectedOrder.plateDetails?.specialInstructions && (
+                                  {parsedPlateDetails?.specialInstructions && (
                                     <div className="mt-3 bg-muted/30 p-2 rounded-md">
                                       <div className="text-sm font-medium mb-1">Special Instructions:</div>
                                       <div className="text-sm text-muted-foreground">
-                                        {selectedOrder.plateDetails.specialInstructions}
+                                        {parsedPlateDetails.specialInstructions}
                                       </div>
                                     </div>
                                   )}
