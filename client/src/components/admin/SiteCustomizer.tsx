@@ -54,9 +54,9 @@ interface UploadedFile {
 
 interface SiteConfig {
   id: number;
-  configKey: string;
-  configValue: string;
-  configType: string;
+  key: string;         // Changed from configKey to key to match API response
+  value: string;       // Changed from configValue to value to match API response
+  type: string;        // Changed from configType to type to match API response
   description: string | null;
   updatedAt: Date;
 }
@@ -156,13 +156,14 @@ export default function SiteCustomizer() {
   // Load general settings from site config
   useEffect(() => {
     if (siteConfigs) {
+      console.log("Loading general settings from configs:", siteConfigs);
       setGeneralSettings(prev => ({
-        siteName: siteConfigs.find(c => c.configKey === 'site.name')?.configValue || prev.siteName || '',
-        tagline: siteConfigs.find(c => c.configKey === 'site.tagline')?.configValue || prev.tagline || '',
-        contactEmail: siteConfigs.find(c => c.configKey === 'site.contactEmail')?.configValue || prev.contactEmail || '',
-        contactPhone: siteConfigs.find(c => c.configKey === 'site.contactPhone')?.configValue || prev.contactPhone || '',
-        primaryColor: siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || prev.primaryColor || '#0070f3',
-        logoUrl: siteConfigs.find(c => c.configKey === 'site.logoUrl')?.configValue || prev.logoUrl || '',
+        siteName: siteConfigs.find(c => c.key === 'site.name')?.value || prev.siteName || '',
+        tagline: siteConfigs.find(c => c.key === 'site.tagline')?.value || prev.tagline || '',
+        contactEmail: siteConfigs.find(c => c.key === 'site.contactEmail')?.value || prev.contactEmail || '',
+        contactPhone: siteConfigs.find(c => c.key === 'site.contactPhone')?.value || prev.contactPhone || '',
+        primaryColor: siteConfigs.find(c => c.key === 'site.primaryColor')?.value || prev.primaryColor || '#0070f3',
+        logoUrl: siteConfigs.find(c => c.key === 'site.logoUrl')?.value || prev.logoUrl || '',
       }));
     }
   }, [siteConfigs]);
@@ -172,10 +173,10 @@ export default function SiteCustomizer() {
     if (siteConfigs) {
       const featureMap: Record<string, string> = {};
       siteConfigs.forEach(config => {
-        if (config.configType === 'feature') {
+        if (config.type === 'feature') {
           // Extract feature name from config key (e.g., "feature.showBadges" -> "showBadges")
-          const featureName = config.configKey.split('.')[1];
-          featureMap[featureName] = config.configValue;
+          const featureName = config.key.split('.')[1];
+          featureMap[featureName] = config.value;
         }
       });
       
@@ -496,7 +497,7 @@ export default function SiteCustomizer() {
                     <Input 
                       id="site-name" 
                       placeholder="My Number Plate Company" 
-                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.name')?.configValue || ''}
+                      defaultValue={siteConfigs?.find(c => c.key === 'site.name')?.value || ''}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
