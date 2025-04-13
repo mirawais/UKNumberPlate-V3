@@ -4,10 +4,85 @@ import {
   InsertBadge,
   InsertColor,
   InsertCarBrand,
-  InsertPaymentMethod
+  InsertPaymentMethod,
+  InsertSiteConfig
 } from "@shared/schema";
 
 export const mockData = {
+  siteConfigs: [
+    {
+      configKey: "site.name",
+      configValue: "Number Plate Store",
+      configType: "text",
+      description: "Site name displayed in the header and title"
+    },
+    {
+      configKey: "site.tagline",
+      configValue: "UK Number Plates",
+      configType: "text",
+      description: "Site tagline shown under the site name"
+    },
+    {
+      configKey: "site.contactEmail",
+      configValue: "contact@example.com",
+      configType: "text",
+      description: "Contact email shown in the footer"
+    },
+    {
+      configKey: "site.contactPhone",
+      configValue: "+44 123 456 7890",
+      configType: "text",
+      description: "Contact phone shown in the footer"
+    },
+    {
+      configKey: "site.primaryColor",
+      configValue: "#0070f3",
+      configType: "color",
+      description: "Primary color for buttons and accents"
+    },
+    {
+      configKey: "feature.showBadges",
+      configValue: "true",
+      configType: "feature",
+      description: "Toggle to show or hide badges on plates"
+    },
+    {
+      configKey: "feature.showBorders",
+      configValue: "true",
+      configType: "feature",
+      description: "Toggle to show or hide borders on plates"
+    },
+    {
+      configKey: "feature.showCarBrands",
+      configValue: "true",
+      configType: "feature",
+      description: "Toggle to show or hide car brand options"
+    },
+    {
+      configKey: "feature.roadLegalPlates",
+      configValue: "true",
+      configType: "feature",
+      description: "Toggle to show or hide road legal plates tab"
+    },
+    {
+      configKey: "feature.showPlates",
+      configValue: "true",
+      configType: "feature",
+      description: "Toggle to show or hide show plates tab"
+    },
+    {
+      configKey: "feature.useStripeCheckout",
+      configValue: "false",
+      configType: "feature",
+      description: "Toggle to use Stripe checkout instead of built-in checkout"
+    },
+    {
+      configKey: "feature.allowDocumentUpload",
+      configValue: "true",
+      configType: "feature",
+      description: "Toggle to allow document upload for road legal plates"
+    }
+  ] as InsertSiteConfig[],
   plateSizes: [
     {
       name: "Standard",

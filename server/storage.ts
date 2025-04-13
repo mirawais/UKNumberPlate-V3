@@ -200,6 +200,11 @@ export class MemStorage implements IStorage {
     mockData.carBrands.forEach(brand => this.createCarBrand(brand));
     mockData.paymentMethods.forEach(method => this.createPaymentMethod(method));
     
+    // Initialize site configs
+    if (mockData.siteConfigs) {
+      mockData.siteConfigs.forEach(config => this.createSiteConfig(config));
+    }
+    
     // Initial pricing
     this.pricingMap.set(1, {
       id: 1,
