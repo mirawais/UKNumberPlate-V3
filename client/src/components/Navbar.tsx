@@ -30,17 +30,17 @@ const Navbar = () => {
         </div>
         
         <nav className="hidden md:flex space-x-6">
-          <Link href="/">
-            <a className="text-gray-700 hover:text-primary">Home</a>
+          <Link href="/" className="text-gray-700 hover:text-primary">
+            Home
           </Link>
-          <Link href="/shop">
-            <a className="text-gray-700 hover:text-primary">Shop</a>
+          <Link href="/shop" className="text-gray-700 hover:text-primary">
+            Shop
           </Link>
-          <Link href="/about">
-            <a className="text-gray-700 hover:text-primary">About</a>
+          <Link href="/about" className="text-gray-700 hover:text-primary">
+            About
           </Link>
-          <Link href="/contact">
-            <a className="text-gray-700 hover:text-primary">Contact</a>
+          <Link href="/contact" className="text-gray-700 hover:text-primary">
+            Contact
           </Link>
         </nav>
         
@@ -53,17 +53,17 @@ const Navbar = () => {
             </SheetTrigger>
             <SheetContent>
               <div className="flex flex-col space-y-4 mt-8">
-                <Link href="/">
-                  <a className="text-gray-700 hover:text-primary py-2">Home</a>
+                <Link href="/" className="text-gray-700 hover:text-primary py-2">
+                  Home
                 </Link>
-                <Link href="/shop">
-                  <a className="text-gray-700 hover:text-primary py-2">Shop</a>
+                <Link href="/shop" className="text-gray-700 hover:text-primary py-2">
+                  Shop
                 </Link>
-                <Link href="/about">
-                  <a className="text-gray-700 hover:text-primary py-2">About</a>
+                <Link href="/about" className="text-gray-700 hover:text-primary py-2">
+                  About
                 </Link>
-                <Link href="/contact">
-                  <a className="text-gray-700 hover:text-primary py-2">Contact</a>
+                <Link href="/contact" className="text-gray-700 hover:text-primary py-2">
+                  Contact
                 </Link>
               </div>
             </SheetContent>

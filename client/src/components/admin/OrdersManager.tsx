@@ -559,7 +559,49 @@ export default function OrdersManager() {
                       )}
                       
                       <DialogFooter>
-                        <Button variant="outline">
+                        <Button 
+                          variant="outline"
+                          onClick={() => {
+                            // Generate a simple invoice with order details
+                            const invoiceContent = `
+                              NUMBER PLATE ORDER INVOICE
+                              --------------------------
+                              
+                              Invoice #: INV-${selectedOrder.id}
+                              Date: ${new Date(selectedOrder.orderDate).toLocaleDateString()}
+                              Order #: ${selectedOrder.id}
+                              Status: ${selectedOrder.orderStatus}
+                              
+                              CUSTOMER INFORMATION
+                              -------------------
+                              Name: ${selectedOrder.customerName}
+                              Email: ${selectedOrder.customerEmail}
+                              
+                              ORDER DETAILS
+                              ------------
+                              Registration: ${parsedPlateDetails?.registrationText || parsedPlateDetails?.plateText || parsedPlateDetails?.registrationNumber || "Custom Plate"}
+                              Plate Type: ${parsedPlateDetails?.isRoadLegal || parsedPlateDetails?.plateType === 'road-legal' ? 'Road Legal Plate' : 'Show Plate'}
+                              Plate Position: ${parsedPlateDetails?.plateType || "Both"}
+                              
+                              PAYMENT DETAILS
+                              --------------
+                              Amount: ${formatCurrency(selectedOrder.totalPrice)}
+                              
+                              Thank you for your order!
+                            `;
+                            
+                            // Create a Blob and download it
+                            const blob = new Blob([invoiceContent], { type: 'text/plain' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `invoice-order-${selectedOrder.id}.txt`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          }}
+                        >
                           <Download className="h-4 w-4 mr-2" />
                           Download Invoice
                         </Button>
