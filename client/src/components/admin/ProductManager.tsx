@@ -984,13 +984,45 @@ const ProductManager = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="imagePath">Image URL</Label>
-                  <Input 
-                    id="imagePath" 
-                    value={modalData.imagePath || ''} 
-                    onChange={(e) => setModalData({...modalData, imagePath: e.target.value})}
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <Label htmlFor="imageFile">Image Upload</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="imageFile"
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          uploadFileMutation.mutate(file);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => document.getElementById('imageFile')?.click()}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Upload Image
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  {modalData.imagePath && (
+                    <div className="mt-2 text-sm text-gray-500">
+                      Image uploaded: {modalData.imagePath.split('/').pop()}
+                    </div>
+                  )}
                 </div>
                 
                 <div>
@@ -1029,14 +1061,45 @@ const ProductManager = () => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="imagePath">Image URL</Label>
-                  <Input 
-                    id="imagePath" 
-                    value={modalData.imagePath || ''} 
-                    onChange={(e) => setModalData({...modalData, imagePath: e.target.value})}
-                    placeholder="https://example.com/badge.png"
-                    required
-                  />
+                  <Label htmlFor="badgeImageFile">Image Upload</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="badgeImageFile"
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          uploadFileMutation.mutate(file);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => document.getElementById('badgeImageFile')?.click()}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Upload Badge Image
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  {modalData.imagePath && (
+                    <div className="mt-2 text-sm text-gray-500">
+                      Image uploaded: {modalData.imagePath.split('/').pop()}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex items-center gap-2">

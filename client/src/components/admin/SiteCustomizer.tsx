@@ -285,16 +285,40 @@ export default function SiteCustomizer() {
     }
   });
   
-  // Handle feature toggle changes
+  // Handle feature toggle changes - now only updates the state
   const handleFeatureToggle = (feature: string, value: boolean) => {
     setFeatures({ ...features, [feature]: value });
-    
-    // Update the config in the database
-    upsertConfigMutation.mutate({
+  };
+  
+  // Save all feature toggles at once
+  const saveFeatureToggles = () => {
+    // Create an array of all the feature toggle changes to save
+    const featureUpdates = Object.entries(features).map(([feature, value]) => ({
       key: `feature.${feature}`,
       value: value.toString(),
       type: 'feature',
       description: `Toggle for ${feature} feature`,
+    }));
+    
+    // Update each feature toggle in sequence
+    Promise.all(
+      featureUpdates.map(config => 
+        apiRequest('POST', '/api/site-configs/upsert', config)
+      )
+    )
+    .then(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
+      toast({
+        title: 'Features updated',
+        description: 'Feature toggles have been saved successfully.',
+      });
+    })
+    .catch(error => {
+      toast({
+        title: 'Error updating features',
+        description: error.message || 'Failed to save feature toggles',
+        variant: 'destructive',
+      });
     });
   };
   
@@ -613,6 +637,16 @@ export default function SiteCustomizer() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+              
+              <div className="mt-6 flex justify-end">
+                <Button 
+                  type="button" 
+                  onClick={saveFeatureToggles}
+                  className="w-full sm:w-auto"
+                >
+                  Save Feature Settings
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
