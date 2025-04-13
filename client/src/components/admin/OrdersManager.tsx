@@ -391,7 +391,11 @@ export default function OrdersManager() {
                               <div>
                                 <h3 className="font-semibold text-lg">Documents</h3>
                                 <div className="mt-2">
-                                  <Button variant="outline" size="sm">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => window.open(`/api/uploads/${selectedOrder.documentFileId}`, '_blank')}
+                                  >
                                     <FileText className="h-4 w-4 mr-2" />
                                     View Document
                                   </Button>

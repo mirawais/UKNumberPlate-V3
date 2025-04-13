@@ -283,13 +283,17 @@ const PlateCustomizer = () => {
               {/* Text Style Selection */}
               <div className="p-4 border-b">
                 <h3 className="font-bold mb-2">Text Style</h3>
-                <div className="relative">
+                <div className="flex flex-col space-y-2">
                   <Select 
                     value={customization.textStyle} 
                     onValueChange={(value) => {
                       setCustomization({...customization, textStyle: value});
                       const style = textStyles?.find(s => s.id.toString() === value);
-                      if (style) setSelectedTextStyle(style);
+                      if (style) {
+                        setSelectedTextStyle(style);
+                        // Automatically open the modal when a new style is selected
+                        setIsTextStyleModalOpen(true);
+                      }
                     }}
                   >
                     <SelectTrigger>
@@ -303,13 +307,15 @@ const PlateCustomizer = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  
                   <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="absolute right-2 top-2"
+                    variant="outline" 
+                    size="sm" 
+                    className="text-sm h-8 flex items-center gap-2"
                     onClick={handleTextStyleInfo}
                   >
-                    <InfoIcon className="h-4 w-4 text-gray-500" />
+                    <InfoIcon className="h-4 w-4" />
+                    Click to see text style information
                   </Button>
                 </div>
               </div>
@@ -787,9 +793,9 @@ const PlateCustomizer = () => {
 
         {/* Right Panel - Preview & Buy */}
         <div className="w-full md:w-2/3 p-6">
-          <div className="flex flex-col items-center justify-between h-full">
+          <div className="flex flex-col items-center h-full">
             {/* Plate Preview */}
-            <div className="w-full flex justify-center mb-8">
+            <div className="w-full flex justify-center mb-4">
               <PlatePreview
                 customization={customization}
                 colors={colors || []}
@@ -798,17 +804,17 @@ const PlateCustomizer = () => {
               />
             </div>
             
-            {/* Price and Buy Button */}
-            <div className="w-full flex flex-col md:flex-row justify-between items-center mt-auto">
-              <div className="mb-4 md:mb-0">
-                <p className="text-xl font-semibold">
+            {/* Price and Buy Button - Positioned directly under the plate preview */}
+            <div className="w-full flex flex-col items-center mb-8">
+              <div className="mb-4 text-center">
+                <p className="text-2xl font-semibold">
                   Price: <span id="total-price" className="font-bold">£{totalPrice.toFixed(2)}</span>
                 </p>
                 <p className="text-sm text-gray-500">Including VAT</p>
               </div>
               <Button 
                 size="lg"
-                className="bg-primary hover:bg-red-700 text-white font-bold py-3 px-8 rounded-md transition-colors text-lg"
+                className="bg-primary hover:bg-red-700 text-white font-bold py-3 px-12 rounded-md transition-colors text-lg w-full md:w-auto"
                 onClick={handleBuyNow}
               >
                 BUY NOW

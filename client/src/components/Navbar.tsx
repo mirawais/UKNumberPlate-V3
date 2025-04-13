@@ -1,20 +1,24 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Menu, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
 
   // Get cart count from localStorage or API
-  useQuery({
+  const { data: cartData } = useQuery<{ count: number }>({
     queryKey: ['/api/cart/count'],
-    onSuccess: (data) => {
-      if (data) setCartCount(data.count);
-    },
   });
+  
+  // Update cart count when data changes
+  useEffect(() => {
+    if (cartData) {
+      setCartCount(cartData.count);
+    }
+  }, [cartData]);
 
   return (
     <header className="bg-white shadow-md">
@@ -41,19 +45,6 @@ const Navbar = () => {
         </nav>
         
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon">
-            <Search className="h-5 w-5" />
-          </Button>
-          
-          <Button variant="ghost" size="icon" className="relative">
-            <ShoppingCart className="h-5 w-5" />
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                {cartCount}
-              </span>
-            )}
-          </Button>
-          
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
