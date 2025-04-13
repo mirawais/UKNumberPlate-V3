@@ -59,6 +59,11 @@ const OrderManager = () => {
     queryKey: ['/api/car-brands'],
   });
   
+  // Fetch colors for name lookups
+  const { data: colors } = useQuery<Color[]>({
+    queryKey: ['/api/colors'],
+  });
+  
   // Filtered orders based on status and search query
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   
@@ -506,7 +511,7 @@ Thank you for your order!
                                 variant="outline" 
                                 size="sm" 
                                 className="mt-2"
-                                onClick={() => window.open(`/api/uploads/file/${selectedOrder.documentFileId}`, '_blank')}
+                                onClick={() => window.open(`/api/uploads/${selectedOrder.documentFileId}`, '_blank')}
                               >
                                 View Document
                               </Button>
