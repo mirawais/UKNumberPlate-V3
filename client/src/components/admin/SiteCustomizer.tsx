@@ -404,23 +404,10 @@ export default function SiteCustomizer() {
       // Refetch site configs after saving
       await queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
       
-      // Update local state to match saved state
-      const updatedConfigs = await apiRequest('GET', '/api/site-configs');
-      const featureMap: Record<string, string> = {};
-      updatedConfigs.forEach((config: any) => {
-        if (config.configType === 'feature') {
-          const featureName = config.configKey.split('.')[1];
-          featureMap[featureName] = config.configValue;
-        }
-      });
-      
-      // Update features state
+      // Update local state directly from current features
       setFeatures(prev => ({
         ...prev,
-        ...Object.entries(featureMap).reduce((acc, [key, value]) => ({
-          ...acc,
-          [key]: value !== 'false',
-        }), {}),
+        ...features
       }));
       
       toast({
