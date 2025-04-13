@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface SiteConfig {
   id: number;
@@ -34,6 +34,7 @@ interface SiteConfigContextType {
   features: SiteFeatures;
   siteInfo: SiteInfo;
   isLoading: boolean;
+  refreshConfig: () => void;
 }
 
 const defaultFeatures: SiteFeatures = {
@@ -60,15 +61,24 @@ const SiteConfigContext = createContext<SiteConfigContextType>({
   features: defaultFeatures,
   siteInfo: defaultSiteInfo,
   isLoading: true,
+  refreshConfig: () => {}
 });
 
 export const SiteConfigProvider = ({ children }: { children: ReactNode }) => {
   const [features, setFeatures] = useState<SiteFeatures>(defaultFeatures);
   const [siteInfo, setSiteInfo] = useState<SiteInfo>(defaultSiteInfo);
+  const queryClient = useQueryClient();
   
-  const { data: siteConfigs, isLoading } = useQuery<SiteConfig[]>({
+  const { data: siteConfigs, isLoading, refetch } = useQuery<SiteConfig[]>({
     queryKey: ['/api/site-configs'],
+    refetchOnWindowFocus: true,
+    staleTime: 5000, // Consider data stale after 5 seconds
   });
+
+  // Function to refresh configuration data
+  const refreshConfig = () => {
+    refetch();
+  };
 
   useEffect(() => {
     if (siteConfigs) {
@@ -107,7 +117,7 @@ export const SiteConfigProvider = ({ children }: { children: ReactNode }) => {
   }, [siteConfigs]);
 
   return (
-    <SiteConfigContext.Provider value={{ features, siteInfo, isLoading }}>
+    <SiteConfigContext.Provider value={{ features, siteInfo, isLoading, refreshConfig }}>
       {children}
     </SiteConfigContext.Provider>
   );

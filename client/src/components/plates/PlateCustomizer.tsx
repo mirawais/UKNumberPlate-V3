@@ -405,47 +405,53 @@ const PlateCustomizer = () => {
                 </div>
               )}
               
-              {/* Document Upload (Required for road legal plates) */}
-              <div className="p-4 border-b">
-                <h3 className="font-bold mb-2">Vehicle Document Upload</h3>
-                <p className="text-sm text-gray-500 mb-3">
-                  Please upload a copy of your vehicle document for verification (required for road legal plates)
-                </p>
-                <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
-                  <input
-                    type="file"
-                    id="document-upload"
-                    className="hidden"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => {
-                      const files = e.target.files;
-                      if (files && files.length > 0) {
-                        // Store file in customization or use separate state if needed
-                        toast({
-                          title: "Document Uploaded",
-                          description: `Successfully uploaded: ${files[0].name}`,
-                        });
-                      }
-                    }}
-                  />
-                  <label 
-                    htmlFor="document-upload" 
-                    className="cursor-pointer block"
-                  >
-                    <div className="flex flex-col items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                      <span className="text-sm font-medium text-primary">
-                        Click to upload document
-                      </span>
-                      <span className="text-xs text-gray-500 mt-1">
-                        PDF, JPG or PNG (max 5MB)
-                      </span>
-                    </div>
-                  </label>
+              {/* Document Upload (Required for road legal plates) - Conditional based on feature toggle */}
+              {features.allowDocumentUpload && (
+                <div className="p-4 border-b">
+                  <h3 className="font-bold mb-2">Vehicle Document Upload</h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Please upload a copy of your vehicle document for verification (required for road legal plates)
+                  </p>
+                  <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+                    <input
+                      type="file"
+                      id="document-upload"
+                      className="hidden"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const files = e.target.files;
+                        if (files && files.length > 0) {
+                          // Store file in customization state
+                          setCustomization({
+                            ...customization,
+                            documentFile: files[0]
+                          });
+                          toast({
+                            title: "Document Uploaded",
+                            description: `Successfully uploaded: ${files[0].name}`,
+                          });
+                        }
+                      }}
+                    />
+                    <label 
+                      htmlFor="document-upload" 
+                      className="cursor-pointer block"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <span className="text-sm font-medium text-primary">
+                          Click to upload document
+                        </span>
+                        <span className="text-xs text-gray-500 mt-1">
+                          PDF, JPG or PNG (max 5MB)
+                        </span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* Reset Design Button */}
               <div className="p-4">
