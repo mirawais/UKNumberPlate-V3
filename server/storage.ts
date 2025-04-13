@@ -699,14 +699,14 @@ export class MemStorage implements IStorage {
     
     if (existingConfig) {
       return this.updateSiteConfig(existingConfig.id, { 
-        value, 
+        configValue: value, 
         updatedAt: new Date() 
       }) as Promise<SiteConfig>;
     } else {
       return this.createSiteConfig({ 
-        key, 
-        value, 
-        type,
+        configKey: key, 
+        configValue: value, 
+        configType: type,
         description: description || null
       });
     }
