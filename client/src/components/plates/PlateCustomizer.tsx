@@ -624,70 +624,76 @@ const PlateCustomizer = () => {
                   </div>
                 )}
                 
-                {/* Badge Selection */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">Badge:</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {badges?.map((badge) => (
+                {/* Badge Selection - Conditionally show badges based on feature toggle */}
+                {features.showBadges && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">Badge:</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {badges?.map((badge) => (
+                        <button 
+                          key={badge.id}
+                          className={`h-16 w-full p-1 rounded ${
+                            customization.badge === badge.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                          } bg-gray-100 text-center text-xs`}
+                          onClick={() => setCustomization({...customization, badge: badge.id.toString(), isRoadLegal: false})}
+                        >
+                          <img src={badge.imagePath} className="w-full h-full object-contain mx-auto" alt={badge.name} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Border Selection - Conditional based on feature flag */}
+              {features.showBorders && (
+                <div className="p-4 border-b">
+                  <h3 className="font-bold mb-2">Border</h3>
+                  <div className="grid grid-cols-4 gap-2">
+                    {colors?.map((color) => (
                       <button 
-                        key={badge.id}
-                        className={`h-16 w-full p-1 rounded ${
-                          customization.badge === badge.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                        } bg-gray-100 text-center text-xs`}
-                        onClick={() => setCustomization({...customization, badge: badge.id.toString(), isRoadLegal: false})}
-                      >
-                        <img src={badge.imagePath} className="w-full h-full object-contain mx-auto" alt={badge.name} />
-                      </button>
+                        key={color.id}
+                        className={`h-8 w-full rounded ${
+                          customization.borderColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                        }`}
+                        style={{ backgroundColor: color.hexCode }}
+                        title={color.name}
+                        onClick={() => setCustomization({...customization, borderColor: color.id.toString(), isRoadLegal: false})}
+                      />
                     ))}
+                    <button 
+                      className={`h-8 w-full rounded ${
+                        customization.borderColor === '' ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                      } bg-transparent`}
+                      title="None"
+                      onClick={() => setCustomization({...customization, borderColor: '', isRoadLegal: false})}
+                    />
                   </div>
                 </div>
-              </div>
+              )}
               
-              {/* Border Selection */}
-              <div className="p-4 border-b">
-                <h3 className="font-bold mb-2">Border</h3>
-                <div className="grid grid-cols-4 gap-2">
-                  {colors?.map((color) => (
-                    <button 
-                      key={color.id}
-                      className={`h-8 w-full rounded ${
-                        customization.borderColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                      }`}
-                      style={{ backgroundColor: color.hexCode }}
-                      title={color.name}
-                      onClick={() => setCustomization({...customization, borderColor: color.id.toString(), isRoadLegal: false})}
-                    />
-                  ))}
-                  <button 
-                    className={`h-8 w-full rounded ${
-                      customization.borderColor === '' ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                    } bg-transparent`}
-                    title="None"
-                    onClick={() => setCustomization({...customization, borderColor: '', isRoadLegal: false})}
-                  />
+              {/* Plate Surround - Conditional based on feature flag */}
+              {features.showCarBrands && (
+                <div className="p-4 border-b">
+                  <h3 className="font-bold mb-2">Plate Surround</h3>
+                  <Select 
+                    value={customization.carBrand} 
+                    onValueChange={(value) => setCustomization({...customization, carBrand: value, isRoadLegal: false})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select car brand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {carBrands?.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.id.toString()}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-              
-              {/* Plate Surround */}
-              <div className="p-4 border-b">
-                <h3 className="font-bold mb-2">Plate Surround</h3>
-                <Select 
-                  value={customization.carBrand} 
-                  onValueChange={(value) => setCustomization({...customization, carBrand: value, isRoadLegal: false})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select car brand" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {carBrands?.map((brand) => (
-                      <SelectItem key={brand.id} value={brand.id.toString()}>
-                        {brand.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              )}
               
               {/* Reset Design Button */}
               <div className="p-4">
