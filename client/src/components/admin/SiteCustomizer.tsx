@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import { 
   Tabs, 
   TabsContent, 
@@ -108,6 +109,7 @@ function FeatureToggle({ label, description, value, onChange }: FeatureTogglePro
 export default function SiteCustomizer() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { refreshConfig } = useSiteConfig();
   const [activeTab, setActiveTab] = useState('general');
   const [uploadingFile, setUploadingFile] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -390,6 +392,10 @@ export default function SiteCustomizer() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
+      
+      // Call the context's refreshConfig method to update the application-wide state
+      refreshConfig();
+      
       toast({
         title: 'General settings updated',
         description: 'Your site settings have been saved successfully.',
@@ -424,6 +430,9 @@ export default function SiteCustomizer() {
       
       // Refetch site configs after saving
       await queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
+      
+      // Call the context's refreshConfig method to update the application-wide state
+      refreshConfig();
       
       toast({
         title: 'Features updated',
