@@ -410,7 +410,7 @@ export default function OrdersManager() {
                                   </div>
                                   
                                   <div className="bg-muted/30 p-2 rounded-md mb-3">
-                                    <div className="text-sm font-medium mb-1">Plate Type:</div>
+                                    <div className="text-sm font-medium mb-1">Plate Category:</div>
                                     <div className="text-sm">
                                       {parsedPlateDetails?.isRoadLegal || parsedPlateDetails?.plateType === 'road-legal' ? 'Road Legal Plate' : 'Show Plate'}
                                     </div>
@@ -424,32 +424,32 @@ export default function OrdersManager() {
                                         <div>Style: {parsedPlateDetails?.textStyle || parsedPlateDetails?.style || "Standard"}</div>
                                         <div>Material: {parsedPlateDetails?.material || "Standard"}</div>
                                         <div>Layout: {parsedPlateDetails?.layout || "Standard"}</div>
+                                        {parsedPlateDetails?.plateType && (
+                                          <div>Position: {parsedPlateDetails.plateType}</div>
+                                        )}
                                       </div>
                                     </div>
                                     
                                     <div className="bg-muted/30 p-2 rounded-md">
                                       <div className="text-sm font-medium mb-1">Customization:</div>
                                       <div className="text-sm text-muted-foreground space-y-1">
-                                        {parsedPlateDetails?.badge && (
+                                        {parsedPlateDetails?.badge && parsedPlateDetails.badge !== "none" && (
                                           <div>Badge: {parsedPlateDetails.badge}</div>
                                         )}
-                                        {parsedPlateDetails?.borderColor && (
-                                          <div>Border: {parsedPlateDetails.borderColor}</div>
+                                        {parsedPlateDetails?.borderColor && parsedPlateDetails.borderColor !== "none" && (
+                                          <div>Border Color: {parsedPlateDetails.borderColor}</div>
                                         )}
-                                        {parsedPlateDetails?.border && (
-                                          <div>Border: {parsedPlateDetails.border}</div>
+                                        {parsedPlateDetails?.border && parsedPlateDetails.border !== "none" && (
+                                          <div>Border Style: {parsedPlateDetails.border}</div>
                                         )}
-                                        {parsedPlateDetails?.textColor && (
+                                        {parsedPlateDetails?.textColor && parsedPlateDetails.textColor !== "none" && (
                                           <div>Text Color: {parsedPlateDetails.textColor}</div>
                                         )}
-                                        {parsedPlateDetails?.backgroundType && (
+                                        {parsedPlateDetails?.backgroundType && parsedPlateDetails.backgroundType !== "none" && (
                                           <div>Background: {parsedPlateDetails.backgroundType}</div>
                                         )}
-                                        {parsedPlateDetails?.carBrand && (
+                                        {parsedPlateDetails?.carBrand && parsedPlateDetails.carBrand !== "none" && (
                                           <div>Car Brand: {parsedPlateDetails.carBrand}</div>
-                                        )}
-                                        {parsedPlateDetails?.plateType && (
-                                          <div>Plate Type: {parsedPlateDetails.plateType}</div>
                                         )}
                                       </div>
                                     </div>
