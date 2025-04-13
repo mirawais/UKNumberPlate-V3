@@ -1134,7 +1134,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/site-configs/upsert', requireAdmin, async (req, res) => {
     try {
-      const { key, value, type, description } = req.body;
+      // Support both naming conventions for backward compatibility
+      const key = req.body.configKey || req.body.key;
+      const value = req.body.configValue || req.body.value;
+      const type = req.body.configType || req.body.type;
+      const { description } = req.body;
+      
       if (!key || !value || !type) {
         return res.status(400).json({ message: 'Missing required fields' });
       }
