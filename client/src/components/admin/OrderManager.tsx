@@ -59,11 +59,6 @@ const OrderManager = () => {
     queryKey: ['/api/car-brands'],
   });
   
-  // Fetch colors for name lookups
-  const { data: colors } = useQuery<Color[]>({
-    queryKey: ['/api/colors'],
-  });
-  
   // Filtered orders based on status and search query
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   
@@ -126,9 +121,25 @@ const OrderManager = () => {
   
   // Handler for viewing order details
   const handleViewOrder = (order: Order) => {
-    // Cast the order to include PlateCustomization to satisfy TS
-    setSelectedOrder(order as Order & { plateDetails: PlateCustomization });
-    setIsViewModalOpen(true);
+    try {
+      // Parse plateDetails from JSON if needed
+      const parsedOrder = {
+        ...order,
+        plateDetails: typeof order.plateDetails === 'string' 
+          ? JSON.parse(order.plateDetails) 
+          : order.plateDetails
+      };
+      
+      setSelectedOrder(parsedOrder as Order & { plateDetails: PlateCustomization });
+      setIsViewModalOpen(true);
+    } catch (error) {
+      console.error('Error parsing order details:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load order details. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
   
   // Handler for updating order status
@@ -179,6 +190,11 @@ const OrderManager = () => {
   // Function to handle invoice download
   const handleDownloadInvoice = (order: Order & { plateDetails: PlateCustomization }) => {
     try {
+      // Ensure plateDetails is properly parsed
+      const plateDetails = typeof order.plateDetails === 'string'
+        ? JSON.parse(order.plateDetails)
+        : order.plateDetails;
+      
       // Create invoice content
       const invoiceContent = `
 INVOICE
@@ -194,19 +210,19 @@ ${order.customerPhone}
 ${order.shippingAddress}
 
 ORDER DETAILS:
-Registration: ${order.plateDetails.registrationText}
-Type: ${order.plateDetails.plateType === 'both' 
+Registration: ${plateDetails.registrationText}
+Type: ${plateDetails.plateType === 'both' 
         ? 'Front & Rear' 
-        : order.plateDetails.plateType === 'front' 
+        : plateDetails.plateType === 'front' 
           ? 'Front Only' 
           : 'Rear Only'}
-Road Legal: ${order.plateDetails.isRoadLegal ? 'Yes' : 'No (Show Plate)'}
-Size: ${getPlateSizeName(order.plateDetails.plateSize)}
-Style: ${getTextStyleName(order.plateDetails.textStyle)}
-${order.plateDetails.badge ? `Badge: ${getBadgeName(order.plateDetails.badge)}` : ''}
-${order.plateDetails.textColor ? `Text Color: ${getColorName(order.plateDetails.textColor)}` : ''}
-${order.plateDetails.borderColor ? `Border: ${getColorName(order.plateDetails.borderColor)}` : ''}
-${order.plateDetails.carBrand ? `Car Brand: ${getCarBrandName(order.plateDetails.carBrand)}` : ''}
+Road Legal: ${plateDetails.isRoadLegal ? 'Yes' : 'No (Show Plate)'}
+Size: ${getPlateSizeName(plateDetails.plateSize)}
+Style: ${getTextStyleName(plateDetails.textStyle)}
+${plateDetails.badge ? `Badge: ${getBadgeName(plateDetails.badge)}` : ''}
+${plateDetails.textColor ? `Text Color: ${getColorName(plateDetails.textColor)}` : ''}
+${plateDetails.borderColor ? `Border: ${getColorName(plateDetails.borderColor)}` : ''}
+${plateDetails.carBrand ? `Car Brand: ${getCarBrandName(plateDetails.carBrand)}` : ''}
 
 PAYMENT INFORMATION:
 Method: ${order.paymentMethod}
