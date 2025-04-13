@@ -156,20 +156,20 @@ export default function SiteCustomizer() {
   // Load general settings from site config
   useEffect(() => {
     if (siteConfigs) {
-      setGeneralSettings({
-        siteName: siteConfigs.find(c => c.configKey === 'site.name')?.configValue || '',
-        tagline: siteConfigs.find(c => c.configKey === 'site.tagline')?.configValue || '',
-        contactEmail: siteConfigs.find(c => c.configKey === 'site.contactEmail')?.configValue || '',
-        contactPhone: siteConfigs.find(c => c.configKey === 'site.contactPhone')?.configValue || '',
-        primaryColor: siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3',
-        logoUrl: siteConfigs.find(c => c.configKey === 'site.logoUrl')?.configValue || '',
-      });
+      setGeneralSettings(prev => ({
+        siteName: siteConfigs.find(c => c.configKey === 'site.name')?.configValue || prev.siteName || '',
+        tagline: siteConfigs.find(c => c.configKey === 'site.tagline')?.configValue || prev.tagline || '',
+        contactEmail: siteConfigs.find(c => c.configKey === 'site.contactEmail')?.configValue || prev.contactEmail || '',
+        contactPhone: siteConfigs.find(c => c.configKey === 'site.contactPhone')?.configValue || prev.contactPhone || '',
+        primaryColor: siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || prev.primaryColor || '#0070f3',
+        logoUrl: siteConfigs.find(c => c.configKey === 'site.logoUrl')?.configValue || prev.logoUrl || '',
+      }));
     }
   }, [siteConfigs]);
   
   // Load feature toggles from site config
   useEffect(() => {
-    if (siteConfigs && !Object.keys(features).length) {
+    if (siteConfigs) {
       const featureMap: Record<string, string> = {};
       siteConfigs.forEach(config => {
         if (config.configType === 'feature') {
@@ -190,11 +190,10 @@ export default function SiteCustomizer() {
         allowDocumentUpload: featureMap['allowDocumentUpload'] !== 'false',
       };
       
-      // Set the updated features only if we don't have any features set
-      console.log('Initial features load:', updatedFeatures);
+      // Always update features when configs change
       setFeatures(updatedFeatures);
     }
-  }, [siteConfigs, features]);
+  }, [siteConfigs]);
   
   // Form setup for content blocks
   const contentForm = useForm({
