@@ -179,16 +179,20 @@ export default function SiteCustomizer() {
         }
       });
       
+      console.log('Feature map from config:', featureMap);
+      
       // Create new features object with proper boolean conversion
       const updatedFeatures = {
-        showBadges: featureMap['showBadges'] !== 'false',
-        showBorders: featureMap['showBorders'] !== 'false',
-        showCarBrands: featureMap['showCarBrands'] !== 'false',
-        roadLegalPlates: featureMap['roadLegalPlates'] !== 'false',
-        showPlates: featureMap['showPlates'] !== 'false',
-        useStripeCheckout: featureMap['useStripeCheckout'] !== 'false',
-        allowDocumentUpload: featureMap['allowDocumentUpload'] !== 'false',
+        showBadges: featureMap['showBadges'] === 'true',
+        showBorders: featureMap['showBorders'] === 'true',
+        showCarBrands: featureMap['showCarBrands'] === 'true',
+        roadLegalPlates: featureMap['roadLegalPlates'] === 'true',
+        showPlates: featureMap['showPlates'] === 'true',
+        useStripeCheckout: featureMap['useStripeCheckout'] === 'true',
+        allowDocumentUpload: featureMap['allowDocumentUpload'] === 'true',
       };
+      
+      console.log('Updated features after parsing:', updatedFeatures);
       
       // Always update features when configs change
       setFeatures(updatedFeatures);
@@ -363,20 +367,32 @@ export default function SiteCustomizer() {
         }
       ];
 
+      console.log('Saving general settings:', settings);
+
       // Update settings one by one to ensure each succeeds
       for (const config of settings) {
         // Skip empty values to prevent "Missing required fields" error
         if (!config.value && config.value !== '0') continue;
         
-        await apiRequest('POST', '/api/site-configs/upsert', config);
+        // Fix configKey vs key discrepancy
+        const requestData = {
+          key: config.key,
+          value: config.value,
+          type: config.type,
+          description: config.description
+        };
+        
+        console.log('Saving config:', requestData);
+        await apiRequest('POST', '/api/site-configs/upsert', requestData);
       }
 
-      queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
       toast({
         title: 'General settings updated',
         description: 'Your site settings have been saved successfully.',
       });
     } catch (error: any) {
+      console.error('Error saving general settings:', error);
       toast({
         title: 'Error updating settings',
         description: error.message || 'Failed to save general settings',
@@ -391,10 +407,12 @@ export default function SiteCustomizer() {
       // Create an array of all the feature toggle changes to save
       const featureUpdates = Object.entries(features).map(([feature, value]) => ({
         key: `feature.${feature}`,
-        value: value.toString(),
+        value: value.toString(), // Make sure boolean is converted to string
         type: 'feature',
         description: `Toggle for ${feature} feature`,
       }));
+      
+      console.log('Saving feature toggles:', featureUpdates);
       
       // Update each feature toggle one by one to ensure each is saved
       for (const config of featureUpdates) {
@@ -404,17 +422,12 @@ export default function SiteCustomizer() {
       // Refetch site configs after saving
       await queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
       
-      // Update local state with the saved changes
-      setFeatures(prev => ({
-        ...prev,
-        ...features 
-      }));
-      
       toast({
         title: 'Features updated',
         description: 'Feature toggles have been saved successfully.',
       });
     } catch (error: any) {
+      console.error('Error saving feature toggles:', error);
       toast({
         title: 'Error updating features',
         description: error.message || 'Failed to save feature toggles',
