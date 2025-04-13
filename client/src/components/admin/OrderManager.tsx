@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Card, CardContent, CardHeader, CardTitle, CardDescription 
@@ -26,7 +26,7 @@ const OrderManager = () => {
   const queryClient = useQueryClient();
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedOrder, setSelectedOrder] = useState<Order & { plateDetails: PlateCustomization } | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
   
   // Query for orders and reference data
@@ -48,98 +48,101 @@ const OrderManager = () => {
   const { data: badges } = useQuery<BadgeType[]>({
     queryKey: ['/api/badges'],
   });
-  
+
   // Fetch colors for name lookups
   const { data: colors } = useQuery<Color[]>({
     queryKey: ['/api/colors'],
   });
-  
+
   // Fetch car brands for name lookups
   const { data: carBrands } = useQuery<CarBrand[]>({
     queryKey: ['/api/car-brands'],
   });
-  
-  // Filtered orders based on status and search query
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
-  
-  useEffect(() => {
-    if (orders) {
-      let filtered = [...orders];
-      
-      // Filter by status
-      if (filterStatus !== 'all') {
-        filtered = filtered.filter(order => order.orderStatus === filterStatus);
-      }
-      
-      // Filter by search query
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(order => 
-          order.customerName.toLowerCase().includes(query) ||
-          order.customerEmail.toLowerCase().includes(query) ||
-          order.id.toString().includes(query)
-        );
-      }
-      
-      setFilteredOrders(filtered);
+
+  // Get parsed plate details from selected order
+  const parsedPlateDetails = useMemo(() => {
+    if (!selectedOrder || !selectedOrder.plateDetails) return null;
+    
+    try {
+      return typeof selectedOrder.plateDetails === 'string'
+        ? JSON.parse(selectedOrder.plateDetails)
+        : selectedOrder.plateDetails;
+    } catch (error) {
+      console.error('Error parsing plate details:', error);
+      return null;
     }
+  }, [selectedOrder]);
+
+  // Filtered and sorted orders
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+    
+    return orders
+      .filter(order => {
+        // Filter by status
+        if (filterStatus !== 'all' && order.orderStatus !== filterStatus) {
+          return false;
+        }
+        
+        // Filter by search query
+        if (searchQuery.trim() !== '') {
+          const query = searchQuery.toLowerCase();
+          return (
+            order.id.toString().includes(query) ||
+            order.customerName.toLowerCase().includes(query) ||
+            order.customerEmail.toLowerCase().includes(query)
+          );
+        }
+        
+        return true;
+      })
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [orders, filterStatus, searchQuery]);
-  
-  // Update order status mutation
+
+  // Mutation for updating order status
   const updateOrderStatusMutation = useMutation({
-    mutationFn: (data: { id: number; status: string }) => 
-      apiRequest('PUT', `/api/orders/${data.id}/status`, { status: data.status }),
+    mutationFn: (variables: { id: number; status: string }) => 
+      apiRequest('PATCH', `/api/orders/${variables.id}/status`, { status: variables.status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-      toast({ title: "Success", description: "Order status updated successfully" });
+      toast({
+        title: "Status Updated",
+        description: "Order status has been updated successfully."
+      });
     },
-    onError: (error) => {
-      toast({ 
-        title: "Error", 
-        description: "Failed to update order status", 
-        variant: "destructive" 
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update order status.",
+        variant: "destructive"
       });
     }
   });
   
-  // Update order payment status mutation
+  // Mutation for updating payment status
   const updateOrderPaymentStatusMutation = useMutation({
-    mutationFn: (data: { id: number; paymentStatus: string }) => 
-      apiRequest('PUT', `/api/orders/${data.id}`, { paymentStatus: data.paymentStatus }),
+    mutationFn: (variables: { id: number; paymentStatus: string }) => 
+      apiRequest('PATCH', `/api/orders/${variables.id}/payment-status`, { paymentStatus: variables.paymentStatus }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-      toast({ title: "Success", description: "Payment status updated successfully" });
+      toast({
+        title: "Payment Status Updated",
+        description: "Payment status has been updated successfully."
+      });
     },
-    onError: (error) => {
-      toast({ 
-        title: "Error", 
-        description: "Failed to update payment status", 
-        variant: "destructive" 
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update payment status.",
+        variant: "destructive"
       });
     }
   });
   
   // Handler for viewing order details
   const handleViewOrder = (order: Order) => {
-    try {
-      // Parse plateDetails from JSON if needed
-      const parsedOrder = {
-        ...order,
-        plateDetails: typeof order.plateDetails === 'string' 
-          ? JSON.parse(order.plateDetails) 
-          : order.plateDetails
-      };
-      
-      setSelectedOrder(parsedOrder as Order & { plateDetails: PlateCustomization });
-      setIsViewModalOpen(true);
-    } catch (error) {
-      console.error('Error parsing order details:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load order details. Please try again.",
-        variant: "destructive"
-      });
-    }
+    setSelectedOrder(order);
+    setIsViewModalOpen(true);
   };
   
   // Handler for updating order status
@@ -188,46 +191,43 @@ const OrderManager = () => {
   };
   
   // Function to handle invoice download
-  const handleDownloadInvoice = (order: Order & { plateDetails: PlateCustomization }) => {
+  const handleDownloadInvoice = () => {
+    if (!selectedOrder || !parsedPlateDetails) return;
+    
     try {
-      // Ensure plateDetails is properly parsed
-      const plateDetails = typeof order.plateDetails === 'string'
-        ? JSON.parse(order.plateDetails)
-        : order.plateDetails;
-      
       // Create invoice content
       const invoiceContent = `
 INVOICE
 ======================================
-Order #${order.id}
-Date: ${formatDate(order.createdAt)}
+Order #${selectedOrder.id}
+Date: ${formatDate(selectedOrder.createdAt)}
 --------------------------------------
 
 CUSTOMER INFORMATION:
-${order.customerName}
-${order.customerEmail}
-${order.customerPhone}
-${order.shippingAddress}
+${selectedOrder.customerName}
+${selectedOrder.customerEmail}
+${selectedOrder.customerPhone}
+${selectedOrder.shippingAddress}
 
 ORDER DETAILS:
-Registration: ${plateDetails.registrationText}
-Type: ${plateDetails.plateType === 'both' 
+Registration: ${parsedPlateDetails.registrationText}
+Type: ${parsedPlateDetails.plateType === 'both' 
         ? 'Front & Rear' 
-        : plateDetails.plateType === 'front' 
+        : parsedPlateDetails.plateType === 'front' 
           ? 'Front Only' 
           : 'Rear Only'}
-Road Legal: ${plateDetails.isRoadLegal ? 'Yes' : 'No (Show Plate)'}
-Size: ${getPlateSizeName(plateDetails.plateSize)}
-Style: ${getTextStyleName(plateDetails.textStyle)}
-${plateDetails.badge ? `Badge: ${getBadgeName(plateDetails.badge)}` : ''}
-${plateDetails.textColor ? `Text Color: ${getColorName(plateDetails.textColor)}` : ''}
-${plateDetails.borderColor ? `Border: ${getColorName(plateDetails.borderColor)}` : ''}
-${plateDetails.carBrand ? `Car Brand: ${getCarBrandName(plateDetails.carBrand)}` : ''}
+Road Legal: ${parsedPlateDetails.isRoadLegal ? 'Yes' : 'No (Show Plate)'}
+Size: ${getPlateSizeName(parsedPlateDetails.plateSize)}
+Style: ${getTextStyleName(parsedPlateDetails.textStyle)}
+${parsedPlateDetails.badge ? `Badge: ${getBadgeName(parsedPlateDetails.badge)}` : ''}
+${parsedPlateDetails.textColor ? `Text Color: ${getColorName(parsedPlateDetails.textColor)}` : ''}
+${parsedPlateDetails.borderColor ? `Border: ${getColorName(parsedPlateDetails.borderColor)}` : ''}
+${parsedPlateDetails.carBrand ? `Car Brand: ${getCarBrandName(parsedPlateDetails.carBrand)}` : ''}
 
 PAYMENT INFORMATION:
-Method: ${order.paymentMethod}
-Status: ${order.paymentStatus}
-TOTAL: £${Number(order.totalPrice).toFixed(2)}
+Method: ${selectedOrder.paymentMethod}
+Status: ${selectedOrder.paymentStatus}
+TOTAL: £${Number(selectedOrder.totalPrice).toFixed(2)}
 
 Thank you for your order!
       `;
@@ -237,7 +237,7 @@ Thank you for your order!
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `invoice-order-${order.id}.txt`;
+      link.download = `invoice-order-${selectedOrder.id}.txt`;
       document.body.appendChild(link);
       link.click();
       
@@ -469,7 +469,7 @@ Thank you for your order!
                         <Button 
                           variant="outline" 
                           className="text-xs"
-                          onClick={() => handleDownloadInvoice(selectedOrder)}
+                          onClick={handleDownloadInvoice}
                         >
                           <DownloadIcon className="h-4 w-4 mr-1" />
                           Download Invoice
@@ -479,42 +479,42 @@ Thank you for your order!
                     
                     <h4 className="font-semibold mt-4 mb-2">Plate Details</h4>
                     <div className="bg-gray-50 p-3 rounded-md">
-                      {selectedOrder.plateDetails ? (
+                      {parsedPlateDetails ? (
                         <>
-                          <p><span className="font-semibold">Registration:</span> {selectedOrder.plateDetails.registrationText}</p>
+                          <p><span className="font-semibold">Registration:</span> {parsedPlateDetails.registrationText}</p>
                           <p><span className="font-semibold">Type:</span> {
-                            selectedOrder.plateDetails.plateType === 'both' 
+                            parsedPlateDetails.plateType === 'both' 
                               ? 'Front & Rear' 
-                              : selectedOrder.plateDetails.plateType === 'front' 
+                              : parsedPlateDetails.plateType === 'front' 
                                 ? 'Front Only' 
                                 : 'Rear Only'
                           }</p>
                           <p><span className="font-semibold">Road Legal:</span> {
-                            selectedOrder.plateDetails.isRoadLegal ? 'Yes' : 'No (Show Plate)'
+                            parsedPlateDetails.isRoadLegal ? 'Yes' : 'No (Show Plate)'
                           }</p>
-                          <p><span className="font-semibold">Size:</span> {getPlateSizeName(selectedOrder.plateDetails.plateSize)}</p>
-                          <p><span className="font-semibold">Style:</span> {getTextStyleName(selectedOrder.plateDetails.textStyle)}</p>
+                          <p><span className="font-semibold">Size:</span> {getPlateSizeName(parsedPlateDetails.plateSize)}</p>
+                          <p><span className="font-semibold">Style:</span> {getTextStyleName(parsedPlateDetails.textStyle)}</p>
                           
-                          {selectedOrder.plateDetails.badge && (
+                          {parsedPlateDetails.badge && (
                             <p><span className="font-semibold">Badge:</span> {
-                              selectedOrder.plateDetails.badge === 'gb' ? 'GB' : getBadgeName(selectedOrder.plateDetails.badge)
+                              parsedPlateDetails.badge === 'gb' ? 'GB' : getBadgeName(parsedPlateDetails.badge)
                             }</p>
                           )}
                           
-                          {selectedOrder.plateDetails.textColor && (
-                            <p><span className="font-semibold">Text Color:</span> {getColorName(selectedOrder.plateDetails.textColor)}</p>
+                          {parsedPlateDetails.textColor && (
+                            <p><span className="font-semibold">Text Color:</span> {getColorName(parsedPlateDetails.textColor)}</p>
                           )}
                           
-                          {selectedOrder.plateDetails.borderColor && (
-                            <p><span className="font-semibold">Border Color:</span> {getColorName(selectedOrder.plateDetails.borderColor)}</p>
+                          {parsedPlateDetails.borderColor && (
+                            <p><span className="font-semibold">Border Color:</span> {getColorName(parsedPlateDetails.borderColor)}</p>
                           )}
                           
-                          {selectedOrder.plateDetails.carBrand && (
-                            <p><span className="font-semibold">Car Brand:</span> {getCarBrandName(selectedOrder.plateDetails.carBrand)}</p>
+                          {parsedPlateDetails.carBrand && (
+                            <p><span className="font-semibold">Car Brand:</span> {getCarBrandName(parsedPlateDetails.carBrand)}</p>
                           )}
                           
                           {/* Document information */}
-                          {selectedOrder.plateDetails.isRoadLegal && selectedOrder.documentFileId && (
+                          {parsedPlateDetails.isRoadLegal && selectedOrder.documentFileId && (
                             <div className="mt-2 border-t pt-2">
                               <p className="font-semibold">Uploaded Document:</p>
                               <div className="bg-green-50 p-2 mt-1 rounded-md text-sm flex items-center">
