@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { PlusIcon, TrashIcon, PencilIcon } from 'lucide-react';
+import { PlusIcon, TrashIcon, PencilIcon, Upload, Loader2 } from 'lucide-react';
 import type { 
   PlateSize, TextStyle, Badge, Color, CarBrand, Pricing, PaymentMethod
 } from '@shared/schema';
@@ -35,6 +35,43 @@ const ProductManager = () => {
   const [modalType, setModalType] = useState<string>('');
   const [modalData, setModalData] = useState<any>({});
   const [modalAction, setModalAction] = useState<'create' | 'edit'>('create');
+  const [isUploading, setIsUploading] = useState(false);
+  
+  // File upload mutation
+  const uploadFileMutation = useMutation({
+    mutationFn: async (file: File) => {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/uploads', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setModalData({...modalData, imagePath: `/api/uploads/${data.id}`});
+      toast({
+        title: 'File Uploaded',
+        description: `File has been uploaded successfully.`,
+      });
+      setIsUploading(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Upload Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+      setIsUploading(false);
+    }
+  });
   
   // Create/Update mutations for Plate Sizes
   const createPlateSizeMutation = useMutation({
