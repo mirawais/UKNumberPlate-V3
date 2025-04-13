@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProductManager from './ProductManager';
 import OrderManager from './OrderManager';
 import PaymentSummary from './PaymentSummary';
+import SiteCustomizer from './SiteCustomizer';
 import { Card, CardContent } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import type { Order } from '@shared/schema';
@@ -47,10 +48,11 @@ const AdminPanel = () => {
       </div>
       
       <Tabs defaultValue="orders" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="orders">Order Management</TabsTrigger>
           <TabsTrigger value="payments">Payment Settings</TabsTrigger>
           <TabsTrigger value="products">Product Configuration</TabsTrigger>
+          <TabsTrigger value="site">Site Customization</TabsTrigger>
         </TabsList>
         
         <TabsContent value="orders" className="mt-6">
@@ -63,6 +65,10 @@ const AdminPanel = () => {
         
         <TabsContent value="products" className="mt-6">
           <ProductManager />
+        </TabsContent>
+        
+        <TabsContent value="site" className="mt-6">
+          <SiteCustomizer />
         </TabsContent>
       </Tabs>
     </div>
