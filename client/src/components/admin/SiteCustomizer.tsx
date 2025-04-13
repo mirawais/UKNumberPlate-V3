@@ -139,6 +139,7 @@ export default function SiteCustomizer() {
     contactEmail: '',
     contactPhone: '',
     primaryColor: '#0070f3',
+    logoUrl: '',
   });
   
   // Feature toggle states
