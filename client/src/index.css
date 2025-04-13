@@ -1,8 +1,8 @@
+@import url('./lib/plates.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('./lib/plates.css');
 
 @layer base {
   * {
