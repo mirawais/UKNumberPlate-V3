@@ -149,18 +149,21 @@ export default function SiteCustomizer() {
       const featureMap: Record<string, string> = {};
       siteConfigs.forEach(config => {
         if (config.configType === 'feature') {
-          featureMap[config.configKey] = config.configValue;
+          // Extract feature name from config key (e.g., "feature.showBadges" -> "showBadges")
+          const featureName = config.configKey.split('.')[1];
+          featureMap[featureName] = config.configValue;
         }
       });
       
+      // Set defaults for all features to true if not defined in database
       setFeatures({
-        showBadges: featureMap['feature.showBadges'] === 'true',
-        showBorders: featureMap['feature.showBorders'] === 'true',
-        showCarBrands: featureMap['feature.showCarBrands'] === 'true',
-        roadLegalPlates: featureMap['feature.roadLegalPlates'] === 'true',
-        showPlates: featureMap['feature.showPlates'] === 'true',
-        useStripeCheckout: featureMap['feature.useStripeCheckout'] === 'true',
-        allowDocumentUpload: featureMap['feature.allowDocumentUpload'] === 'true',
+        showBadges: featureMap['showBadges'] !== 'false',
+        showBorders: featureMap['showBorders'] !== 'false',
+        showCarBrands: featureMap['showCarBrands'] !== 'false',
+        roadLegalPlates: featureMap['roadLegalPlates'] !== 'false',
+        showPlates: featureMap['showPlates'] !== 'false',
+        useStripeCheckout: featureMap['useStripeCheckout'] !== 'false',
+        allowDocumentUpload: featureMap['allowDocumentUpload'] !== 'false',
       });
     }
   }, [siteConfigs]);
