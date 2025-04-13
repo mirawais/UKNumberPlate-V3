@@ -162,6 +162,7 @@ export default function SiteCustomizer() {
         contactEmail: siteConfigs.find(c => c.configKey === 'site.contactEmail')?.configValue || '',
         contactPhone: siteConfigs.find(c => c.configKey === 'site.contactPhone')?.configValue || '',
         primaryColor: siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3',
+        logoUrl: siteConfigs.find(c => c.configKey === 'site.logoUrl')?.configValue || '',
       });
     }
   }, [siteConfigs]);
@@ -178,15 +179,15 @@ export default function SiteCustomizer() {
         }
       });
       
-      // Create new features object, being explicit about boolean conversion
+      // Create new features object with proper boolean conversion
       const updatedFeatures = {
-        showBadges: featureMap['showBadges'] === 'false' ? false : true,
-        showBorders: featureMap['showBorders'] === 'false' ? false : true,
-        showCarBrands: featureMap['showCarBrands'] === 'false' ? false : true,
-        roadLegalPlates: featureMap['roadLegalPlates'] === 'false' ? false : true,
-        showPlates: featureMap['showPlates'] === 'false' ? false : true,
-        useStripeCheckout: featureMap['useStripeCheckout'] === 'false' ? false : true,
-        allowDocumentUpload: featureMap['allowDocumentUpload'] === 'false' ? false : true,
+        showBadges: featureMap['showBadges'] !== 'false',
+        showBorders: featureMap['showBorders'] !== 'false',
+        showCarBrands: featureMap['showCarBrands'] !== 'false',
+        roadLegalPlates: featureMap['roadLegalPlates'] !== 'false',
+        showPlates: featureMap['showPlates'] !== 'false',
+        useStripeCheckout: featureMap['useStripeCheckout'] !== 'false',
+        allowDocumentUpload: featureMap['allowDocumentUpload'] !== 'false',
       };
       
       // Set the updated features
@@ -354,6 +355,12 @@ export default function SiteCustomizer() {
           value: generalSettings.primaryColor || '#0070f3',
           type: 'color',
           description: 'Primary color used throughout the site'
+        },
+        {
+          key: 'site.logoUrl',
+          value: generalSettings.logoUrl || '',
+          type: 'text',
+          description: 'URL or ID of the site logo image'
         }
       ];
 
@@ -554,6 +561,46 @@ export default function SiteCustomizer() {
                   </div>
                 </div>
                 
+                <div className="space-y-2">
+                  <Label htmlFor="site-logo">Site Logo</Label>
+                  <div className="flex items-center space-x-2">
+                    <Input 
+                      id="site-logo" 
+                      type="text" 
+                      placeholder="URL to your logo image or upload ID"
+                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.logoUrl')?.configValue || ''}
+                      onChange={(e) => {
+                        setGeneralSettings(prev => ({
+                          ...prev,
+                          logoUrl: e.target.value
+                        }));
+                      }}
+                    />
+                    <Button
+                      type="button" 
+                      variant="outline"
+                      onClick={() => {
+                        // Just go to the other card on the same tab
+                        document.getElementById('media-library-card')?.scrollIntoView({
+                          behavior: 'smooth'
+                        });
+                      }}
+                    >
+                      Choose From Media
+                    </Button>
+                  </div>
+                  {generalSettings.logoUrl && (
+                    <div className="mt-2 p-2 border rounded-md">
+                      <p className="text-sm text-muted-foreground mb-1">Current logo:</p>
+                      <img 
+                        src={generalSettings.logoUrl.startsWith('http') ? generalSettings.logoUrl : `/api/uploads/${generalSettings.logoUrl}`} 
+                        alt="Site Logo" 
+                        className="max-h-16 object-contain" 
+                      />
+                    </div>
+                  )}
+                </div>
+                
                 <div className="mt-6">
                   <Button 
                     type="button" 
@@ -567,7 +614,7 @@ export default function SiteCustomizer() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card id="media-library-card">
             <CardHeader>
               <CardTitle>Media Library</CardTitle>
               <CardDescription>
@@ -616,7 +663,32 @@ export default function SiteCustomizer() {
                 {uploadedFiles && uploadedFiles.length > 0 ? (
                   <div className="grid grid-cols-4 gap-4">
                     {uploadedFiles.map((file) => (
-                      <div key={file.id} className="border rounded-md overflow-hidden">
+                      <div 
+                        key={file.id} 
+                        className="border rounded-md overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                        onClick={() => {
+                          if (file.mimeType.startsWith('image/')) {
+                            setGeneralSettings(prev => ({
+                              ...prev,
+                              logoUrl: String(file.id)
+                            }));
+                            toast({
+                              title: "Image Selected",
+                              description: `Selected ${file.originalFilename} as site logo.`,
+                            });
+                            // Scroll back to the site logo section
+                            document.getElementById('site-logo')?.scrollIntoView({
+                              behavior: 'smooth'
+                            });
+                          } else {
+                            toast({
+                              title: "Invalid Selection",
+                              description: "Only image files can be used as site logo.",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                      >
                         {file.mimeType.startsWith('image/') ? (
                           <div className="aspect-square bg-slate-100 relative">
                             <img
@@ -639,6 +711,29 @@ export default function SiteCustomizer() {
                               ? `${(parseInt(file.fileSize) / (1024 * 1024)).toFixed(2)} MB`
                               : `${(parseInt(file.fileSize) / 1024).toFixed(2)} KB`}
                           </div>
+                          {file.mimeType.startsWith('image/') && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="w-full mt-1 text-xs h-7"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setGeneralSettings(prev => ({
+                                  ...prev,
+                                  logoUrl: String(file.id)
+                                }));
+                                toast({
+                                  title: "Image Selected",
+                                  description: `Selected ${file.originalFilename} as site logo.`,
+                                });
+                                document.getElementById('site-logo')?.scrollIntoView({
+                                  behavior: 'smooth'
+                                });
+                              }}
+                            >
+                              Use as Logo
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}
