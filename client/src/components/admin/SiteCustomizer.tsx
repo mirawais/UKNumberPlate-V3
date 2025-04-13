@@ -511,7 +511,7 @@ export default function SiteCustomizer() {
                     <Input 
                       id="site-tagline" 
                       placeholder="The best UK number plates" 
-                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.tagline')?.configValue || ''}
+                      defaultValue={siteConfigs?.find(c => c.key === 'site.tagline')?.value || ''}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
@@ -528,7 +528,7 @@ export default function SiteCustomizer() {
                     id="contact-email" 
                     type="email" 
                     placeholder="contact@example.com" 
-                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactEmail')?.configValue || ''}
+                    defaultValue={siteConfigs?.find(c => c.key === 'site.contactEmail')?.value || ''}
                     onChange={(e) => {
                       setGeneralSettings(prev => ({
                         ...prev,
@@ -543,7 +543,7 @@ export default function SiteCustomizer() {
                   <Input 
                     id="contact-phone" 
                     placeholder="+44 123 456789" 
-                    defaultValue={siteConfigs?.find(c => c.configKey === 'site.contactPhone')?.configValue || ''}
+                    defaultValue={siteConfigs?.find(c => c.key === 'site.contactPhone')?.value || ''}
                     onChange={(e) => {
                       setGeneralSettings(prev => ({
                         ...prev,
@@ -560,7 +560,7 @@ export default function SiteCustomizer() {
                       id="primary-color" 
                       type="color" 
                       className="w-12 h-10" 
-                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
+                      defaultValue={siteConfigs?.find(c => c.key === 'site.primaryColor')?.value || '#0070f3'}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
@@ -571,7 +571,7 @@ export default function SiteCustomizer() {
                     <Input 
                       type="text" 
                       className="flex-1" 
-                      value={generalSettings.primaryColor || siteConfigs?.find(c => c.configKey === 'site.primaryColor')?.configValue || '#0070f3'}
+                      value={generalSettings.primaryColor || siteConfigs?.find(c => c.key === 'site.primaryColor')?.value || '#0070f3'}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
@@ -589,7 +589,7 @@ export default function SiteCustomizer() {
                       id="site-logo" 
                       type="text" 
                       placeholder="URL to your logo image or upload ID"
-                      defaultValue={siteConfigs?.find(c => c.configKey === 'site.logoUrl')?.configValue || ''}
+                      defaultValue={siteConfigs?.find(c => c.key === 'site.logoUrl')?.value || ''}
                       onChange={(e) => {
                         setGeneralSettings(prev => ({
                           ...prev,
