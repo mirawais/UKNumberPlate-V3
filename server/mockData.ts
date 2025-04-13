@@ -47,6 +47,12 @@ export const mockData = {
       description: "Toggle to show or hide badges on plates"
     },
     {
+      configKey: "feature.showTextColors",
+      configValue: "true",
+      configType: "feature",
+      description: "Toggle to show or hide text color options"
+    },
+    {
       configKey: "feature.showBorders",
       configValue: "true",
       configType: "feature",
