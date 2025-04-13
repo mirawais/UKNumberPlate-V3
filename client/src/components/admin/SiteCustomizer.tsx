@@ -145,6 +145,7 @@ export default function SiteCustomizer() {
   // Feature toggle states
   const [features, setFeatures] = useState({
     showBadges: true,
+    showTextColors: true,
     showBorders: true,
     showCarBrands: true,
     roadLegalPlates: true,
@@ -185,6 +186,7 @@ export default function SiteCustomizer() {
       // Create new features object with proper boolean conversion
       const updatedFeatures = {
         showBadges: featureMap['showBadges'] === 'true',
+        showTextColors: featureMap['showTextColors'] === 'true',
         showBorders: featureMap['showBorders'] === 'true',
         showCarBrands: featureMap['showCarBrands'] === 'true',
         roadLegalPlates: featureMap['roadLegalPlates'] === 'true',
@@ -788,6 +790,12 @@ export default function SiteCustomizer() {
                       description="Allow users to add badges to their number plates"
                       value={features.showBadges}
                       onChange={(value) => handleFeatureToggle('showBadges', value)}
+                    />
+                    <FeatureToggle
+                      label="Show Text Colors"
+                      description="Allow users to select different text colors for their plates"
+                      value={features.showTextColors}
+                      onChange={(value) => handleFeatureToggle('showTextColors', value)}
                     />
                     <FeatureToggle
                       label="Show Border Options"
