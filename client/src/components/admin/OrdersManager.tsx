@@ -391,7 +391,7 @@ export default function OrdersManager() {
                               <div className="mt-2 space-y-2">
                                 <div className="border rounded-md p-3">
                                   <div className="font-medium text-lg mb-2">
-                                    {selectedOrder.plateDetails?.registrationNumber || "Custom Plate"}
+                                    {selectedOrder.plateDetails?.plateText || selectedOrder.plateDetails?.registrationNumber || "Custom Plate"}
                                   </div>
                                   
                                   <div className="bg-muted/30 p-2 rounded-md mb-3">

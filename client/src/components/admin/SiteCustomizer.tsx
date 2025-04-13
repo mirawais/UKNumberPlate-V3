@@ -177,16 +177,20 @@ export default function SiteCustomizer() {
         }
       });
       
-      // Set defaults for all features to true if not defined in database
-      setFeatures({
-        showBadges: featureMap['showBadges'] !== 'false',
-        showBorders: featureMap['showBorders'] !== 'false',
-        showCarBrands: featureMap['showCarBrands'] !== 'false',
-        roadLegalPlates: featureMap['roadLegalPlates'] !== 'false',
-        showPlates: featureMap['showPlates'] !== 'false',
-        useStripeCheckout: featureMap['useStripeCheckout'] !== 'false',
-        allowDocumentUpload: featureMap['allowDocumentUpload'] !== 'false',
-      });
+      // Create new features object, being explicit about boolean conversion
+      const updatedFeatures = {
+        showBadges: featureMap['showBadges'] === 'false' ? false : true,
+        showBorders: featureMap['showBorders'] === 'false' ? false : true,
+        showCarBrands: featureMap['showCarBrands'] === 'false' ? false : true,
+        roadLegalPlates: featureMap['roadLegalPlates'] === 'false' ? false : true,
+        showPlates: featureMap['showPlates'] === 'false' ? false : true,
+        useStripeCheckout: featureMap['useStripeCheckout'] === 'false' ? false : true,
+        allowDocumentUpload: featureMap['allowDocumentUpload'] === 'false' ? false : true,
+      };
+      
+      // Set the updated features
+      console.log('Updating features:', updatedFeatures);
+      setFeatures(updatedFeatures);
     }
   }, [siteConfigs]);
   
@@ -316,93 +320,92 @@ export default function SiteCustomizer() {
   };
   
   // Save all general settings at once 
-  const saveGeneralSettings = () => {
-    // Create an array of general settings to update
-    const settings = [
-      {
-        key: 'site.name',
-        value: generalSettings.siteName || '',
-        type: 'text',
-        description: 'Website name displayed in header and title'
-      },
-      {
-        key: 'site.tagline',
-        value: generalSettings.tagline || '',
-        type: 'text',
-        description: 'Short tagline displayed in the header'
-      },
-      {
-        key: 'site.contactEmail',
-        value: generalSettings.contactEmail || '',
-        type: 'text',
-        description: 'Contact email for customer inquiries'
-      },
-      {
-        key: 'site.contactPhone',
-        value: generalSettings.contactPhone || '',
-        type: 'text',
-        description: 'Contact phone for customer inquiries'
-      },
-      {
-        key: 'site.primaryColor',
-        value: generalSettings.primaryColor || '#0070f3',
-        type: 'color',
-        description: 'Primary color used throughout the site'
-      }
-    ];
+  const saveGeneralSettings = async () => {
+    try {
+      // Create an array of general settings to update
+      const settings = [
+        {
+          key: 'site.name',
+          value: generalSettings.siteName || '',
+          type: 'text',
+          description: 'Website name displayed in header and title'
+        },
+        {
+          key: 'site.tagline',
+          value: generalSettings.tagline || '',
+          type: 'text',
+          description: 'Short tagline displayed in the header'
+        },
+        {
+          key: 'site.contactEmail',
+          value: generalSettings.contactEmail || '',
+          type: 'text',
+          description: 'Contact email for customer inquiries'
+        },
+        {
+          key: 'site.contactPhone',
+          value: generalSettings.contactPhone || '',
+          type: 'text',
+          description: 'Contact phone for customer inquiries'
+        },
+        {
+          key: 'site.primaryColor',
+          value: generalSettings.primaryColor || '#0070f3',
+          type: 'color',
+          description: 'Primary color used throughout the site'
+        }
+      ];
 
-    // Update all settings in parallel
-    Promise.all(
-      settings.map(config => 
-        apiRequest('POST', '/api/site-configs/upsert', config)
-      )
-    )
-    .then(() => {
+      // Update settings one by one to ensure each succeeds
+      for (const config of settings) {
+        // Skip empty values to prevent "Missing required fields" error
+        if (!config.value && config.value !== '0') continue;
+        
+        await apiRequest('POST', '/api/site-configs/upsert', config);
+      }
+
       queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
       toast({
         title: 'General settings updated',
         description: 'Your site settings have been saved successfully.',
       });
-    })
-    .catch(error => {
+    } catch (error: any) {
       toast({
         title: 'Error updating settings',
         description: error.message || 'Failed to save general settings',
         variant: 'destructive',
       });
-    });
+    }
   };
 
   // Save all feature toggles at once
-  const saveFeatureToggles = () => {
-    // Create an array of all the feature toggle changes to save
-    const featureUpdates = Object.entries(features).map(([feature, value]) => ({
-      key: `feature.${feature}`,
-      value: value.toString(),
-      type: 'feature',
-      description: `Toggle for ${feature} feature`,
-    }));
-    
-    // Update each feature toggle in sequence
-    Promise.all(
-      featureUpdates.map(config => 
-        apiRequest('POST', '/api/site-configs/upsert', config)
-      )
-    )
-    .then(() => {
+  const saveFeatureToggles = async () => {
+    try {
+      // Create an array of all the feature toggle changes to save
+      const featureUpdates = Object.entries(features).map(([feature, value]) => ({
+        key: `feature.${feature}`,
+        value: value.toString(),
+        type: 'feature',
+        description: `Toggle for ${feature} feature`,
+      }));
+      
+      // Update each feature toggle one by one to ensure each is saved
+      for (const config of featureUpdates) {
+        await apiRequest('POST', '/api/site-configs/upsert', config);
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['/api/site-configs'] });
       toast({
         title: 'Features updated',
         description: 'Feature toggles have been saved successfully.',
       });
-    })
-    .catch(error => {
+    } catch (error: any) {
       toast({
         title: 'Error updating features',
         description: error.message || 'Failed to save feature toggles',
         variant: 'destructive',
       });
-    });
+    }
   };
   
   // Handle file upload
