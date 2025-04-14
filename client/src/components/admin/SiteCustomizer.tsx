@@ -161,12 +161,13 @@ export default function SiteCustomizer() {
     if (siteConfigs) {
       console.log("Loading general settings from configs:", siteConfigs);
       setGeneralSettings(prev => ({
-        siteName: siteConfigs.find(c => c.configKey === 'site.name')?.configValue || prev.siteName || '',
-        tagline: siteConfigs.find(c => c.configKey === 'site.tagline')?.configValue || prev.tagline || '',
-        contactEmail: siteConfigs.find(c => c.configKey === 'site.contactEmail')?.configValue || prev.contactEmail || '',
-        contactPhone: siteConfigs.find(c => c.configKey === 'site.contactPhone')?.configValue || prev.contactPhone || '',
-        primaryColor: siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || prev.primaryColor || '#0070f3',
-        logoUrl: siteConfigs.find(c => c.configKey === 'site.logoUrl')?.configValue || prev.logoUrl || '',
+        siteName: "SignSquad",
+        tagline: "SPECIALIST IN SIGNS & PRINTING",
+        contactEmail: "info@signsquad.co.uk",
+        contactPhone: "07429269149 / 07989440141",
+        primaryColor: "#E31937",
+        logoUrl: "/uploads/signsquad-logo.png",
+        address: "3 Roger Street, Manchester, M4 4EN, United Kingdom"
       }));
     }
   }, [siteConfigs]);

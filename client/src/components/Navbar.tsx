@@ -25,7 +25,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/">
-            <h1 className="text-2xl font-bold text-primary cursor-pointer">PlateCustomizer</h1>
+            <h1 className="text-2xl font-bold text-primary cursor-pointer">SignSquad</h1>
           </Link>
         </div>
         

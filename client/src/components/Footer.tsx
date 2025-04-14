@@ -69,13 +69,13 @@ const Footer = () => {
             <h4 className="font-bold mb-4">Contact Us</h4>
             <ul className="space-y-2">
               <li className="flex items-center text-gray-400">
-                <Mail className="mr-2 h-4 w-4" /> support@platecustomizer.com
+                <Mail className="mr-2 h-4 w-4" /> info@signsquad.co.uk
               </li>
               <li className="flex items-center text-gray-400">
-                <Phone className="mr-2 h-4 w-4" /> +44 123 456 7890
+                <Phone className="mr-2 h-4 w-4" /> 07429269149 / 07989440141
               </li>
               <li className="flex items-center text-gray-400">
-                <MapPin className="mr-2 h-4 w-4" /> 123 Plate Street, London, UK
+                <MapPin className="mr-2 h-4 w-4" /> 3 Roger Street, Manchester, M4 4EN, United Kingdom
               </li>
             </ul>
             <div className="flex space-x-4 mt-4">
