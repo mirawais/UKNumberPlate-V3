@@ -13,25 +13,25 @@ const PlatePreview = ({ customization, colors, badges, carBrands }: PlatePreview
   const textColor = useMemo(() => {
     return colors.find(color => color.id.toString() === customization.textColor);
   }, [colors, customization.textColor]);
-  
+
   const borderColor = useMemo(() => {
     return colors.find(color => color.id.toString() === customization.borderColor);
   }, [colors, customization.borderColor]);
-  
+
   // Get badge from ID
   const badge = useMemo(() => {
     return badges.find(badge => badge.id.toString() === customization.badge);
   }, [badges, customization.badge]);
-  
+
   // Get car brand from ID
   const carBrand = useMemo(() => {
     return carBrands.find(brand => brand.id.toString() === customization.carBrand);
   }, [carBrands, customization.carBrand]);
-  
+
   // Plate styling will depend on plate type and customization
   const showFrontPlate = customization.plateType === 'both' || customization.plateType === 'front';
   const showRearPlate = customization.plateType === 'both' || customization.plateType === 'rear';
-  
+
   return (
     <div className="relative w-full max-w-2xl">
       {/* Front Plate */}
@@ -59,12 +59,13 @@ const PlatePreview = ({ customization, colors, badges, carBrands }: PlatePreview
               </div>
             </div>
           )}
-          
+
           {/* Plate Text */}
           <div className="flex justify-center items-center h-full">
             <p 
               className="font-bold text-7xl tracking-wider plate-text"
               style={{ 
+                fontFamily: 'UKNumberPlate',
                 color: textColor ? textColor.hexCode : 'black',
                 WebkitTextStroke: '1px #333',
                 filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.5))'
@@ -73,7 +74,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands }: PlatePreview
               {customization.registrationText || 'YOUR REG'}
             </p>
           </div>
-          
+
           {/* Car Brand */}
           {carBrand && (
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3">
@@ -82,7 +83,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands }: PlatePreview
           )}
         </div>
       )}
-      
+
       {/* Rear Plate */}
       {showRearPlate && (
         <div 
@@ -108,12 +109,13 @@ const PlatePreview = ({ customization, colors, badges, carBrands }: PlatePreview
               </div>
             </div>
           )}
-          
+
           {/* Plate Text */}
           <div className="flex justify-center items-center h-full">
             <p 
               className="font-bold text-7xl tracking-wider plate-text"
               style={{ 
+                fontFamily: 'UKNumberPlate',
                 color: textColor ? textColor.hexCode : 'black',
                 WebkitTextStroke: '1px #333',
                 filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.5))'
@@ -122,7 +124,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands }: PlatePreview
               {customization.registrationText || 'YOUR REG'}
             </p>
           </div>
-          
+
           {/* Car Brand */}
           {carBrand && (
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3">
