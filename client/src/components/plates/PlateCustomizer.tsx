@@ -801,6 +801,7 @@ const PlateCustomizer = () => {
                 colors={colors || []}
                 badges={badges || []}
                 carBrands={carBrands || []}
+                plateSizes={plateSizes || []}
               />
             </div>
             
