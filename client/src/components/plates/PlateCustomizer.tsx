@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import PlatePreview from './PlatePreview';
 import TextStyleModal from './TextStyleModal';
 import CheckoutModal from '../checkout/CheckoutModal';
@@ -30,11 +29,10 @@ const PlateCustomizer = () => {
   const { data: carBrands } = useQuery<CarBrand[]>({ queryKey: ['/api/car-brands'] });
   const { data: pricing } = useQuery<Pricing>({ queryKey: ['/api/pricing'] });
   
-  // State for open/closed modals and UI toggles
+  // State for open/closed modals
   const [isTextStyleModalOpen, setIsTextStyleModalOpen] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [selectedTextStyle, setSelectedTextStyle] = useState<TextStyle | null>(null);
-  const [showBadgesColors, setShowBadgesColors] = useState(true);
   
   // State for plate customization
   const [customization, setCustomization] = useState<PlateCustomization>({
@@ -322,64 +320,52 @@ const PlateCustomizer = () => {
                 </div>
               </div>
               
-              {/* Badges & Colours */}
-              <div className="p-4 border-b">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold">Badges & Colours</h3>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Show</span>
-                    <Switch 
-                      checked={showBadgesColors}
-                      onCheckedChange={setShowBadgesColors}
-                      className="data-[state=checked]:bg-primary"
-                    />
-                  </div>
+              {/* Badges & Colours - Conditionally shown based on feature toggles */}
+              {(features.showBadges || features.showTextColors) && (
+                <div className="p-4 border-b">
+                  <h3 className="font-bold mb-2">Badges & Colours</h3>
+                  
+                  {/* Color Selection - Conditionally show text colors based on feature toggle */}
+                  {features.showTextColors && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-2">Text Color:</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {colors?.map((color) => (
+                          <button 
+                            key={color.id}
+                            className={`h-8 w-full rounded ${
+                              customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                            }`}
+                            style={{ backgroundColor: color.hexCode }}
+                            title={color.name}
+                            onClick={() => setCustomization({...customization, textColor: color.id.toString()})}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Badge Selection - Conditionally show badges based on feature toggle */}
+                  {features.showBadges && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">Badge:</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {badges?.map((badge) => (
+                          <button 
+                            key={badge.id}
+                            className={`h-16 w-full p-1 rounded ${
+                              customization.badge === badge.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                            } bg-gray-100 text-center text-xs`}
+                            onClick={() => setCustomization({...customization, badge: badge.id.toString()})}
+                          >
+                            <img src={badge.imagePath} className="w-full h-full object-contain mx-auto" alt={badge.name} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
-                {showBadgesColors && (
-                  <>
-                    {/* Color Selection - Conditionally show text colors based on feature toggle */}
-                    {features.showTextColors && (
-                      <div className="mb-4">
-                        <p className="text-sm text-gray-600 mb-2">Text Color:</p>
-                        <div className="grid grid-cols-4 gap-2">
-                          {colors?.map((color) => (
-                            <button 
-                              key={color.id}
-                              className={`h-8 w-full rounded ${
-                                customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                              }`}
-                              style={{ backgroundColor: color.hexCode }}
-                              title={color.name}
-                              onClick={() => setCustomization({...customization, textColor: color.id.toString()})}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Badge Selection - Conditionally show badges based on feature toggle */}
-                    {features.showBadges && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-2">Badge:</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          {badges?.map((badge) => (
-                            <button 
-                              key={badge.id}
-                              className={`h-16 w-full p-1 rounded ${
-                                customization.badge === badge.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                              } bg-gray-100 text-center text-xs`}
-                              onClick={() => setCustomization({...customization, badge: badge.id.toString()})}
-                            >
-                              <img src={badge.imagePath} className="w-full h-full object-contain mx-auto" alt={badge.name} />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+              )}
               
               {/* Border Selection - Conditional based on feature flag */}
               {features.showBorders && (
@@ -683,64 +669,52 @@ const PlateCustomizer = () => {
                 </div>
               </div>
               
-              {/* Badges & Colours */}
-              <div className="p-4 border-b">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold">Badges & Colours</h3>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Show</span>
-                    <Switch 
-                      checked={showBadgesColors}
-                      onCheckedChange={setShowBadgesColors}
-                      className="data-[state=checked]:bg-primary"
-                    />
-                  </div>
+              {/* Badges & Colours - Conditionally shown based on feature toggles */}
+              {(features.showBadges || features.showTextColors) && (
+                <div className="p-4 border-b">
+                  <h3 className="font-bold mb-2">Badges & Colours</h3>
+                  
+                  {/* Color Selection - Conditionally show text colors based on feature toggle */}
+                  {features.showTextColors && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-2">Text Color:</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {colors?.map((color) => (
+                          <button 
+                            key={color.id}
+                            className={`h-8 w-full rounded ${
+                              customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                            }`}
+                            style={{ backgroundColor: color.hexCode }}
+                            title={color.name}
+                            onClick={() => setCustomization({...customization, textColor: color.id.toString(), isRoadLegal: false})}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Badge Selection - Conditionally show badges based on feature toggle */}
+                  {features.showBadges && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">Badge:</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {badges?.map((badge) => (
+                          <button 
+                            key={badge.id}
+                            className={`h-16 w-full p-1 rounded ${
+                              customization.badge === badge.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
+                            } bg-gray-100 text-center text-xs`}
+                            onClick={() => setCustomization({...customization, badge: badge.id.toString(), isRoadLegal: false})}
+                          >
+                            <img src={badge.imagePath} className="w-full h-full object-contain mx-auto" alt={badge.name} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
-                {showBadgesColors && (
-                  <>
-                    {/* Color Selection - Conditionally show text colors based on feature toggle */}
-                    {features.showTextColors && (
-                      <div className="mb-4">
-                        <p className="text-sm text-gray-600 mb-2">Text Color:</p>
-                        <div className="grid grid-cols-4 gap-2">
-                          {colors?.map((color) => (
-                            <button 
-                              key={color.id}
-                              className={`h-8 w-full rounded ${
-                                customization.textColor === color.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                              }`}
-                              style={{ backgroundColor: color.hexCode }}
-                              title={color.name}
-                              onClick={() => setCustomization({...customization, textColor: color.id.toString(), isRoadLegal: false})}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Badge Selection - Conditionally show badges based on feature toggle */}
-                    {features.showBadges && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-2">Badge:</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          {badges?.map((badge) => (
-                            <button 
-                              key={badge.id}
-                              className={`h-16 w-full p-1 rounded ${
-                                customization.badge === badge.id.toString() ? 'ring-2 ring-offset-2 ring-primary' : 'border border-gray-300'
-                              } bg-gray-100 text-center text-xs`}
-                              onClick={() => setCustomization({...customization, badge: badge.id.toString(), isRoadLegal: false})}
-                            >
-                              <img src={badge.imagePath} className="w-full h-full object-contain mx-auto" alt={badge.name} />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+              )}
               
               {/* Border Selection - Conditional based on feature flag */}
               {features.showBorders && (
