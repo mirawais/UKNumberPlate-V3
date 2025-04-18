@@ -636,7 +636,11 @@ const PlateCustomizer = () => {
                     onValueChange={(value) => {
                       setCustomization({...customization, textStyle: value, isRoadLegal: false});
                       const style = textStyles?.find(s => s.id.toString() === value);
-                      if (style) setSelectedTextStyle(style);
+                      if (style) {
+                        setSelectedTextStyle(style);
+                        // Automatically open the modal when a new style is selected, same as road legal tab
+                        setIsTextStyleModalOpen(true);
+                      }
                     }}
                   >
                     <SelectTrigger>

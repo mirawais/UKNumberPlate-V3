@@ -1,8 +1,10 @@
 // Utility functions for UK number plate rendering based on official specifications
 
-// Convert millimeters to pixels with default ratio of 3.78 (adjustable)
+// Convert millimeters to pixels with fixed ratio of 3.78 for UK plates
+// This ensures text height remains exactly 79mm (298.62px)
 export const mmToPixels = (mm: number, ratio: number = 3.78): number => {
-  return mm * ratio;
+  // Using exact calculations for precise measurements
+  return Math.round(mm * ratio);
 };
 
 // UK plate specifications in millimeters

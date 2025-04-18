@@ -94,13 +94,15 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   const plateWidthPx = mmToPixels(dimensions.width, pixelRatio);
   const plateHeightPx = mmToPixels(dimensions.height, pixelRatio);
   
-  // Character height is fixed at exactly 79mm = 298.62px (using 3.78px/mm)
+  // Character height must be FIXED at exactly 79mm = 298.62px (using exact 3.78px/mm)
+  // This is a UK legal requirement that must be maintained regardless of plate size
   const characterHeightPx = 298.62;
   
+  // Scale other elements proportionally but keep text size fixed
   const marginPx = mmToPixels(UK_PLATE_SPECS.MARGIN, pixelRatio);
   const badgeWidthPx = mmToPixels(UK_PLATE_SPECS.BADGE_WIDTH, pixelRatio);
 
-  // Use exact height for font size - no adjustment
+  // Use exact height for font size - MUST remain at 298.62px (79mm)
   const fontSize = characterHeightPx;
 
   return (
