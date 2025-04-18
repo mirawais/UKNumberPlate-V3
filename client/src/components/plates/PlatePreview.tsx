@@ -102,8 +102,21 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   const marginPx = mmToPixels(UK_PLATE_SPECS.MARGIN, pixelRatio);
   const badgeWidthPx = mmToPixels(UK_PLATE_SPECS.BADGE_WIDTH, pixelRatio);
 
-  // Use exact height for font size - MUST remain at 298.62px (79mm)
-  const fontSize = characterHeightPx;
+  // Calculate available width for text to prevent overflow
+  const availableWidthPx = plateWidthPx - (marginPx * 2) - (badge ? badgeWidthPx : 0);
+  
+  // Calculate optimal font size to ensure text fits within plate boundaries
+  // Standard is 298.62px (79mm) but we'll scale down if needed to prevent overflow
+  const minFontSize = 150; // Minimum readable size
+  const maxFontSize = characterHeightPx; // Maximum size (standard 79mm height)
+  
+  // Calculate estimated text width at maximum font size
+  const textWidthEstimate = customization.registrationText.length * (maxFontSize * 0.7); // 0.7 is approximate width/height ratio
+  
+  // If text would overflow, scale down proportionally, but not below minimum
+  const fontSize = textWidthEstimate > availableWidthPx 
+    ? Math.max(minFontSize, maxFontSize * (availableWidthPx / textWidthEstimate))
+    : maxFontSize;
 
   return (
     <div className="relative w-full max-w-2xl" ref={setContainerRef}>
