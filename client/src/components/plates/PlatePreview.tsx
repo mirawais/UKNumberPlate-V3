@@ -87,26 +87,30 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
     };
   }, [containerRef]);
 
-  // Calculate dimensions in pixels
+  // Fixed pixel per mm value (1mm = 3.78px) - exact conversion
+  const FIXED_PX_RATIO = 3.78;
+  
+  // Calculate dimensions in pixels using fixed ratio for the container 
   const plateWidthPx = mmToPixels(dimensions.width, pixelRatio);
   const plateHeightPx = mmToPixels(dimensions.height, pixelRatio);
-  const characterHeightPx = mmToPixels(UK_PLATE_SPECS.CHARACTER_HEIGHT, pixelRatio);
+  
+  // Character height is fixed at exactly 79mm = 298.62px (using 3.78px/mm)
+  const characterHeightPx = 298.62;
+  
   const marginPx = mmToPixels(UK_PLATE_SPECS.MARGIN, pixelRatio);
   const badgeWidthPx = mmToPixels(UK_PLATE_SPECS.BADGE_WIDTH, pixelRatio);
 
-  // Calculate font size based on character height
-  const fontSize = characterHeightPx * 0.9; // Slightly smaller to account for font rendering differences
+  // Use exact height for font size - no adjustment
+  const fontSize = characterHeightPx;
 
   return (
     <div className="relative w-full max-w-2xl" ref={setContainerRef}>
       {/* Front Plate */}
       {showFrontPlate && (
         <div 
-          className="relative mx-auto mb-4 bg-white border-2 rounded-lg overflow-hidden"
+          className="relative mx-auto mb-4 bg-white"
           style={{ 
-            borderColor: borderColor ? borderColor.hexCode : 'black',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            transform: 'perspective(500px) rotateX(2deg)',
+            border: '2px solid black',
             width: `${plateWidthPx}px`,
             height: `${plateHeightPx}px`,
             maxWidth: '100%'
@@ -115,7 +119,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
           {/* Badge */}
           {badge && (
             <div 
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-800 rounded-sm"
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-800"
               style={{
                 left: `${marginPx / 2}px`,
                 height: `${plateHeightPx * 0.8}px`,
@@ -123,11 +127,11 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
               }}
             >
               <div className="relative w-full h-full flex flex-col">
-                <div className="h-2/3 w-full bg-blue-800 overflow-hidden rounded-t">
+                <div className="h-2/3 w-full bg-blue-800 overflow-hidden">
                   <img src={badge.imagePath} className="w-full h-full object-cover" alt={badge.name} />
                 </div>
                 <div className="h-1/3 w-full bg-blue-800 flex items-center justify-center">
-                  <span className="text-white font-bold" style={{ fontSize: `${plateHeightPx * 0.12}px` }}>
+                  <span className="text-white" style={{ fontSize: `${plateHeightPx * 0.12}px` }}>
                     {badge.name.slice(0, 2).toUpperCase()}
                   </span>
                 </div>
@@ -146,12 +150,10 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
             {displayLines.map((line, index) => (
               <p 
                 key={index}
-                className="font-bold tracking-wider plate-text text-center"
+                className="plate-text text-center"
                 style={{ 
                   fontFamily: 'UKNumberPlate',
                   color: textColor ? textColor.hexCode : 'black',
-                  WebkitTextStroke: '1px #333',
-                  filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.5))',
                   fontSize: `${fontSize}px`,
                   lineHeight: isSplitText ? `${plateHeightPx * 0.48}px` : `${plateHeightPx}px`,
                   marginTop: isSplitText && index === 0 ? `${plateHeightPx * 0.05}px` : '0',
@@ -169,7 +171,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
               className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3"
               style={{ fontSize: `${plateHeightPx * 0.12}px` }}
             >
-              <p className="italic text-gray-700">{carBrand.name}</p>
+              <p className="text-gray-700">{carBrand.name}</p>
             </div>
           )}
         </div>
@@ -178,11 +180,9 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
       {/* Rear Plate */}
       {showRearPlate && (
         <div 
-          className="relative mx-auto bg-[#FECC00] border-2 rounded-lg overflow-hidden"
+          className="relative mx-auto bg-[#FECC00]"
           style={{ 
-            borderColor: borderColor ? borderColor.hexCode : 'black',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            transform: 'perspective(500px) rotateX(2deg)',
+            border: '2px solid black',
             width: `${plateWidthPx}px`,
             height: `${plateHeightPx}px`,
             maxWidth: '100%'
@@ -191,7 +191,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
           {/* Badge */}
           {badge && (
             <div 
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-800 rounded-sm"
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-800"
               style={{
                 left: `${marginPx / 2}px`,
                 height: `${plateHeightPx * 0.8}px`,
@@ -199,11 +199,11 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
               }}
             >
               <div className="relative w-full h-full flex flex-col">
-                <div className="h-2/3 w-full bg-blue-800 overflow-hidden rounded-t">
+                <div className="h-2/3 w-full bg-blue-800 overflow-hidden">
                   <img src={badge.imagePath} className="w-full h-full object-cover" alt={badge.name} />
                 </div>
                 <div className="h-1/3 w-full bg-blue-800 flex items-center justify-center">
-                  <span className="text-white font-bold" style={{ fontSize: `${plateHeightPx * 0.12}px` }}>
+                  <span className="text-white" style={{ fontSize: `${plateHeightPx * 0.12}px` }}>
                     {badge.name.slice(0, 2).toUpperCase()}
                   </span>
                 </div>
@@ -222,12 +222,10 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
             {displayLines.map((line, index) => (
               <p 
                 key={index}
-                className="font-bold tracking-wider plate-text text-center"
+                className="plate-text text-center"
                 style={{ 
                   fontFamily: 'UKNumberPlate',
                   color: textColor ? textColor.hexCode : 'black',
-                  WebkitTextStroke: '1px #333',
-                  filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.5))',
                   fontSize: `${fontSize}px`,
                   lineHeight: isSplitText ? `${plateHeightPx * 0.48}px` : `${plateHeightPx}px`,
                   marginTop: isSplitText && index === 0 ? `${plateHeightPx * 0.05}px` : '0',
@@ -245,7 +243,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
               className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3"
               style={{ fontSize: `${plateHeightPx * 0.12}px` }}
             >
-              <p className="italic text-gray-700">{carBrand.name}</p>
+              <p className="text-gray-700">{carBrand.name}</p>
             </div>
           )}
         </div>
