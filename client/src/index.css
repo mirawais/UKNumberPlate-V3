@@ -1,4 +1,5 @@
 @import url('./lib/plates.css');
+@import url('./lib/theme-variables.css');
 
 @tailwind base;
 @tailwind components;

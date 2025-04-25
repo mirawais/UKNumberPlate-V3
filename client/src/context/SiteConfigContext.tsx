@@ -80,6 +80,55 @@ export const SiteConfigProvider = ({ children }: { children: ReactNode }) => {
     refetch();
   };
 
+  // Function to convert hex color to HSL values
+  const hexToHSL = (hexColor: string): string => {
+    // Remove the hash if it exists
+    hexColor = hexColor.replace('#', '');
+    
+    // Parse the hex values
+    const r = parseInt(hexColor.substring(0, 2), 16) / 255;
+    const g = parseInt(hexColor.substring(2, 4), 16) / 255;
+    const b = parseInt(hexColor.substring(4, 6), 16) / 255;
+    
+    // Find the max and min values to compute the lightness
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    
+    let h = 0;
+    let s = 0;
+    
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      
+      if (max === r) {
+        h = (g - b) / d + (g < b ? 6 : 0);
+      } else if (max === g) {
+        h = (b - r) / d + 2;
+      } else if (max === b) {
+        h = (r - g) / d + 4;
+      }
+      
+      h *= 60;
+    }
+    
+    // Round values for CSS
+    h = Math.round(h);
+    s = Math.round(s * 100);
+    const lightness = Math.round(l * 100);
+    
+    return `${h} ${s}% ${lightness}%`;
+  };
+  
+  // Update CSS variables when primary color changes
+  const updateCSSVariables = (primaryColor: string) => {
+    if (primaryColor && primaryColor.startsWith('#')) {
+      const hslValue = hexToHSL(primaryColor);
+      document.documentElement.style.setProperty('--primary', hslValue);
+    }
+  };
+
   useEffect(() => {
     if (siteConfigs) {
       // Process features
@@ -104,15 +153,21 @@ export const SiteConfigProvider = ({ children }: { children: ReactNode }) => {
         allowDocumentUpload: featureMap['allowDocumentUpload'] === 'true',
       });
       
+      // Get primary color from config
+      const primaryColor = siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || defaultSiteInfo.primaryColor;
+      
       // Update site info
       setSiteInfo({
         siteName: siteConfigs.find(c => c.configKey === 'site.name')?.configValue || defaultSiteInfo.siteName,
         tagline: siteConfigs.find(c => c.configKey === 'site.tagline')?.configValue || defaultSiteInfo.tagline,
         contactEmail: siteConfigs.find(c => c.configKey === 'site.contactEmail')?.configValue || defaultSiteInfo.contactEmail,
         contactPhone: siteConfigs.find(c => c.configKey === 'site.contactPhone')?.configValue || defaultSiteInfo.contactPhone,
-        primaryColor: siteConfigs.find(c => c.configKey === 'site.primaryColor')?.configValue || defaultSiteInfo.primaryColor,
+        primaryColor,
         logoUrl: siteConfigs.find(c => c.configKey === 'site.logoUrl')?.configValue || defaultSiteInfo.logoUrl,
       });
+      
+      // Update CSS variables with the primary color
+      updateCSSVariables(primaryColor);
     }
   }, [siteConfigs]);
 
