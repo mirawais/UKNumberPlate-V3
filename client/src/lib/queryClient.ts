@@ -13,8 +13,8 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Check if the URL is already absolute (starts with http:// or https://)
-  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+  // Only add API_BASE_URL if it's not empty and url is not already absolute
+  const fullUrl = url.startsWith('http') || !API_BASE_URL ? url : `${API_BASE_URL}${url}`;
   
   const res = await fetch(fullUrl, {
     method,
@@ -33,11 +33,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Handle array query keys properly and append to API base URL if needed
+    // Handle array query keys properly
     let url = queryKey[0] as string;
     
-    // Check if the URL is already absolute (starts with http:// or https://)
-    if (!url.startsWith('http')) {
+    // Only add API_BASE_URL if it's not empty and url is not already absolute
+    if (!url.startsWith('http') && API_BASE_URL) {
       url = `${API_BASE_URL}${url}`;
     }
     
