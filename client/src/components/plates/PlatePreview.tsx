@@ -105,10 +105,10 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   // For smaller plates like Motorbike and 4x4, increase the margin
   if (dimensions.width <= 280) {
     // For very small plates like Motorbike (229mm x 178mm)
-    marginMultiplier = 2.5;
+    marginMultiplier = 4.0;
   } else if (dimensions.width <= 350) {
     // For medium-small plates like 4x4 (279mm x 203mm)
-    marginMultiplier = 2.0;
+    marginMultiplier = 3.5;
   }
   
   // Scale other elements proportionally but keep text size fixed
@@ -130,10 +130,10 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   let fontScaleFactor = 1.0;
   if (dimensions.width <= 280) {
     // For very small plates like Motorbike (229mm x 178mm)
-    fontScaleFactor = 0.6; // Scale down font more dramatically 
+    fontScaleFactor = 0.4; // Scale down font more dramatically 
   } else if (dimensions.width <= 350) {
     // For medium-small plates like 4x4 (279mm x 203mm)
-    fontScaleFactor = 0.75; // Scale down font less dramatically
+    fontScaleFactor = 0.5; // Scale down font less dramatically
   }
   
   // If text would overflow, scale down proportionally, but not below minimum
@@ -147,16 +147,31 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
     let verticalSpacing = 0.05; // Default top margin factor
     let bottomSpacing = 0.02; // Default bottom margin factor
     let lineHeightFactor = 0.48; // Default line height factor
+    let verticalPosition = {}; // Additional positioning for smaller plates
     
     // Increase vertical spacing for smaller plates
-    if (dimensions.height < 180) {
-      verticalSpacing = 0.15; // More spacing for very small plates
-      bottomSpacing = 0.04;
-      lineHeightFactor = 0.42; // Reduced line height for better fit
-    } else if (dimensions.height < 220) {
-      verticalSpacing = 0.1; // Medium spacing for medium-small plates
-      bottomSpacing = 0.03;
-      lineHeightFactor = 0.44; // Slightly reduced line height
+    if (dimensions.width <= 280) {
+      // For very small plates like Motorbike (229mm x 178mm)
+      verticalSpacing = 0.25; // Much more top spacing
+      bottomSpacing = 0.1;
+      lineHeightFactor = 0.4; // Reduced line height for better fit
+      // Add vertical centering for small plates
+      verticalPosition = { 
+        position: 'relative',
+        top: '50%',
+        transform: 'translateY(-50%)'
+      };
+    } else if (dimensions.width <= 350) {
+      // For medium-small plates like 4x4 (279mm x 203mm)
+      verticalSpacing = 0.2; 
+      bottomSpacing = 0.05;
+      lineHeightFactor = 0.42; 
+      // Add vertical centering for medium plates
+      verticalPosition = { 
+        position: 'relative',
+        top: '50%',
+        transform: 'translateY(-50%)'
+      };
     }
     
     return {
@@ -165,7 +180,8 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
       fontSize: `${fontSize}px`,
       lineHeight: isSplitText ? `${plateHeightPx * lineHeightFactor}px` : `${plateHeightPx}px`,
       marginTop: isSplitText && index === 0 ? `${plateHeightPx * verticalSpacing}px` : '0',
-      marginBottom: isSplitText && index === 0 ? `${plateHeightPx * bottomSpacing}px` : '0'
+      marginBottom: isSplitText && index === 0 ? `${plateHeightPx * bottomSpacing}px` : '0',
+      ...verticalPosition // Apply vertical centering if needed for small plates
     };
   };
 
@@ -207,25 +223,43 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   );
 
   // Reusable text component
-  const PlateTextComponent = () => (
-    <div 
-      className={`flex ${isSplitText ? 'flex-col' : ''} justify-center items-center h-full`}
-      style={{
-        paddingLeft: badge ? `${badgeWidthPx + marginPx}px` : `${marginPx}px`,
-        paddingRight: `${marginPx}px`
-      }}
-    >
-      {displayLines.map((line, index) => (
-        <p 
-          key={index}
-          className="plate-text text-center"
-          style={getTextStyles(index)}
-        >
-          {line}
-        </p>
-      ))}
-    </div>
-  );
+  const PlateTextComponent = () => {
+    // For smaller plates, apply extra container styling for better centering
+    const containerStyle = dimensions.width <= 350 ? {
+      display: 'flex',
+      flexDirection: isSplitText ? 'column' : 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100%',
+      paddingLeft: badge ? `${badgeWidthPx + marginPx}px` : `${marginPx}px`,
+      paddingRight: `${marginPx}px`,
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0
+    } : {
+      paddingLeft: badge ? `${badgeWidthPx + marginPx}px` : `${marginPx}px`,
+      paddingRight: `${marginPx}px`
+    };
+    
+    return (
+      <div 
+        className={`flex ${isSplitText ? 'flex-col' : ''} justify-center items-center h-full`}
+        style={containerStyle}
+      >
+        {displayLines.map((line, index) => (
+          <p 
+            key={index}
+            className="plate-text text-center"
+            style={getTextStyles(index)}
+          >
+            {line}
+          </p>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="relative w-full max-w-2xl" ref={setContainerRef}>
