@@ -98,8 +98,21 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   // This is a UK legal requirement that must be maintained regardless of plate size
   const characterHeightPx = 298.62;
   
+  // Dynamic margin adjustment based on plate dimensions
+  // Increase margins for smaller plates to prevent text overflow
+  let marginMultiplier = 1.0; // Default multiplier
+  
+  // For smaller plates like Motorbike and 4x4, increase the margin
+  if (dimensions.width <= 280) {
+    // For very small plates like Motorbike (229mm x 178mm)
+    marginMultiplier = 1.5;
+  } else if (dimensions.width <= 350) {
+    // For medium-small plates like 4x4 (279mm x 203mm)
+    marginMultiplier = 1.3;
+  }
+  
   // Scale other elements proportionally but keep text size fixed
-  const marginPx = mmToPixels(UK_PLATE_SPECS.MARGIN, pixelRatio);
+  const marginPx = mmToPixels(UK_PLATE_SPECS.MARGIN * marginMultiplier, pixelRatio);
   const badgeWidthPx = mmToPixels(UK_PLATE_SPECS.BADGE_WIDTH, pixelRatio);
 
   // Calculate available width for text to prevent overflow
@@ -117,6 +130,92 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   const fontSize = textWidthEstimate > availableWidthPx 
     ? Math.max(minFontSize, maxFontSize * (availableWidthPx / textWidthEstimate))
     : maxFontSize;
+    
+  // Function to get dynamic text styling based on plate dimensions
+  const getTextStyles = (index: number) => {
+    // Calculate dynamic vertical spacing based on plate size
+    let verticalSpacing = 0.05; // Default top margin factor
+    let bottomSpacing = 0.02; // Default bottom margin factor
+    let lineHeightFactor = 0.48; // Default line height factor
+    
+    // Increase vertical spacing for smaller plates
+    if (dimensions.height < 180) {
+      verticalSpacing = 0.15; // More spacing for very small plates
+      bottomSpacing = 0.04;
+      lineHeightFactor = 0.42; // Reduced line height for better fit
+    } else if (dimensions.height < 220) {
+      verticalSpacing = 0.1; // Medium spacing for medium-small plates
+      bottomSpacing = 0.03;
+      lineHeightFactor = 0.44; // Slightly reduced line height
+    }
+    
+    return {
+      fontFamily: 'UKNumberPlate',
+      color: textColor ? textColor.hexCode : 'black',
+      fontSize: `${fontSize}px`,
+      lineHeight: isSplitText ? `${plateHeightPx * lineHeightFactor}px` : `${plateHeightPx}px`,
+      marginTop: isSplitText && index === 0 ? `${plateHeightPx * verticalSpacing}px` : '0',
+      marginBottom: isSplitText && index === 0 ? `${plateHeightPx * bottomSpacing}px` : '0'
+    };
+  };
+
+  // Reusable badge component
+  const BadgeComponent = () => (
+    badge ? (
+      <div 
+        className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-800"
+        style={{
+          left: `${marginPx / 2}px`,
+          height: `${plateHeightPx * 0.8}px`,
+          width: `${badgeWidthPx}px`
+        }}
+      >
+        <div className="relative w-full h-full flex flex-col">
+          <div className="h-2/3 w-full bg-blue-800 overflow-hidden">
+            <img src={badge.imagePath} className="w-full h-full object-cover" alt={badge.name} />
+          </div>
+          <div className="h-1/3 w-full bg-blue-800 flex items-center justify-center">
+            <span className="text-white" style={{ fontSize: `${plateHeightPx * 0.12}px` }}>
+              {badge.name.slice(0, 2).toUpperCase()}
+            </span>
+          </div>
+        </div>
+      </div>
+    ) : null
+  );
+
+  // Reusable car brand component
+  const CarBrandComponent = () => (
+    carBrand ? (
+      <div 
+        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3"
+        style={{ fontSize: `${plateHeightPx * 0.12}px` }}
+      >
+        <p className="text-gray-700">{carBrand.name}</p>
+      </div>
+    ) : null
+  );
+
+  // Reusable text component
+  const PlateTextComponent = () => (
+    <div 
+      className={`flex ${isSplitText ? 'flex-col' : ''} justify-center items-center h-full`}
+      style={{
+        paddingLeft: badge ? `${badgeWidthPx + marginPx}px` : `${marginPx}px`,
+        paddingRight: `${marginPx}px`
+      }}
+    >
+      {displayLines.map((line, index) => (
+        <p 
+          key={index}
+          className="plate-text text-center"
+          style={getTextStyles(index)}
+        >
+          {line}
+        </p>
+      ))}
+    </div>
+  );
 
   return (
     <div className="relative w-full max-w-2xl" ref={setContainerRef}>
@@ -131,64 +230,9 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
             maxWidth: '100%'
           }}
         >
-          {/* Badge */}
-          {badge && (
-            <div 
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-800"
-              style={{
-                left: `${marginPx / 2}px`,
-                height: `${plateHeightPx * 0.8}px`,
-                width: `${badgeWidthPx}px`
-              }}
-            >
-              <div className="relative w-full h-full flex flex-col">
-                <div className="h-2/3 w-full bg-blue-800 overflow-hidden">
-                  <img src={badge.imagePath} className="w-full h-full object-cover" alt={badge.name} />
-                </div>
-                <div className="h-1/3 w-full bg-blue-800 flex items-center justify-center">
-                  <span className="text-white" style={{ fontSize: `${plateHeightPx * 0.12}px` }}>
-                    {badge.name.slice(0, 2).toUpperCase()}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Plate Text */}
-          <div 
-            className={`flex ${isSplitText ? 'flex-col' : ''} justify-center items-center h-full`}
-            style={{
-              paddingLeft: badge ? `${badgeWidthPx + marginPx}px` : `${marginPx}px`,
-              paddingRight: `${marginPx}px`
-            }}
-          >
-            {displayLines.map((line, index) => (
-              <p 
-                key={index}
-                className="plate-text text-center"
-                style={{ 
-                  fontFamily: 'UKNumberPlate',
-                  color: textColor ? textColor.hexCode : 'black',
-                  fontSize: `${fontSize}px`,
-                  lineHeight: isSplitText ? `${plateHeightPx * 0.48}px` : `${plateHeightPx}px`,
-                  marginTop: isSplitText && index === 0 ? `${plateHeightPx * 0.05}px` : '0',
-                  marginBottom: isSplitText && index === 0 ? `${plateHeightPx * 0.02}px` : '0'
-                }}
-              >
-                {line}
-              </p>
-            ))}
-          </div>
-
-          {/* Car Brand */}
-          {carBrand && (
-            <div 
-              className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3"
-              style={{ fontSize: `${plateHeightPx * 0.12}px` }}
-            >
-              <p className="text-gray-700">{carBrand.name}</p>
-            </div>
-          )}
+          <BadgeComponent />
+          <PlateTextComponent />
+          <CarBrandComponent />
         </div>
       )}
 
@@ -203,64 +247,9 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
             maxWidth: '100%'
           }}
         >
-          {/* Badge */}
-          {badge && (
-            <div 
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-800"
-              style={{
-                left: `${marginPx / 2}px`,
-                height: `${plateHeightPx * 0.8}px`,
-                width: `${badgeWidthPx}px`
-              }}
-            >
-              <div className="relative w-full h-full flex flex-col">
-                <div className="h-2/3 w-full bg-blue-800 overflow-hidden">
-                  <img src={badge.imagePath} className="w-full h-full object-cover" alt={badge.name} />
-                </div>
-                <div className="h-1/3 w-full bg-blue-800 flex items-center justify-center">
-                  <span className="text-white" style={{ fontSize: `${plateHeightPx * 0.12}px` }}>
-                    {badge.name.slice(0, 2).toUpperCase()}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Plate Text */}
-          <div 
-            className={`flex ${isSplitText ? 'flex-col' : ''} justify-center items-center h-full`}
-            style={{
-              paddingLeft: badge ? `${badgeWidthPx + marginPx}px` : `${marginPx}px`,
-              paddingRight: `${marginPx}px`
-            }}
-          >
-            {displayLines.map((line, index) => (
-              <p 
-                key={index}
-                className="plate-text text-center"
-                style={{ 
-                  fontFamily: 'UKNumberPlate',
-                  color: textColor ? textColor.hexCode : 'black',
-                  fontSize: `${fontSize}px`,
-                  lineHeight: isSplitText ? `${plateHeightPx * 0.48}px` : `${plateHeightPx}px`,
-                  marginTop: isSplitText && index === 0 ? `${plateHeightPx * 0.05}px` : '0',
-                  marginBottom: isSplitText && index === 0 ? `${plateHeightPx * 0.02}px` : '0'
-                }}
-              >
-                {line}
-              </p>
-            ))}
-          </div>
-
-          {/* Car Brand */}
-          {carBrand && (
-            <div 
-              className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3"
-              style={{ fontSize: `${plateHeightPx * 0.12}px` }}
-            >
-              <p className="text-gray-700">{carBrand.name}</p>
-            </div>
-          )}
+          <BadgeComponent />
+          <PlateTextComponent />
+          <CarBrandComponent />
         </div>
       )}
     </div>
