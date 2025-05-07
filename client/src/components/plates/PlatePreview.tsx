@@ -28,19 +28,20 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
 
   // Get badge from ID
   const badge = useMemo(() => {
-    return badges.find(badge => badge.id.toString() === customization.badge);
+    return customization.badge ? badges.find(b => b.id.toString() === customization.badge) : undefined;
   }, [badges, customization.badge]);
 
   // Get car brand from ID
   const carBrand = useMemo(() => {
-    return carBrands.find(brand => brand.id.toString() === customization.carBrand);
+    return customization.carBrand ? carBrands.find(b => b.id.toString() === customization.carBrand) : undefined;
   }, [carBrands, customization.carBrand]);
 
-  // Plate styling will depend on plate type and customization
-  const showFrontPlate = customization.plateType === 'both' || customization.plateType === 'front';
-  const showRearPlate = customization.plateType === 'both' || customization.plateType === 'rear';
+  // Get specific plate size information
+  const plateSize = useMemo(() => {
+    return plateSizes.find(size => size.id.toString() === customization.plateSize);
+  }, [plateSizes, customization.plateSize]);
 
-  // Get the plate dimensions based on selected size
+  // Get plate dimensions
   const dimensions = useMemo(() => {
     return getPlateDimensions(customization.plateSize || '1', plateSizes);
   }, [customization.plateSize, plateSizes]);
@@ -75,114 +76,119 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
     };
 
     updatePixelRatio();
-    
-    // Set up resize observer to handle responsive scaling
+
     const resizeObserver = new ResizeObserver(updatePixelRatio);
     resizeObserver.observe(containerRef);
 
     return () => {
-      if (containerRef) {
-        resizeObserver.unobserve(containerRef);
-      }
+      resizeObserver.disconnect();
     };
   }, [containerRef]);
 
-  // Fixed pixel per mm value (1mm = 3.78px) - exact conversion
-  const FIXED_PX_RATIO = 3.78;
-  
-  // Calculate dimensions in pixels using fixed ratio for the container 
+  // Show both plates, front only, or rear only
+  const showFrontPlate = customization.plateOption !== 'rear';
+  const showRearPlate = customization.plateOption !== 'front';
+
+  // Convert mm dimensions to pixels
   const plateWidthPx = mmToPixels(dimensions.width, pixelRatio);
   const plateHeightPx = mmToPixels(dimensions.height, pixelRatio);
   
-  // Character height must be FIXED at exactly 79mm = 298.62px (using exact 3.78px/mm)
-  // This is a UK legal requirement that must be maintained regardless of plate size
-  const characterHeightPx = 298.62;
+  // Calculate margins in pixels
+  const marginFactor = dimensions.width < 280 ? 4.0 : // Motorbike
+                      dimensions.width < 300 ? 3.5 : // 4x4
+                      dimensions.width < 400 ? 2.5 : // Small
+                      2.0; // Standard
+  const marginPx = mmToPixels(UK_PLATE_SPECS.MARGIN_MM * marginFactor, pixelRatio);
   
-  // Dynamic margin adjustment based on plate dimensions
-  // Increase margins for smaller plates to prevent text overflow
-  let marginMultiplier = 1.0; // Default multiplier
+  // Badge width is 1/8 of plate width for larger plates, more for smaller
+  const badgeWidthPx = plateWidthPx * (dimensions.width < 300 ? 0.2 : 0.125);
   
-  // For smaller plates like Motorbike and 4x4, increase the margin
-  if (dimensions.width <= 280) {
-    // For very small plates like Motorbike (229mm x 178mm)
-    marginMultiplier = 4.0;
-  } else if (dimensions.width <= 350) {
-    // For medium-small plates like 4x4 (279mm x 203mm)
-    marginMultiplier = 3.5;
-  }
+  // Calculate available width for text (accounting for badge)
+  const availableWidthPx = badge 
+    ? plateWidthPx - (marginPx * 2) - badgeWidthPx 
+    : plateWidthPx - (marginPx * 2);
   
-  // Scale other elements proportionally but keep text size fixed
-  const marginPx = mmToPixels(UK_PLATE_SPECS.MARGIN * marginMultiplier, pixelRatio);
-  const badgeWidthPx = mmToPixels(UK_PLATE_SPECS.BADGE_WIDTH, pixelRatio);
-
-  // Calculate available width for text to prevent overflow
-  const availableWidthPx = plateWidthPx - (marginPx * 2) - (badge ? badgeWidthPx : 0);
-  
-  // Calculate optimal font size to ensure text fits within plate boundaries
-  // Standard is 298.62px (79mm) but we'll scale down if needed to prevent overflow
-  const minFontSize = 150; // Minimum readable size
-  const maxFontSize = characterHeightPx; // Maximum size (standard 79mm height)
+  // Set maximum font size based on plate height
+  const maxFontSize = plateHeightPx * UK_PLATE_SPECS.CHAR_HEIGHT_RATIO;
+  const minFontSize = maxFontSize * 0.5; // Minimum font size (half of max)
   
   // Calculate estimated text width at maximum font size
   const textWidthEstimate = customization.registrationText.length * (maxFontSize * 0.7); // 0.7 is approximate width/height ratio
   
-  // More aggressive font scaling for smaller plates
+  // Special handling for different plate sizes
+  // Use different font scaling strategy based on plate size
   let fontScaleFactor = 1.0;
-  if (dimensions.width <= 280) {
-    // For very small plates like Motorbike (229mm x 178mm)
-    fontScaleFactor = 0.4; // Scale down font more dramatically 
+  let useFixedSize = false;
+  
+  // Identify special small plate types
+  const isMotorbike = plateSize?.name === "Motorbike" || dimensions.width <= 230;
+  const is4x4 = plateSize?.name === "4 x 4" || dimensions.width <= 280;
+  
+  // Apply aggressive scaling for small plates
+  if (isMotorbike) {
+    fontScaleFactor = 0.25; // Very small for Motorbike
+    useFixedSize = true;
+  } else if (is4x4) {
+    fontScaleFactor = 0.35; // Small for 4x4
+    useFixedSize = true;
   } else if (dimensions.width <= 350) {
-    // For medium-small plates like 4x4 (279mm x 203mm)
-    fontScaleFactor = 0.5; // Scale down font less dramatically
+    fontScaleFactor = 0.5; // Medium scaling for other small plates
   }
   
-  // If text would overflow, scale down proportionally, but not below minimum
-  const fontSize = textWidthEstimate > availableWidthPx 
-    ? Math.max(minFontSize, maxFontSize * fontScaleFactor * (availableWidthPx / textWidthEstimate))
-    : maxFontSize * fontScaleFactor;
+  // Determine font size with additional safety factor for small plates
+  let fontSize;
+  if (useFixedSize) {
+    fontSize = maxFontSize * fontScaleFactor;
+  } else {
+    // For larger plates, shrink to fit if needed
+    fontSize = textWidthEstimate > availableWidthPx
+      ? Math.max(minFontSize, maxFontSize * fontScaleFactor * (availableWidthPx / textWidthEstimate))
+      : maxFontSize * fontScaleFactor;
+  }
     
   // Function to get dynamic text styling based on plate dimensions
   const getTextStyles = (index: number) => {
-    // Calculate dynamic vertical spacing based on plate size
-    let verticalSpacing = 0.05; // Default top margin factor
-    let bottomSpacing = 0.02; // Default bottom margin factor
-    let lineHeightFactor = 0.48; // Default line height factor
-    let verticalPosition = {}; // Additional positioning for smaller plates
-    
-    // Increase vertical spacing for smaller plates
-    if (dimensions.width <= 280) {
-      // For very small plates like Motorbike (229mm x 178mm)
-      verticalSpacing = 0.25; // Much more top spacing
-      bottomSpacing = 0.1;
-      lineHeightFactor = 0.4; // Reduced line height for better fit
-      // Add vertical centering for small plates
-      verticalPosition = { 
-        position: 'relative',
-        top: '50%',
-        transform: 'translateY(-50%)'
-      };
-    } else if (dimensions.width <= 350) {
-      // For medium-small plates like 4x4 (279mm x 203mm)
-      verticalSpacing = 0.2; 
-      bottomSpacing = 0.05;
-      lineHeightFactor = 0.42; 
-      // Add vertical centering for medium plates
-      verticalPosition = { 
-        position: 'relative',
-        top: '50%',
-        transform: 'translateY(-50%)'
-      };
-    }
-    
-    return {
+    // Base text styling
+    let styles = {
       fontFamily: 'UKNumberPlate',
       color: textColor ? textColor.hexCode : 'black',
       fontSize: `${fontSize}px`,
-      lineHeight: isSplitText ? `${plateHeightPx * lineHeightFactor}px` : `${plateHeightPx}px`,
-      marginTop: isSplitText && index === 0 ? `${plateHeightPx * verticalSpacing}px` : '0',
-      marginBottom: isSplitText && index === 0 ? `${plateHeightPx * bottomSpacing}px` : '0',
-      ...verticalPosition // Apply vertical centering if needed for small plates
+      lineHeight: '1',
+      padding: 0,
+      margin: 0
     };
+
+    // For motorbike plates, add special styling
+    if (isMotorbike) {
+      return {
+        ...styles,
+        fontSize: `${fontSize}px`,
+        lineHeight: '1',
+        whiteSpace: 'nowrap' as const
+      };
+    }
+    
+    // For 4x4 plates, slightly larger
+    if (is4x4) {
+      return {
+        ...styles,
+        fontSize: `${fontSize}px`,
+        lineHeight: '1.1',
+        whiteSpace: 'nowrap' as const
+      };
+    }
+
+    // For split text, add line height adjustments
+    if (isSplitText) {
+      return {
+        ...styles,
+        lineHeight: index === 0 ? '0.9' : '1.1',
+        marginTop: index === 0 ? `${plateHeightPx * 0.08}px` : '0',
+        marginBottom: index === 0 ? `${plateHeightPx * 0.04}px` : '0'
+      };
+    }
+    
+    return styles;
   };
 
   // Reusable badge component
@@ -192,7 +198,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
         className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-800"
         style={{
           left: `${marginPx / 2}px`,
-          height: `${plateHeightPx * 0.8}px`,
+          height: isMotorbike ? `${plateHeightPx * 0.7}px` : `${plateHeightPx * 0.8}px`,
           width: `${badgeWidthPx}px`
         }}
       >
@@ -222,43 +228,48 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
     ) : null
   );
 
-  // Reusable text component
-  const PlateTextComponent = () => {
-    // For smaller plates, apply extra container styling for better centering
-    const containerStyle = dimensions.width <= 350 ? {
-      display: 'flex',
-      flexDirection: isSplitText ? 'column' : 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100%',
-      paddingLeft: badge ? `${badgeWidthPx + marginPx}px` : `${marginPx}px`,
-      paddingRight: `${marginPx}px`,
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0
-    } : {
-      paddingLeft: badge ? `${badgeWidthPx + marginPx}px` : `${marginPx}px`,
+  // Determine the container style for text based on plate size
+  const getTextContainerStyle = () => {
+    const baseStyle = {
+      paddingLeft: badge ? `${badgeWidthPx + marginPx/2}px` : `${marginPx}px`,
       paddingRight: `${marginPx}px`
     };
     
-    return (
-      <div 
-        className={`flex ${isSplitText ? 'flex-col' : ''} justify-center items-center h-full`}
-        style={containerStyle}
-      >
-        {displayLines.map((line, index) => (
-          <p 
-            key={index}
-            className="plate-text text-center"
-            style={getTextStyles(index)}
-          >
-            {line}
-          </p>
-        ))}
-      </div>
-    );
+    // For small plates like Motorbike, use absolute positioning
+    if (isMotorbike) {
+      return {
+        ...baseStyle,
+        position: 'absolute' as const,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        justifyContent: 'center',
+        alignItems: 'center',
+        maxWidth: '100%'
+      };
+    }
+    
+    // For slightly larger plates like 4x4
+    if (is4x4) {
+      return {
+        ...baseStyle,
+        position: 'absolute' as const,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        flexDirection: 'column' as const,
+        justifyContent: 'center',
+        alignItems: 'center',
+        maxWidth: '100%'
+      };
+    }
+    
+    return baseStyle;
   };
 
   return (
@@ -271,11 +282,27 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
             border: '2px solid black',
             width: `${plateWidthPx}px`,
             height: `${plateHeightPx}px`,
-            maxWidth: '100%'
+            maxWidth: '100%',
+            overflow: 'hidden'
           }}
         >
           <BadgeComponent />
-          <PlateTextComponent />
+          
+          <div 
+            className={`flex ${isSplitText ? 'flex-col' : ''} justify-center items-center h-full`}
+            style={getTextContainerStyle()}
+          >
+            {displayLines.map((line, index) => (
+              <p 
+                key={index}
+                className="plate-text text-center"
+                style={getTextStyles(index)}
+              >
+                {line}
+              </p>
+            ))}
+          </div>
+          
           <CarBrandComponent />
         </div>
       )}
@@ -288,11 +315,27 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
             border: '2px solid black',
             width: `${plateWidthPx}px`,
             height: `${plateHeightPx}px`,
-            maxWidth: '100%'
+            maxWidth: '100%',
+            overflow: 'hidden'
           }}
         >
           <BadgeComponent />
-          <PlateTextComponent />
+          
+          <div 
+            className={`flex ${isSplitText ? 'flex-col' : ''} justify-center items-center h-full`}
+            style={getTextContainerStyle()}
+          >
+            {displayLines.map((line, index) => (
+              <p 
+                key={index}
+                className="plate-text text-center"
+                style={getTextStyles(index)}
+              >
+                {line}
+              </p>
+            ))}
+          </div>
+          
           <CarBrandComponent />
         </div>
       )}
