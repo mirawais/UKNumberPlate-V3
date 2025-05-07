@@ -547,6 +547,7 @@ const PlateCustomizer = () => {
                   onValueChange={(value) => setCustomization({
                     ...customization, 
                     plateType: value as 'both' | 'front' | 'rear',
+                    plateOption: value as 'both' | 'front' | 'rear',
                     isRoadLegal: false
                   })}
                   className="flex justify-between gap-2"

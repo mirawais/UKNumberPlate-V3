@@ -130,6 +130,8 @@ export const calculateFontSize = (plateHeightPx: number): number => {
 export interface PlateDimensions {
   width: number;
   height: number;
+  isMotorbike?: boolean;
+  is4x4?: boolean;
 }
 
 export const getPlateDimensions = (plateSize: string, plateSizes: any[]): PlateDimensions => {
@@ -147,9 +149,18 @@ export const getPlateDimensions = (plateSize: string, plateSizes: any[]): PlateD
   // Parse dimensions string like "520mm x 111mm"
   try {
     const dimensions = size.dimensions.replace(/mm/g, '').split('x').map((d: string) => parseInt(d.trim(), 10));
+    const width = dimensions[0] || 520;
+    const height = dimensions[1] || 111;
+    
+    // Identify special plate types based on dimensions
+    const isMotorbike = width <= 230;
+    const is4x4 = width > 230 && width <= 280;
+    
     return {
-      width: dimensions[0] || 520,
-      height: dimensions[1] || 111
+      width,
+      height,
+      isMotorbike,
+      is4x4
     };
   } catch (e) {
     console.error("Error parsing plate dimensions:", e);

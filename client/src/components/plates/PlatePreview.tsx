@@ -41,6 +41,10 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
     return getPlateDimensions(customization.plateSize || '1', plateSizes);
   }, [customization.plateSize, plateSizes]);
 
+  // Identify special plate types
+  const isMotorbike = dimensions.isMotorbike;
+  const is4x4 = dimensions.is4x4;
+
   // Determine if text should be split into two lines
   const isSplitText = useMemo(() => {
     return shouldSplitText(customization.registrationText || '', dimensions.width);
@@ -88,8 +92,15 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   const plateWidthPx = mmToPixels(dimensions.width, pixelRatio);
   const plateHeightPx = mmToPixels(dimensions.height, pixelRatio);
   
-  // Calculate margins in pixels
-  const marginMultiplier = dimensions.width < 280 ? 1.2 : 1; // Slightly larger margin for motorbike plates
+  // Calculate margins in pixels - reduce margin for smaller plates
+  let marginMultiplier = 1.0;
+  
+  if (isMotorbike) {
+    marginMultiplier = 0.7; // Significantly reduced margin for motorbike plates
+  } else if (is4x4) {
+    marginMultiplier = 0.8; // Reduced margin for 4x4 plates
+  }
+  
   const marginPx = mmToPixels(UK_PLATE_SPECS.MARGIN * marginMultiplier, pixelRatio);
   
   // Badge width is 1/8 of plate width for larger plates, more for smaller
@@ -100,8 +111,8 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
     ? plateWidthPx - (marginPx * 2) - badgeWidthPx 
     : plateWidthPx - (marginPx * 2);
   
-  // Set maximum font size based on plate height - character height is about 70% of plate height
-  const CHARACTER_HEIGHT_RATIO = 0.7;
+  // Set maximum font size based on plate height
+  const CHARACTER_HEIGHT_RATIO = 0.7; // Character height is about 70% of plate height
   const maxFontSize = plateHeightPx * CHARACTER_HEIGHT_RATIO;
   const minFontSize = maxFontSize * 0.5; // Minimum font size (half of max)
   
@@ -110,10 +121,6 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   
   // Special font scaling for different plate sizes
   let fontScaleFactor = 1.0;
-  
-  // Identify special small plate types
-  const isMotorbike = dimensions.width <= 230;
-  const is4x4 = dimensions.width > 230 && dimensions.width <= 280;
   
   // Apply aggressive scaling for small plates
   if (isMotorbike) {
