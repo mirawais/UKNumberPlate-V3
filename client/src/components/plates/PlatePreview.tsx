@@ -105,10 +105,10 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   // For smaller plates like Motorbike and 4x4, increase the margin
   if (dimensions.width <= 280) {
     // For very small plates like Motorbike (229mm x 178mm)
-    marginMultiplier = 1.5;
+    marginMultiplier = 2.5;
   } else if (dimensions.width <= 350) {
     // For medium-small plates like 4x4 (279mm x 203mm)
-    marginMultiplier = 1.3;
+    marginMultiplier = 2.0;
   }
   
   // Scale other elements proportionally but keep text size fixed
@@ -126,10 +126,20 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   // Calculate estimated text width at maximum font size
   const textWidthEstimate = customization.registrationText.length * (maxFontSize * 0.7); // 0.7 is approximate width/height ratio
   
+  // More aggressive font scaling for smaller plates
+  let fontScaleFactor = 1.0;
+  if (dimensions.width <= 280) {
+    // For very small plates like Motorbike (229mm x 178mm)
+    fontScaleFactor = 0.6; // Scale down font more dramatically 
+  } else if (dimensions.width <= 350) {
+    // For medium-small plates like 4x4 (279mm x 203mm)
+    fontScaleFactor = 0.75; // Scale down font less dramatically
+  }
+  
   // If text would overflow, scale down proportionally, but not below minimum
   const fontSize = textWidthEstimate > availableWidthPx 
-    ? Math.max(minFontSize, maxFontSize * (availableWidthPx / textWidthEstimate))
-    : maxFontSize;
+    ? Math.max(minFontSize, maxFontSize * fontScaleFactor * (availableWidthPx / textWidthEstimate))
+    : maxFontSize * fontScaleFactor;
     
   // Function to get dynamic text styling based on plate dimensions
   const getTextStyles = (index: number) => {

@@ -31,7 +31,7 @@ const shippingSchema = z.object({
 });
 
 const paymentSchema = z.object({
-  paymentMethod: z.enum(['bank', 'paypal', 'stripe', 'cod'])
+  paymentMethod: z.enum(['stripe'])
 });
 
 const CheckoutForm = ({ 
@@ -197,34 +197,8 @@ const CheckoutForm = ({
         
         {step === 'payment' && (
           <div className="grid grid-cols-1 gap-4 mb-6">
-            <h3 className="font-bold mb-2">Select Payment Method</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card 
-                className="cursor-pointer hover:border-primary"
-                onClick={() => handleSelectPayment('bank')}
-              >
-                <CardContent className="p-4 flex items-center">
-                  <Banknote className="h-8 w-8 mr-4" />
-                  <div>
-                    <h4 className="font-bold">Bank Transfer</h4>
-                    <p className="text-sm text-gray-500">Pay via direct bank transfer</p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card 
-                className="cursor-pointer hover:border-primary"
-                onClick={() => handleSelectPayment('paypal')}
-              >
-                <CardContent className="p-4 flex items-center">
-                  <Wallet className="h-8 w-8 mr-4" />
-                  <div>
-                    <h4 className="font-bold">PayPal</h4>
-                    <p className="text-sm text-gray-500">Pay with your PayPal account</p>
-                  </div>
-                </CardContent>
-              </Card>
-              
+            <h3 className="font-bold mb-2">Payment Method</h3>
+            <div className="grid grid-cols-1 gap-4">
               <Card 
                 className="cursor-pointer hover:border-primary"
                 onClick={() => handleSelectPayment('stripe')}
@@ -233,20 +207,7 @@ const CheckoutForm = ({
                   <CreditCard className="h-8 w-8 mr-4" />
                   <div>
                     <h4 className="font-bold">Credit/Debit Card</h4>
-                    <p className="text-sm text-gray-500">Pay with Stripe secure payments</p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card 
-                className="cursor-pointer hover:border-primary"
-                onClick={() => handleSelectPayment('cod')}
-              >
-                <CardContent className="p-4 flex items-center">
-                  <Truck className="h-8 w-8 mr-4" />
-                  <div>
-                    <h4 className="font-bold">Cash on Delivery</h4>
-                    <p className="text-sm text-gray-500">Pay when you receive the plates</p>
+                    <p className="text-sm text-gray-500">Secure payment with Stripe</p>
                   </div>
                 </CardContent>
               </Card>

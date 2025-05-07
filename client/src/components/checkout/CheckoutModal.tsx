@@ -28,7 +28,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     address2: '',
     city: '',
     postcode: '',
-    paymentMethod: 'bank',
+    paymentMethod: 'stripe',
   });
   
   const handleDetailsSubmit = (data: { firstName: string; lastName: string; email: string; phone: string }) => {
@@ -42,6 +42,16 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
   };
   
   const handlePaymentMethodSelect = async (method: string) => {
+    // Only accept Stripe as payment method
+    if (method !== 'stripe') {
+      toast({
+        title: "Payment Method Unavailable",
+        description: "Only card payments are accepted at this time.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setOrderDetails(prev => ({ ...prev, paymentMethod: method }));
     
     try {
@@ -53,40 +63,26 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
         shippingAddress: `${orderDetails.address1}, ${orderDetails.address2 ? orderDetails.address2 + ', ' : ''}${orderDetails.city}, ${orderDetails.postcode}`,
         plateDetails: customization,
         totalPrice,
-        paymentMethod: method,
-        orderStatus: method === 'stripe' ? 'pending_payment' : 'pending',
+        paymentMethod: 'stripe',
+        orderStatus: 'pending_payment',
         // Include document file ID if it exists (for road legal plates)
         documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
       };
       
-      if (method === 'stripe') {
-        // Save order details to localStorage for the checkout page
-        localStorage.setItem('orderDetails', JSON.stringify({
-          ...customization,
-          customerName: `${orderDetails.firstName} ${orderDetails.lastName}`,
-          customerEmail: orderDetails.email,
-          customerPhone: orderDetails.phone,
-          shippingAddress: `${orderDetails.address1}, ${orderDetails.address2 ? orderDetails.address2 + ', ' : ''}${orderDetails.city}, ${orderDetails.postcode}`,
-          documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null
-        }));
-        localStorage.setItem('orderAmount', totalPrice.toString());
-        
-        // Close modal and redirect to checkout page
-        onClose();
-        window.location.href = '/checkout';
-        return;
-      }
+      // Save order details to localStorage for the checkout page
+      localStorage.setItem('orderDetails', JSON.stringify({
+        ...customization,
+        customerName: `${orderDetails.firstName} ${orderDetails.lastName}`,
+        customerEmail: orderDetails.email,
+        customerPhone: orderDetails.phone,
+        shippingAddress: `${orderDetails.address1}, ${orderDetails.address2 ? orderDetails.address2 + ', ' : ''}${orderDetails.city}, ${orderDetails.postcode}`,
+        documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null
+      }));
+      localStorage.setItem('orderAmount', totalPrice.toString());
       
-      // For non-Stripe payments, complete the order directly
-      await apiRequest('POST', '/api/orders', order);
-      
-      // Show confirmation
-      toast({
-        title: "Order Placed Successfully",
-        description: "Thank you for your order. We'll process it right away!"
-      });
-      
-      setCurrentStep('confirmation');
+      // Close modal and redirect to checkout page
+      onClose();
+      window.location.href = '/checkout';
       
     } catch (error) {
       toast({
@@ -108,7 +104,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
       address2: '',
       city: '',
       postcode: '',
-      paymentMethod: 'bank',
+      paymentMethod: 'stripe',
     });
     onClose();
   };
