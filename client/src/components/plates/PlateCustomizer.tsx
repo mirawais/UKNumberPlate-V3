@@ -37,6 +37,7 @@ const PlateCustomizer = () => {
   // State for plate customization
   const [customization, setCustomization] = useState<PlateCustomization>({
     plateType: 'both',
+    plateOption: 'both', // Added to match PlatePreview component
     registrationText: 'YOUR REG',
     plateSize: '',
     textStyle: '',
@@ -197,7 +198,11 @@ const PlateCustomizer = () => {
                 <RadioGroup 
                   defaultValue="both" 
                   value={customization.plateType}
-                  onValueChange={(value) => setCustomization({...customization, plateType: value as 'both' | 'front' | 'rear'})}
+                  onValueChange={(value) => setCustomization({
+                    ...customization, 
+                    plateType: value as 'both' | 'front' | 'rear',
+                    plateOption: value as 'both' | 'front' | 'rear' // Update plateOption to match plateType
+                  })}
                   className="flex justify-between gap-2"
                 >
                   <div className="relative w-1/3">

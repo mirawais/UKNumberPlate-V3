@@ -253,6 +253,7 @@ export type Order = typeof orders.$inferSelect;
 // Type for plate customization (used for state management)
 export type PlateCustomization = {
   plateType: 'both' | 'front' | 'rear';
+  plateOption: 'both' | 'front' | 'rear'; // Added for PlatePreview component
   registrationText: string;
   plateSize: string;
   textStyle: string;
