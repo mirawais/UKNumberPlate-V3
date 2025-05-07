@@ -140,6 +140,7 @@ const PlateCustomizer = () => {
   const handleResetDesign = () => {
     setCustomization({
       plateType: 'both',
+      plateOption: 'both',
       registrationText: 'YOUR REG',
       plateSize: plateSizes?.[0]?.id.toString() || '',
       textStyle: textStyles?.[0]?.id.toString() || '',
@@ -779,6 +780,7 @@ const PlateCustomizer = () => {
                   onClick={() => {
                     setCustomization({
                       plateType: 'both',
+                      plateOption: 'both',
                       registrationText: 'YOUR REG',
                       plateSize: plateSizes?.[0]?.id.toString() || '',
                       textStyle: textStyles?.[0]?.id.toString() || '',
