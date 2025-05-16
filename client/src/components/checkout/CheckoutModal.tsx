@@ -38,6 +38,11 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     queryKey: ['/api/pricing'] 
   });
   
+  // Track if delivery method is selected to add fee
+  const [calculatedDeliveryFee, setCalculatedDeliveryFee] = useState(0);
+  // Calculate final price including delivery if selected
+  const finalPrice = totalPrice + calculatedDeliveryFee;
+  
   const handleDetailsSubmit = (data: { firstName: string; lastName: string; email: string; phone: string }) => {
     setOrderDetails(prev => ({ ...prev, ...data }));
     setCurrentStep('shipping');
@@ -51,6 +56,17 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     shippingMethod: 'delivery' | 'pickup';
   }) => {
     setOrderDetails(prev => ({ ...prev, ...data }));
+    
+    // Update delivery fee based on shipping method
+    if (data.shippingMethod === 'delivery') {
+      // Apply delivery fee from pricing data
+      const deliveryFee = parseFloat(pricing?.deliveryFee || "4.99");
+      setCalculatedDeliveryFee(deliveryFee);
+    } else {
+      // No delivery fee for pickup
+      setCalculatedDeliveryFee(0);
+    }
+    
     setCurrentStep('payment');
   };
   
@@ -82,9 +98,21 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
         documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
       };
       
-      // Calculate delivery fee if shipping method is delivery
-      const deliveryFee = orderDetails.shippingMethod === 'delivery' ? parseFloat(pricing?.deliveryFee || "4.99") : 0;
-      const finalPrice = totalPrice + deliveryFee;
+      // Prepare order data including shipping method and delivery fee
+      const orderData = {
+        customerName: `${orderDetails.firstName} ${orderDetails.lastName}`,
+        customerEmail: orderDetails.email,
+        customerPhone: orderDetails.phone,
+        shippingMethod: orderDetails.shippingMethod,
+        shippingAddress: `${orderDetails.address1}, ${orderDetails.address2 ? orderDetails.address2 + ', ' : ''}${orderDetails.city}, ${orderDetails.postcode}`,
+        plateDetails: customization,
+        totalPrice: totalPrice,
+        paymentMethod: 'stripe',
+        orderStatus: 'pending_payment',
+        // Include document file ID if it exists (for road legal plates)
+        documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
+        deliveryFee: calculatedDeliveryFee
+      };
       
       // Save order details to localStorage for the checkout page
       localStorage.setItem('orderDetails', JSON.stringify({
@@ -95,7 +123,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
         shippingMethod: orderDetails.shippingMethod,
         shippingAddress: `${orderDetails.address1}, ${orderDetails.address2 ? orderDetails.address2 + ', ' : ''}${orderDetails.city}, ${orderDetails.postcode}`,
         documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
-        deliveryFee: deliveryFee
+        deliveryFee: calculatedDeliveryFee
       }));
       localStorage.setItem('orderAmount', finalPrice.toString());
       
@@ -171,6 +199,25 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
               <p className="font-semibold">£{totalPrice.toFixed(2)}</p>
               <p className="text-xs text-gray-500">incl. VAT</p>
             </div>
+          </div>
+          
+          {/* Show delivery fee if applicable */}
+          {calculatedDeliveryFee > 0 && (
+            <div className="mb-3 flex justify-between border-t pt-2">
+              <div>
+                <p className="font-semibold">Shipping Method</p>
+                <p className="text-sm text-gray-600">Delivery</p>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold">£{calculatedDeliveryFee.toFixed(2)}</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Show total with delivery fee */}
+          <div className="mb-3 flex justify-between border-t border-black pt-2">
+            <p className="font-bold">Total</p>
+            <p className="font-bold">£{finalPrice.toFixed(2)}</p>
           </div>
         </div>
         
