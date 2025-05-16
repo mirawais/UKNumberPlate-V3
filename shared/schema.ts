@@ -159,7 +159,8 @@ export const pricing = pgTable("pricing", {
   id: serial("id").primaryKey(),
   frontPlatePrice: numeric("front_plate_price").notNull(),
   rearPlatePrice: numeric("rear_plate_price").notNull(),
-  bothPlatesDiscount: numeric("both_plates_discount").default("0").notNull(),
+  bothPlatesPrice: numeric("both_plates_price").default("25").notNull(),
+  bothPlatesDiscount: numeric("both_plates_discount").default("0"),
   taxRate: numeric("tax_rate").default("20").notNull(), // VAT percentage
   deliveryFee: numeric("delivery_fee").default("4.99").notNull(), // Delivery fee
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
