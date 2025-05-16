@@ -302,6 +302,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update pricing" });
     }
   });
+  
+  app.patch("/api/pricing/:id", requireAdmin, async (req, res) => {
+    try {
+      const pricing = await storage.updatePricing(parseInt(req.params.id), req.body);
+      if (!pricing) {
+        return res.status(404).json({ message: "Pricing not found" });
+      }
+      res.json(pricing);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update pricing" });
+    }
+  });
 
   // Payment Methods
   app.get("/api/payment-methods", async (req, res) => {
