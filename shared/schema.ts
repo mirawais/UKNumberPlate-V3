@@ -250,8 +250,8 @@ export type PaymentMethod = typeof paymentMethods.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
-// Type for plate customization (used for state management)
-export type PlateCustomization = {
+// Custom interface for plate customization (used for state management)
+export interface PlateCustomization {
   plateType: 'both' | 'front' | 'rear';
   plateOption: 'both' | 'front' | 'rear'; // Added for PlatePreview component
   registrationText: string;

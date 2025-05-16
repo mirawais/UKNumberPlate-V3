@@ -139,7 +139,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   // Function to get dynamic text styling based on plate dimensions
   const getTextStyles = (index: number) => {
     // Base text styling
-    const styles = {
+    const styles: any = {
       fontFamily: 'UKNumberPlate',
       color: textColor ? textColor.hexCode : 'black',
       fontSize: `${fontSize}px`,
@@ -147,6 +147,30 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
       padding: 0,
       margin: 0
     };
+
+    // Apply 3D effect if the text style includes "3D"
+    // Check if the selected text style contains "3D" in its name
+    const is3DStyle = customization.textStyle && customization.textStyle.toLowerCase().includes("3d");
+    
+    if (is3DStyle) {
+      styles.textShadow = `
+        0px 1px 0px rgba(0,0,0,0.3),
+        0px 2px 0px rgba(0,0,0,0.3),
+        0px 3px 2px rgba(0,0,0,0.2)
+      `;
+      styles.fontWeight = 'bold';
+      
+      // If it's a gel style, add slightly more depth and contrast
+      if (customization.textStyle.toLowerCase().includes("gel")) {
+        styles.textShadow = `
+          0px 1px 0px rgba(0,0,0,0.4),
+          0px 2px 0px rgba(0,0,0,0.3),
+          0px 3px 3px rgba(0,0,0,0.2),
+          0px 4px 5px rgba(0,0,0,0.1)
+        `;
+        styles.letterSpacing = '1px';
+      }
+    }
 
     // For split text, adjust spacing
     if (isSplitText) {
