@@ -355,9 +355,23 @@ export default function OrdersManager() {
                             </div>
                             
                             <div>
-                              <h3 className="font-semibold text-lg">Shipping Address</h3>
-                              <div className="mt-2 whitespace-pre-line">
-                                {selectedOrder.shippingAddress}
+                              <h3 className="font-semibold text-lg">Shipping Information</h3>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                <div>
+                                  <Label className="text-muted-foreground">Shipping Method</Label>
+                                  <div className="font-medium">
+                                    {parsedPlateDetails?.shippingMethod === 'delivery' ? 'Delivery' : 'Pickup'}
+                                    {parsedPlateDetails?.shippingMethod === 'delivery' && parsedPlateDetails?.deliveryFee && 
+                                      ` (+£${parseFloat(parsedPlateDetails.deliveryFee).toFixed(2)})`
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mt-2">
+                                <Label className="text-muted-foreground">Address</Label>
+                                <div className="whitespace-pre-line">
+                                  {selectedOrder.shippingAddress}
+                                </div>
                               </div>
                             </div>
                             

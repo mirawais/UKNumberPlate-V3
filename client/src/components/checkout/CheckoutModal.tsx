@@ -82,16 +82,22 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
         documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
       };
       
+      // Calculate delivery fee if shipping method is delivery
+      const deliveryFee = orderDetails.shippingMethod === 'delivery' ? parseFloat(pricing?.deliveryFee || "4.99") : 0;
+      const finalPrice = totalPrice + deliveryFee;
+      
       // Save order details to localStorage for the checkout page
       localStorage.setItem('orderDetails', JSON.stringify({
         ...customization,
         customerName: `${orderDetails.firstName} ${orderDetails.lastName}`,
         customerEmail: orderDetails.email,
         customerPhone: orderDetails.phone,
+        shippingMethod: orderDetails.shippingMethod,
         shippingAddress: `${orderDetails.address1}, ${orderDetails.address2 ? orderDetails.address2 + ', ' : ''}${orderDetails.city}, ${orderDetails.postcode}`,
-        documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null
+        documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
+        deliveryFee: deliveryFee
       }));
-      localStorage.setItem('orderAmount', totalPrice.toString());
+      localStorage.setItem('orderAmount', finalPrice.toString());
       
       // Close modal and redirect to checkout page
       onClose();
