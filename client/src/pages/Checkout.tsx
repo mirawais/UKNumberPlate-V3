@@ -109,10 +109,15 @@ export default function Checkout() {
         borderColor: parsedDetails.borderColor,
         carBrand: parsedDetails.carBrand,
         isRoadLegal: parsedDetails.isRoadLegal,
-        plateType: parsedDetails.plateType
+        plateType: parsedDetails.plateType,
+        shippingMethod: parsedDetails.shippingMethod || 'pickup' // Include shipping method
       },
       // Include document file ID if it exists (for road legal plates)
       documentFileId: parsedDetails.documentFileId || null,
+      // Include the delivery fee in the order record
+      deliveryFee: parsedDetails.deliveryFee || 0,
+      // Include the shipping method as part of the order details
+      shippingMethod: parsedDetails.shippingMethod || 'pickup',
       totalPrice: parseFloat(orderAmount),
       paymentMethod: 'stripe',
       orderStatus: 'pending_payment'

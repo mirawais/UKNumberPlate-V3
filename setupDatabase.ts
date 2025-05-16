@@ -100,6 +100,26 @@ async function setupDatabase() {
         payment_processor TEXT NOT NULL,
         display_order NUMERIC DEFAULT 0
       );
+
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        customer_name TEXT NOT NULL,
+        customer_email TEXT NOT NULL,
+        customer_phone TEXT NOT NULL,
+        shipping_address TEXT NOT NULL,
+        plate_details JSONB NOT NULL,
+        total_price NUMERIC NOT NULL,
+        payment_method TEXT NOT NULL,
+        payment_status TEXT NOT NULL DEFAULT 'pending',
+        order_status TEXT NOT NULL DEFAULT 'pending',
+        stripe_payment_intent_id TEXT,
+        document_file_id NUMERIC,
+        shipping_method TEXT DEFAULT 'pickup',
+        delivery_fee NUMERIC DEFAULT 0,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW(),
+        notes TEXT
+      );
     `);
 
     // Check if we need to seed initial data
