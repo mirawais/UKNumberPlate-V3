@@ -111,8 +111,8 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
     ? plateWidthPx - (marginPx * 2) - badgeWidthPx 
     : plateWidthPx - (marginPx * 2);
   
-  // Set maximum font size based on plate height
-  const CHARACTER_HEIGHT_RATIO = 0.7; // Character height is about 70% of plate height
+  // Set maximum font size based on plate height - increased slightly as requested
+  const CHARACTER_HEIGHT_RATIO = 0.8; // Character height is about 80% of plate height (increased from 70%)
   const maxFontSize = plateHeightPx * CHARACTER_HEIGHT_RATIO;
   const minFontSize = maxFontSize * 0.5; // Minimum font size (half of max)
   
@@ -219,7 +219,8 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
             width: `${plateWidthPx}px`,
             height: `${plateHeightPx}px`,
             maxWidth: '100%',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            borderRadius: '8px'
           }}
         >
           <BadgeComponent />
@@ -252,7 +253,8 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
             width: `${plateWidthPx}px`,
             height: `${plateHeightPx}px`,
             maxWidth: '100%',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            borderRadius: '8px'
           }}
         >
           <BadgeComponent />
