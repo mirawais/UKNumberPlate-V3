@@ -148,28 +148,29 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
       margin: 0
     };
 
-    // Only apply 3D effects when a 3D style is selected
-    const selectedTextStyle = customization.customFont; // This contains the style name
+    // Always apply 3D effects to all text styles as requested by user
+    // This ensures consistency regardless of which style is selected
     
-    if (selectedTextStyle && selectedTextStyle.toLowerCase().includes('3d')) {
-      // Apply standard 3D effect for all 3D styles
+    // Apply standard 3D effect to all text styles
+    styles.textShadow = `
+      0px 1px 0px rgba(0,0,0,0.3),
+      0px 2px 0px rgba(0,0,0,0.3),
+      0px 3px 2px rgba(0,0,0,0.2)
+    `;
+    styles.fontWeight = 'bold';
+    
+    // Get selected text style name
+    const selectedTextStyle = customization.customFont;
+    
+    // Enhanced effect for Gel styles if selected
+    if (selectedTextStyle && selectedTextStyle.toLowerCase().includes('gel')) {
       styles.textShadow = `
-        0px 1px 0px rgba(0,0,0,0.3),
+        0px 1px 0px rgba(0,0,0,0.4),
         0px 2px 0px rgba(0,0,0,0.3),
-        0px 3px 2px rgba(0,0,0,0.2)
+        0px 3px 3px rgba(0,0,0,0.2),
+        0px 4px 5px rgba(0,0,0,0.1)
       `;
-      styles.fontWeight = 'bold';
-      
-      // Enhanced effect for Gel styles
-      if (selectedTextStyle.toLowerCase().includes('gel')) {
-        styles.textShadow = `
-          0px 1px 0px rgba(0,0,0,0.4),
-          0px 2px 0px rgba(0,0,0,0.3),
-          0px 3px 3px rgba(0,0,0,0.2),
-          0px 4px 5px rgba(0,0,0,0.1)
-        `;
-        styles.letterSpacing = '1px';
-      }
+      styles.letterSpacing = '1px';
     }
 
     // For split text, adjust spacing

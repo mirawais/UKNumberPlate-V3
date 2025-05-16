@@ -449,6 +449,7 @@ const ProductManager = () => {
         frontPlatePrice: modalData.frontPlatePrice || pricing.frontPlatePrice,
         rearPlatePrice: modalData.rearPlatePrice || pricing.rearPlatePrice,
         bothPlatesDiscount: modalData.bothPlatesDiscount || pricing.bothPlatesDiscount,
+        deliveryFee: modalData.deliveryFee || pricing.deliveryFee || "4.99",
         taxRate: modalData.taxRate || pricing.taxRate
       });
     }
@@ -520,6 +521,17 @@ const ProductManager = () => {
                         step="0.01" 
                         defaultValue={pricing.taxRate.toString()} 
                         onChange={(e) => setModalData({...modalData, taxRate: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="deliveryFee">Delivery Fee (£)</Label>
+                      <Input 
+                        id="deliveryFee" 
+                        type="number" 
+                        step="0.01" 
+                        defaultValue={pricing.deliveryFee?.toString() || "4.99"} 
+                        onChange={(e) => setModalData({...modalData, deliveryFee: e.target.value})}
                       />
                     </div>
                   </div>
