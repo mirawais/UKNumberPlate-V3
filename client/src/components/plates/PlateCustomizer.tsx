@@ -167,13 +167,13 @@ const PlateCustomizer = () => {
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="flex flex-col md:flex-row">
         {/* Left Panel - Customization Options */}
-        <div className="w-full md:w-1/3 bg-gray-50">
+        <div className="w-full md:w-1/3 bg-red-50">
           <Tabs defaultValue={features.roadLegalPlates ? "road-legal" : "show-plates"}>
             <TabsList className="w-full grid grid-cols-2">
               {features.roadLegalPlates && (
                 <TabsTrigger 
                   value="road-legal" 
-                  className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:bg-red-300"
+                  className="data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=inactive]:bg-red-200 text-gray-800 rounded-t-md font-medium"
                 >
                   Road Legal Plates
                 </TabsTrigger>
@@ -181,7 +181,7 @@ const PlateCustomizer = () => {
               {features.showPlates && (
                 <TabsTrigger 
                   value="show-plates"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:bg-red-300"
+                  className="data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=inactive]:bg-red-200 text-gray-800 rounded-t-md font-medium"
                 >
                   Show Plates
                 </TabsTrigger>
@@ -189,7 +189,7 @@ const PlateCustomizer = () => {
             </TabsList>
             
             <TabsContent value="road-legal">
-              <div className="p-4 bg-primary text-white">
+              <div className="p-4 bg-red-600 text-white">
                 <h2 className="text-xl font-bold">Select your options</h2>
                 <p className="text-sm">Build your number plate below by choosing from the options and clicking 'Buy Now' to add to basket.</p>
               </div>
@@ -210,14 +210,16 @@ const PlateCustomizer = () => {
                     <RadioGroupItem value="both" id="both-plates" className="sr-only" />
                     <Label 
                       htmlFor="both-plates" 
-                      className={`relative flex flex-col items-center justify-center h-20 w-full ${
-                        customization.plateType === 'both' ? 'bg-red-700' : 'bg-red-400'
-                      } text-white text-center rounded cursor-pointer transition-colors`}
+                      className={`relative flex flex-col items-center justify-center h-16 w-full ${
+                        customization.plateType === 'both' ? 'bg-red-600' : 'bg-red-400'
+                      } text-white text-center rounded-md cursor-pointer transition-colors border-2 ${
+                        customization.plateType === 'both' ? 'border-red-700' : 'border-red-400'
+                      }`}
                     >
-                      <span className="text-xs font-bold">BOTH PLATES</span>
                       {customization.plateType === 'both' && (
-                        <span className="absolute top-0 right-2 text-xs">✓</span>
+                        <div className="absolute top-1 left-1 h-3 w-3 bg-white rounded-full border border-red-700"></div>
                       )}
+                      <span className="text-xs font-bold">BOTH PLATES</span>
                     </Label>
                   </div>
                   
@@ -225,14 +227,16 @@ const PlateCustomizer = () => {
                     <RadioGroupItem value="front" id="front-only" className="sr-only" />
                     <Label 
                       htmlFor="front-only" 
-                      className={`relative flex flex-col items-center justify-center h-20 w-full ${
-                        customization.plateType === 'front' ? 'bg-red-700' : 'bg-red-400'
-                      } text-white text-center rounded cursor-pointer transition-colors`}
+                      className={`relative flex flex-col items-center justify-center h-16 w-full ${
+                        customization.plateType === 'front' ? 'bg-red-600' : 'bg-red-400'
+                      } text-white text-center rounded-md cursor-pointer transition-colors border-2 ${
+                        customization.plateType === 'front' ? 'border-red-700' : 'border-red-400'
+                      }`}
                     >
-                      <span className="text-xs font-bold">FRONT ONLY</span>
                       {customization.plateType === 'front' && (
-                        <span className="absolute top-0 right-2 text-xs">✓</span>
+                        <div className="absolute top-1 left-1 h-3 w-3 bg-white rounded-full border border-red-700"></div>
                       )}
+                      <span className="text-xs font-bold">FRONT ONLY</span>
                     </Label>
                   </div>
                   
@@ -240,14 +244,16 @@ const PlateCustomizer = () => {
                     <RadioGroupItem value="rear" id="rear-only" className="sr-only" />
                     <Label 
                       htmlFor="rear-only" 
-                      className={`relative flex flex-col items-center justify-center h-20 w-full ${
-                        customization.plateType === 'rear' ? 'bg-red-700' : 'bg-red-400'
-                      } text-white text-center rounded cursor-pointer transition-colors`}
+                      className={`relative flex flex-col items-center justify-center h-16 w-full ${
+                        customization.plateType === 'rear' ? 'bg-red-600' : 'bg-red-400'
+                      } text-white text-center rounded-md cursor-pointer transition-colors border-2 ${
+                        customization.plateType === 'rear' ? 'border-red-700' : 'border-red-400'
+                      }`}
                     >
-                      <span className="text-xs font-bold">REAR ONLY</span>
                       {customization.plateType === 'rear' && (
-                        <span className="absolute top-0 right-2 text-xs">✓</span>
+                        <div className="absolute top-1 left-1 h-3 w-3 bg-white rounded-full border border-red-700"></div>
                       )}
+                      <span className="text-xs font-bold">REAR ONLY</span>
                     </Label>
                   </div>
                 </RadioGroup>
@@ -530,7 +536,7 @@ const PlateCustomizer = () => {
             
             <TabsContent value="show-plates">
               {/* Show plates - same content but with isRoadLegal=false */}
-              <div className="p-4 bg-primary text-white">
+              <div className="p-4 bg-red-600 text-white">
                 <h2 className="text-xl font-bold">Select your options</h2>
                 <p className="text-sm">
                   Build your show plate below by choosing from the options and clicking 'Buy Now' to add to basket. 
