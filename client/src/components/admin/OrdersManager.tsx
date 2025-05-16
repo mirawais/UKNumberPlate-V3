@@ -494,7 +494,7 @@ export default function OrdersManager() {
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-muted-foreground">Shipping</span>
-                                  <span>£0.00</span>
+                                  <span>{selectedOrder.deliveryFee ? `£${parseFloat(selectedOrder.deliveryFee).toFixed(2)}` : '£0.00'}</span>
                                 </div>
                                 <div className="flex justify-between font-medium">
                                   <span>Total</span>
