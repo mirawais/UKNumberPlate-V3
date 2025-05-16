@@ -275,21 +275,30 @@ const PlateCustomizer = () => {
               {/* Plate Size Selection */}
               <div className="p-4 border-b">
                 <h3 className="font-bold mb-2">Plate Size</h3>
-                <Select 
-                  value={customization.plateSize} 
-                  onValueChange={(value) => setCustomization({...customization, plateSize: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select plate size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {plateSizes?.map((size) => (
-                      <SelectItem key={size.id} value={size.id.toString()}>
-                        {size.name} ({size.dimensions}) {Number(size.additionalPrice) > 0 ? `- +£${Number(size.additionalPrice).toFixed(2)}` : '- £0.00'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-2">
+                  {plateSizes?.map((size) => (
+                    <div 
+                      key={size.id}
+                      className={`relative cursor-pointer border-2 p-3 rounded-md text-center transition-all ${
+                        customization.plateSize === size.id.toString() 
+                          ? 'border-red-600 bg-red-50' 
+                          : 'border-gray-200 hover:border-red-100'
+                      }`}
+                      onClick={() => setCustomization({...customization, plateSize: size.id.toString()})}
+                    >
+                      <div className="font-bold text-sm">{size.name}</div>
+                      <div className="text-xs text-gray-500">{size.dimensions}</div>
+                      <div className="text-xs mt-1 font-semibold">
+                        {Number(size.additionalPrice) > 0 
+                          ? `+£${Number(size.additionalPrice).toFixed(2)}` 
+                          : 'Standard Price'}
+                      </div>
+                      {customization.plateSize === size.id.toString() && (
+                        <div className="absolute top-1 right-1 h-3 w-3 bg-red-600 rounded-full"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
               
               {/* Text Style Selection */}
@@ -632,61 +641,77 @@ const PlateCustomizer = () => {
               {/* Plate Size Selection */}
               <div className="p-4 border-b">
                 <h3 className="font-bold mb-2">Plate Size</h3>
-                <Select 
-                  value={customization.plateSize} 
-                  onValueChange={(value) => setCustomization({...customization, plateSize: value, isRoadLegal: false})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select plate size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {plateSizes?.map((size) => (
-                      <SelectItem key={size.id} value={size.id.toString()}>
-                        {size.name} ({size.dimensions}) {Number(size.additionalPrice) > 0 ? `- +£${Number(size.additionalPrice).toFixed(2)}` : '- £0.00'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-2">
+                  {plateSizes?.map((size) => (
+                    <div 
+                      key={size.id}
+                      className={`relative cursor-pointer border-2 p-3 rounded-md text-center transition-all ${
+                        customization.plateSize === size.id.toString() 
+                          ? 'border-red-600 bg-red-50' 
+                          : 'border-gray-200 hover:border-red-100'
+                      }`}
+                      onClick={() => setCustomization({...customization, plateSize: size.id.toString(), isRoadLegal: false})}
+                    >
+                      <div className="font-bold text-sm">{size.name}</div>
+                      <div className="text-xs text-gray-500">{size.dimensions}</div>
+                      <div className="text-xs mt-1 font-semibold">
+                        {Number(size.additionalPrice) > 0 
+                          ? `+£${Number(size.additionalPrice).toFixed(2)}` 
+                          : 'Standard Price'}
+                      </div>
+                      {customization.plateSize === size.id.toString() && (
+                        <div className="absolute top-1 right-1 h-3 w-3 bg-red-600 rounded-full"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
               
               {/* Text Style Selection */}
               <div className="p-4 border-b">
                 <h3 className="font-bold mb-2">Text Style</h3>
-                <div className="relative">
-                  <Select 
-                    value={customization.textStyle} 
-                    onValueChange={(value) => {
-                      setCustomization({...customization, textStyle: value, isRoadLegal: false});
-                      const style = textStyles?.find(s => s.id.toString() === value);
-                      if (style) {
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  {textStyles?.map((style) => (
+                    <div 
+                      key={style.id}
+                      className={`relative cursor-pointer border-2 rounded-md p-3 text-center transition-all ${
+                        customization.textStyle === style.id.toString() 
+                          ? 'border-red-600 bg-red-50' 
+                          : 'border-gray-200 hover:border-red-300'
+                      }`}
+                      onClick={() => {
+                        setCustomization({...customization, textStyle: style.id.toString(), isRoadLegal: false});
                         setSelectedTextStyle(style);
-                        // Automatically open the modal when a new style is selected, same as road legal tab
-                        setIsTextStyleModalOpen(true);
-                      }
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select text style" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {textStyles?.map((style) => (
-                        <SelectItem key={style.id} value={style.id.toString()}>
-                          {style.name} {Number(style.additionalPrice) > 0 ? `- +£${Number(style.additionalPrice).toFixed(2)}` : '- £0.00'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-sm h-8 flex items-center gap-2 mt-2 w-full"
-                    onClick={handleTextStyleInfo}
-                  >
-                    <InfoIcon className="h-4 w-4" />
-                    Click to see text style information
-                  </Button>
+                      }}
+                    >
+                      <div className={`font-bold text-lg transition-all ${
+                        customization.textStyle === style.id.toString() 
+                          ? 'text-red-600 transform -translate-y-1 scale-105' 
+                          : 'text-gray-700'
+                      }`} style={customization.textStyle === style.id.toString() ? {
+                        textShadow: '0px 2px 3px rgba(0, 0, 0, 0.2)'
+                      } : {}}>
+                        {style.name}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {Number(style.additionalPrice) > 0 ? `+£${Number(style.additionalPrice).toFixed(2)}` : 'No Extra Cost'}
+                      </div>
+                      {customization.textStyle === style.id.toString() && (
+                        <div className="absolute top-1 right-1 h-3 w-3 bg-red-600 rounded-full"></div>
+                      )}
+                    </div>
+                  ))}
                 </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-sm w-full h-8 flex items-center justify-center gap-2 border-red-200 text-red-600 hover:bg-red-50"
+                  onClick={handleTextStyleInfo}
+                >
+                  <InfoIcon className="h-4 w-4" />
+                  View Text Style Details
+                </Button>
               </div>
               
               {/* Badges & Colours - Conditionally shown based on feature toggles */}
