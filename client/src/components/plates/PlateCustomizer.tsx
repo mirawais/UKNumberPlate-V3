@@ -312,7 +312,11 @@ const PlateCustomizer = () => {
                           : 'border-gray-200 hover:border-red-300'
                       }`}
                       onClick={() => {
-                        setCustomization({...customization, textStyle: style.id.toString()});
+                        setCustomization({
+                          ...customization, 
+                          textStyle: style.id.toString(),
+                          customFont: style.name // Add the style name to be used for 3D effects
+                        });
                         setSelectedTextStyle(style);
                       }}
                     >
@@ -698,7 +702,12 @@ const PlateCustomizer = () => {
                           : 'border-gray-200 hover:border-red-300'
                       }`}
                       onClick={() => {
-                        setCustomization({...customization, textStyle: style.id.toString(), isRoadLegal: false});
+                        setCustomization({
+                          ...customization, 
+                          textStyle: style.id.toString(), 
+                          customFont: style.name, // Add style name for 3D effects
+                          isRoadLegal: false
+                        });
                         setSelectedTextStyle(style);
                       }}
                     >

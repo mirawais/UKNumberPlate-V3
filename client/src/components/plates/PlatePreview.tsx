@@ -148,11 +148,14 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
       margin: 0
     };
 
-    // Apply 3D effect if the text style includes "3D"
-    // Check if the selected text style contains "3D" in its name
-    const is3DStyle = customization.textStyle && customization.textStyle.toLowerCase().includes("3d");
+    // We need to find the actual text style from the textStyles array
+    // This should be passed through from the PlateCustomizer component
+    // This approach will only apply 3D effects when a 3D style is selected
+    // Find the text style that matches the selected ID
+    const textStyleId = customization.textStyle;
+    const selectedTextStyle = customization.customFont; // This should contain the style name
     
-    if (is3DStyle) {
+    if (selectedTextStyle && selectedTextStyle.includes('3D')) {
       styles.textShadow = `
         0px 1px 0px rgba(0,0,0,0.3),
         0px 2px 0px rgba(0,0,0,0.3),
@@ -161,7 +164,7 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
       styles.fontWeight = 'bold';
       
       // If it's a gel style, add slightly more depth and contrast
-      if (customization.textStyle.toLowerCase().includes("gel")) {
+      if (selectedTextStyle.includes('Gel')) {
         styles.textShadow = `
           0px 1px 0px rgba(0,0,0,0.4),
           0px 2px 0px rgba(0,0,0,0.3),
