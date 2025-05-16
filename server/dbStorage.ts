@@ -174,8 +174,21 @@ export class DatabaseStorage implements IStorage {
   async deleteCarBrand(id: number): Promise<boolean> { throw new Error("Not implemented"); }
   
   // Pricing
-  async getPricing(): Promise<Pricing> { throw new Error("Not implemented"); }
-  async updatePricing(id: number, price: Partial<Pricing>): Promise<Pricing | undefined> { throw new Error("Not implemented"); }
+  async getPricing(): Promise<Pricing> { 
+    const [pricingData] = await db.select().from(pricing);
+    return pricingData;
+  }
+  
+  async updatePricing(id: number, price: Partial<Pricing>): Promise<Pricing | undefined> {
+    const [updatedPricing] = await db.update(pricing)
+      .set({
+        ...price,
+        updatedAt: new Date()
+      })
+      .where(eq(pricing.id, id))
+      .returning();
+    return updatedPricing;
+  }
   
   // Payment Methods
   async getPaymentMethods(): Promise<PaymentMethod[]> { throw new Error("Not implemented"); }
