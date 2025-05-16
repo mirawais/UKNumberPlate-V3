@@ -30,6 +30,12 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     city: '',
     postcode: '',
     paymentMethod: 'stripe',
+    shippingMethod: 'pickup'
+  });
+  
+  // Fetch pricing information to get the delivery fee
+  const { data: pricing } = useQuery<Pricing>({ 
+    queryKey: ['/api/pricing'] 
   });
   
   const handleDetailsSubmit = (data: { firstName: string; lastName: string; email: string; phone: string }) => {
@@ -37,7 +43,13 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     setCurrentStep('shipping');
   };
   
-  const handleShippingSubmit = (data: { address1: string; address2: string; city: string; postcode: string }) => {
+  const handleShippingSubmit = (data: { 
+    address1: string; 
+    address2: string; 
+    city: string; 
+    postcode: string;
+    shippingMethod: 'delivery' | 'pickup';
+  }) => {
     setOrderDetails(prev => ({ ...prev, ...data }));
     setCurrentStep('payment');
   };
@@ -106,6 +118,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
       city: '',
       postcode: '',
       paymentMethod: 'stripe',
+      shippingMethod: 'pickup',
     });
     onClose();
   };
@@ -171,6 +184,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
             onSubmit={handleShippingSubmit} 
             initialValues={orderDetails}
             onBack={() => setCurrentStep('details')}
+            deliveryFee={pricing?.deliveryFee || "4.99"}
           />
         )}
         
