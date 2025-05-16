@@ -88,6 +88,8 @@ async function setupDatabase() {
         front_plate_price NUMERIC NOT NULL,
         rear_plate_price NUMERIC NOT NULL,
         both_plates_price NUMERIC NOT NULL,
+        delivery_fee NUMERIC,
+        tax_rate NUMERIC,
         updated_at TIMESTAMP DEFAULT NOW()
       );
 
@@ -176,7 +178,9 @@ async function setupDatabase() {
       await db.insert(pricing).values({
         frontPlatePrice: "15",
         rearPlatePrice: "15",
-        bothPlatesPrice: "25"
+        bothPlatesPrice: "25",
+        deliveryFee: "4.99",
+        taxRate: "20"
       });
 
       // Insert admin user

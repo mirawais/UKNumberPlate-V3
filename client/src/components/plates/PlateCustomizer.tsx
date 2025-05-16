@@ -114,8 +114,8 @@ const PlateCustomizer = () => {
     }
     
     // Add shipping cost if delivery is selected
-    if (customization.shippingMethod === 'delivery') {
-      price += 4.99; // £4.99 for delivery
+    if (customization.shippingMethod === 'delivery' && pricing?.deliveryFee) {
+      price += parseFloat(pricing.deliveryFee); // Use delivery fee from pricing settings
     }
     
     // Round to 2 decimal places
@@ -134,6 +134,16 @@ const PlateCustomizer = () => {
       toast({
         title: "Missing Information",
         description: "Please enter your registration text.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validate document upload for road legal plates
+    if (customization.isRoadLegal && !customization.documentFileId) {
+      toast({
+        title: "Missing Document",
+        description: "Please upload your vehicle document for road legal plates.",
         variant: "destructive"
       });
       return;
