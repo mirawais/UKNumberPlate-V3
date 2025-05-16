@@ -8,7 +8,7 @@ import bodyParser from "body-parser";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { db } from "./db";
+import { db, pool } from "./db";
 
 // Configure directories
 // For Windows or Unix paths
@@ -315,13 +315,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If delivery fee is provided, update it directly in the database
       if (deliveryFee !== undefined) {
+        // Execute raw SQL to update the delivery fee
         const id = parseInt(req.params.id);
-        await db.execute(`UPDATE pricing SET delivery_fee = $1 WHERE id = ${id}`, [deliveryFee]);
+        await pool.query(`UPDATE pricing SET delivery_fee = '${deliveryFee}' WHERE id = ${id}`);
       }
       
       // Get the updated pricing with delivery fee
       const id = parseInt(req.params.id);
-      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = ${id}`);
+      const deliveryFeeResult = await pool.query(`SELECT delivery_fee FROM pricing WHERE id = ${id}`);
       const updatedDeliveryFee = deliveryFeeResult.rows[0]?.delivery_fee || "4.99";
       
       // Return the complete pricing data
@@ -348,13 +349,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If delivery fee is provided, update it directly in the database
       if (deliveryFee !== undefined) {
+        // Execute raw SQL to update the delivery fee
         const id = parseInt(req.params.id);
-        await db.execute(`UPDATE pricing SET delivery_fee = $1 WHERE id = ${id}`, [deliveryFee]);
+        await pool.query(`UPDATE pricing SET delivery_fee = '${deliveryFee}' WHERE id = ${id}`);
       }
       
       // Get the updated pricing with delivery fee
       const id = parseInt(req.params.id);
-      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = ${id}`);
+      const deliveryFeeResult = await pool.query(`SELECT delivery_fee FROM pricing WHERE id = ${id}`);
       const updatedDeliveryFee = deliveryFeeResult.rows[0]?.delivery_fee || "4.99";
       
       // Return the complete pricing data
