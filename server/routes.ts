@@ -304,24 +304,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/pricing/:id", requireAdmin, async (req, res) => {
     try {
-      const pricing = await storage.updatePricing(parseInt(req.params.id), req.body);
+      // Get the delivery fee from the request body
+      const { deliveryFee, ...otherPricingData } = req.body;
+      
+      // Update the pricing record
+      const pricing = await storage.updatePricing(parseInt(req.params.id), otherPricingData);
       if (!pricing) {
         return res.status(404).json({ message: "Pricing not found" });
       }
-      res.json(pricing);
+      
+      // If delivery fee is provided, update it directly in the database
+      if (deliveryFee) {
+        await db.execute(`UPDATE pricing SET delivery_fee = $1 WHERE id = $2`, [deliveryFee, req.params.id]);
+      }
+      
+      // Get the updated pricing with delivery fee
+      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = $1`, [req.params.id]);
+      const updatedDeliveryFee = deliveryFeeResult.rows[0]?.delivery_fee || "4.99";
+      
+      // Return the complete pricing data
+      res.json({
+        ...pricing,
+        deliveryFee: updatedDeliveryFee
+      });
     } catch (error) {
+      console.error("Error updating pricing:", error);
       res.status(500).json({ message: "Failed to update pricing" });
     }
   });
   
   app.patch("/api/pricing/:id", requireAdmin, async (req, res) => {
     try {
-      const pricing = await storage.updatePricing(parseInt(req.params.id), req.body);
+      // Get the delivery fee from the request body
+      const { deliveryFee, ...otherPricingData } = req.body;
+      
+      // Update the pricing record
+      const pricing = await storage.updatePricing(parseInt(req.params.id), otherPricingData);
       if (!pricing) {
         return res.status(404).json({ message: "Pricing not found" });
       }
-      res.json(pricing);
+      
+      // If delivery fee is provided, update it directly in the database
+      if (deliveryFee) {
+        await db.execute(`UPDATE pricing SET delivery_fee = $1 WHERE id = $2`, [deliveryFee, req.params.id]);
+      }
+      
+      // Get the updated pricing with delivery fee
+      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = $1`, [req.params.id]);
+      const updatedDeliveryFee = deliveryFeeResult.rows[0]?.delivery_fee || "4.99";
+      
+      // Return the complete pricing data
+      res.json({
+        ...pricing,
+        deliveryFee: updatedDeliveryFee
+      });
     } catch (error) {
+      console.error("Error updating pricing:", error);
       res.status(500).json({ message: "Failed to update pricing" });
     }
   });
