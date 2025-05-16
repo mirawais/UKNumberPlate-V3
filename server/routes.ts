@@ -314,12 +314,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // If delivery fee is provided, update it directly in the database
-      if (deliveryFee) {
-        await db.execute(`UPDATE pricing SET delivery_fee = $1 WHERE id = $2`, [deliveryFee, req.params.id]);
+      if (deliveryFee !== undefined) {
+        const id = parseInt(req.params.id);
+        await db.execute(`UPDATE pricing SET delivery_fee = $1 WHERE id = ${id}`, [deliveryFee]);
       }
       
       // Get the updated pricing with delivery fee
-      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = $1`, [req.params.id]);
+      const id = parseInt(req.params.id);
+      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = ${id}`);
       const updatedDeliveryFee = deliveryFeeResult.rows[0]?.delivery_fee || "4.99";
       
       // Return the complete pricing data
@@ -345,12 +347,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // If delivery fee is provided, update it directly in the database
-      if (deliveryFee) {
-        await db.execute(`UPDATE pricing SET delivery_fee = $1 WHERE id = $2`, [deliveryFee, req.params.id]);
+      if (deliveryFee !== undefined) {
+        const id = parseInt(req.params.id);
+        await db.execute(`UPDATE pricing SET delivery_fee = $1 WHERE id = ${id}`, [deliveryFee]);
       }
       
       // Get the updated pricing with delivery fee
-      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = $1`, [req.params.id]);
+      const id = parseInt(req.params.id);
+      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = ${id}`);
       const updatedDeliveryFee = deliveryFeeResult.rows[0]?.delivery_fee || "4.99";
       
       // Return the complete pricing data
