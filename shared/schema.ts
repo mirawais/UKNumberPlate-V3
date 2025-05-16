@@ -161,6 +161,7 @@ export const pricing = pgTable("pricing", {
   rearPlatePrice: numeric("rear_plate_price").notNull(),
   bothPlatesDiscount: numeric("both_plates_discount").default("0").notNull(),
   taxRate: numeric("tax_rate").default("20").notNull(), // VAT percentage
+  deliveryFee: numeric("delivery_fee").default("4.99").notNull(), // Delivery fee
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

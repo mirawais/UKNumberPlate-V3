@@ -14,6 +14,7 @@ interface CheckoutFormProps {
   initialValues: any;
   onBack?: () => void;
   onSelectPaymentMethod?: (method: string) => void;
+  deliveryFee?: string;
 }
 
 const detailsSchema = z.object({
@@ -24,10 +25,11 @@ const detailsSchema = z.object({
 });
 
 const shippingSchema = z.object({
-  address1: z.string().min(1, 'Address is required'),
+  shippingMethod: z.enum(['delivery', 'pickup']),
+  address1: z.string().min(1, 'Address is required').optional().or(z.literal('')),
   address2: z.string().optional(),
-  city: z.string().min(1, 'City is required'),
-  postcode: z.string().min(5, 'Postcode is required'),
+  city: z.string().min(1, 'City is required').optional().or(z.literal('')),
+  postcode: z.string().min(5, 'Postcode is required').optional().or(z.literal('')),
 });
 
 const paymentSchema = z.object({
@@ -39,7 +41,8 @@ const CheckoutForm = ({
   onSubmit, 
   initialValues, 
   onBack,
-  onSelectPaymentMethod 
+  onSelectPaymentMethod,
+  deliveryFee = "4.99"
 }: CheckoutFormProps) => {
   let schema;
   
@@ -53,6 +56,8 @@ const CheckoutForm = ({
     case 'payment':
       schema = paymentSchema;
       break;
+    default:
+      schema = detailsSchema;
   }
   
   const form = useForm({
@@ -137,61 +142,98 @@ const CheckoutForm = ({
           <div className="grid grid-cols-1 gap-4 mb-6">
             <FormField
               control={form.control}
-              name="address1"
+              name="shippingMethod"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address Line 1</FormLabel>
+                  <FormLabel>Shipping Method</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <RadioGroup 
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className="flex flex-col space-y-3"
+                    >
+                      <div className="flex items-center space-x-2 rounded-md border p-3">
+                        <RadioGroupItem value="delivery" id="delivery" />
+                        <FormLabel htmlFor="delivery" className="flex-1 cursor-pointer">
+                          <div className="font-medium">Delivery (+£{deliveryFee})</div>
+                          <div className="text-sm text-gray-500">Your plates will be delivered to your address</div>
+                        </FormLabel>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 rounded-md border p-3">
+                        <RadioGroupItem value="pickup" id="pickup" />
+                        <FormLabel htmlFor="pickup" className="flex-1 cursor-pointer">
+                          <div className="font-medium">Pickup (Free)</div>
+                          <div className="text-sm text-gray-500">Collect your plates from our store</div>
+                        </FormLabel>
+                      </div>
+                    </RadioGroup>
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
             
-            <FormField
-              control={form.control}
-              name="address2"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address Line 2 (Optional)</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {form.watch("shippingMethod") === "delivery" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="address1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address Line 1</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="postcode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Postcode</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                <FormField
+                  control={form.control}
+                  name="address2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address Line 2 (Optional)</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="postcode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Postcode</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </>
+            )}
           </div>
         )}
         
