@@ -447,34 +447,7 @@ const PlateCustomizer = () => {
                 </div>
               )}
               
-              {/* Shipping Method */}
-              <div className="p-4 border-b">
-                <h3 className="font-bold mb-2">Shipping Method</h3>
-                <RadioGroup 
-                  value={customization.shippingMethod}
-                  onValueChange={(value) => setCustomization({
-                    ...customization, 
-                    shippingMethod: value as 'delivery' | 'pickup'
-                  })}
-                  className="flex flex-col space-y-3"
-                >
-                  <div className="flex items-center space-x-2 rounded-md border p-3">
-                    <RadioGroupItem value="delivery" id="delivery" />
-                    <Label htmlFor="delivery" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Delivery (+£4.99)</div>
-                      <div className="text-sm text-gray-500">Your plates will be delivered to your address</div>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 rounded-md border p-3">
-                    <RadioGroupItem value="pickup" id="pickup" />
-                    <Label htmlFor="pickup" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Pickup (Free)</div>
-                      <div className="text-sm text-gray-500">Collect your plates from our store</div>
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
+
 
               {/* Document Upload (Required for road legal plates) - Conditional based on feature toggle */}
               {features.allowDocumentUpload && (
@@ -815,35 +788,7 @@ const PlateCustomizer = () => {
                 </div>
               )}
               
-              {/* Shipping Method */}
-              <div className="p-4 border-b">
-                <h3 className="font-bold mb-2">Shipping Method</h3>
-                <RadioGroup 
-                  value={customization.shippingMethod}
-                  onValueChange={(value) => setCustomization({
-                    ...customization, 
-                    shippingMethod: value as 'delivery' | 'pickup',
-                    isRoadLegal: false
-                  })}
-                  className="flex flex-col space-y-3"
-                >
-                  <div className="flex items-center space-x-2 rounded-md border p-3">
-                    <RadioGroupItem value="delivery" id="show-delivery" />
-                    <Label htmlFor="show-delivery" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Delivery (+£4.99)</div>
-                      <div className="text-sm text-gray-500">Your plates will be delivered to your address</div>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 rounded-md border p-3">
-                    <RadioGroupItem value="pickup" id="show-pickup" />
-                    <Label htmlFor="show-pickup" className="flex-1 cursor-pointer">
-                      <div className="font-medium">Pickup (Free)</div>
-                      <div className="text-sm text-gray-500">Collect your plates from our store</div>
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
+
 
               {/* Plate Surround - Conditional based on feature flag */}
               {features.showCarBrands && (
