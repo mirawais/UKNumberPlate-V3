@@ -288,16 +288,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get pricing data from database
       const pricing = await storage.getPricing();
       
-      // Get delivery fee directly from database
-      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = 1`);
-      const deliveryFee = deliveryFeeResult.rows[0]?.delivery_fee || "4.99";
+      // Execute a direct SQL query to get all pricing data including delivery_fee
+      const result = await pool.query(`
+        SELECT id, front_plate_price as "frontPlatePrice", 
+               rear_plate_price as "rearPlatePrice", 
+               both_plates_discount as "bothPlatesDiscount", 
+               tax_rate as "taxRate", 
+               updated_at as "updatedAt", 
+               delivery_fee as "deliveryFee"
+        FROM pricing 
+        WHERE id = 1
+      `);
       
-      // Add delivery fee to response
-      res.json({
-        ...pricing,
-        deliveryFee
-      });
+      // Return the complete pricing data
+      if (result.rows && result.rows.length > 0) {
+        res.json(result.rows[0]);
+      } else {
+        // Fallback to storage method if SQL query returns no rows
+        res.json({
+          ...pricing,
+          deliveryFee: "4.99"
+        });
+      }
     } catch (error) {
+      console.error("Error getting pricing:", error);
       res.status(500).json({ message: "Failed to get pricing" });
     }
   });
