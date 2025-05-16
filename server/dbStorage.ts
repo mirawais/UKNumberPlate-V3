@@ -175,8 +175,19 @@ export class DatabaseStorage implements IStorage {
   
   // Pricing
   async getPricing(): Promise<Pricing> { 
-    const [pricingData] = await db.select().from(pricing);
-    return pricingData;
+    // Use raw query to get all fields including delivery_fee
+    const result = await db.execute(`SELECT 
+      id, 
+      front_plate_price as "frontPlatePrice", 
+      rear_plate_price as "rearPlatePrice", 
+      both_plates_discount as "bothPlatesDiscount", 
+      both_plates_price as "bothPlatesPrice",
+      tax_rate as "taxRate", 
+      delivery_fee as "deliveryFee", 
+      updated_at as "updatedAt" 
+      FROM pricing LIMIT 1;`);
+    
+    return result.rows[0];
   }
   
   async updatePricing(id: number, price: Partial<Pricing>): Promise<Pricing | undefined> {
