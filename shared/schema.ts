@@ -199,6 +199,8 @@ export const orders = pgTable("orders", {
   orderStatus: text("order_status").default("pending").notNull(),
   stripePaymentIntentId: text("stripe_payment_intent_id"), // To track Stripe payment intent
   documentFileId: numeric("document_file_id"), // Reference to uploaded vehicle document for road legal plates
+  shippingMethod: text("shipping_method").default("pickup"), // Delivery or pickup
+  deliveryFee: numeric("delivery_fee").default("0"), // Delivery fee amount
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   notes: text("notes"),
