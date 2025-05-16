@@ -8,6 +8,7 @@ import bodyParser from "body-parser";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { db } from "./db";
 
 // Configure directories
 // For Windows or Unix paths
@@ -284,8 +285,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Pricing
   app.get("/api/pricing", async (req, res) => {
     try {
+      // Get pricing data from database
       const pricing = await storage.getPricing();
-      res.json(pricing);
+      
+      // Get delivery fee directly from database
+      const deliveryFeeResult = await db.execute(`SELECT delivery_fee FROM pricing WHERE id = 1`);
+      const deliveryFee = deliveryFeeResult.rows[0]?.delivery_fee || "4.99";
+      
+      // Add delivery fee to response
+      res.json({
+        ...pricing,
+        deliveryFee
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to get pricing" });
     }
