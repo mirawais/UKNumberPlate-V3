@@ -155,7 +155,7 @@ const CheckoutForm = ({
                       <div className="flex items-center space-x-2 rounded-md border p-3">
                         <RadioGroupItem value="delivery" id="delivery" />
                         <FormLabel htmlFor="delivery" className="flex-1 cursor-pointer">
-                          <div className="font-medium">Delivery (+£{deliveryFee})</div>
+                          <div className="font-medium">Delivery (+£{parseFloat(deliveryFee).toFixed(2)})</div>
                           <div className="text-sm text-gray-500">Your plates will be delivered to your address</div>
                         </FormLabel>
                       </div>

@@ -237,7 +237,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
             onSubmit={handleShippingSubmit} 
             initialValues={orderDetails}
             onBack={() => setCurrentStep('details')}
-            deliveryFee={pricing?.deliveryFee || "2.00"}
+            deliveryFee={pricing?.deliveryFee || "4.99"}
           />
         )}
 
