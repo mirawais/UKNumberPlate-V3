@@ -26,10 +26,34 @@ const detailsSchema = z.object({
 
 const shippingSchema = z.object({
   shippingMethod: z.enum(['delivery', 'pickup']),
-  address1: z.string().min(1, 'Address is required').optional().or(z.literal('')),
+  address1: z.string().optional(),
   address2: z.string().optional(),
-  city: z.string().min(1, 'City is required').optional().or(z.literal('')),
-  postcode: z.string().min(5, 'Postcode is required').optional().or(z.literal('')),
+  city: z.string().optional(),
+  postcode: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.shippingMethod === 'delivery') {
+    if (!data.address1 || data.address1.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Address Line 1 is required for delivery',
+        path: ['address1'],
+      });
+    }
+    if (!data.city || data.city.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'City is required for delivery',
+        path: ['city'],
+      });
+    }
+    if (!data.postcode || data.postcode.trim() === '' || data.postcode.length < 5) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Postcode is required for delivery',
+        path: ['postcode'],
+      });
+    }
+  }
 });
 
 const paymentSchema = z.object({
