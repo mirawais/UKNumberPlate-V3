@@ -32,22 +32,22 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     paymentMethod: 'stripe',
     shippingMethod: 'pickup'
   });
-  
+
   // Fetch pricing information to get the delivery fee
   const { data: pricing } = useQuery<Pricing>({ 
     queryKey: ['/api/pricing'] 
   });
-  
+
   // Track if delivery method is selected to add fee
   const [calculatedDeliveryFee, setCalculatedDeliveryFee] = useState(0);
   // Calculate final price including delivery if selected
   const finalPrice = totalPrice + calculatedDeliveryFee;
-  
+
   const handleDetailsSubmit = (data: { firstName: string; lastName: string; email: string; phone: string }) => {
     setOrderDetails(prev => ({ ...prev, ...data }));
     setCurrentStep('shipping');
   };
-  
+
   const handleShippingSubmit = (data: { 
     address1: string; 
     address2: string; 
@@ -56,7 +56,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     shippingMethod: 'delivery' | 'pickup';
   }) => {
     setOrderDetails(prev => ({ ...prev, ...data }));
-    
+
     // Update delivery fee based on shipping method
     if (data.shippingMethod === 'delivery') {
       // Apply delivery fee from pricing data
@@ -66,10 +66,10 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
       // No delivery fee for pickup
       setCalculatedDeliveryFee(0);
     }
-    
+
     setCurrentStep('payment');
   };
-  
+
   const handlePaymentMethodSelect = async (method: string) => {
     // Only accept Stripe as payment method
     if (method !== 'stripe') {
@@ -80,9 +80,9 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
       });
       return;
     }
-    
+
     setOrderDetails(prev => ({ ...prev, paymentMethod: method }));
-    
+
     try {
       // Prepare order data
       const order = {
@@ -97,7 +97,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
         // Include document file ID if it exists (for road legal plates)
         documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
       };
-      
+
       // Prepare order data including shipping method and delivery fee
       const orderData = {
         customerName: `${orderDetails.firstName} ${orderDetails.lastName}`,
@@ -113,7 +113,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
         documentFileId: customization.documentFileId ? customization.documentFileId.toString() : null,
         deliveryFee: calculatedDeliveryFee
       };
-      
+
       // Save order details to localStorage for the checkout page
       localStorage.setItem('orderDetails', JSON.stringify({
         ...customization,
@@ -126,11 +126,11 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
         deliveryFee: calculatedDeliveryFee
       }));
       localStorage.setItem('orderAmount', finalPrice.toString());
-      
+
       // Close modal and redirect to checkout page
       onClose();
       window.location.href = '/checkout';
-      
+
     } catch (error) {
       toast({
         title: "Order Placement Failed",
@@ -139,7 +139,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
       });
     }
   };
-  
+
   const resetCheckout = () => {
     setCurrentStep('details');
     setOrderDetails({
@@ -156,14 +156,14 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     });
     onClose();
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Complete Your Order</DialogTitle>
         </DialogHeader>
-        
+
         {/* Checkout Steps */}
         <div className="mb-8">
           <Steps 
@@ -179,7 +179,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
             <Step label="Confirmation" />
           </Steps>
         </div>
-        
+
         {/* Order Summary */}
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
           <h4 className="font-bold mb-3">Order Summary</h4>
@@ -200,7 +200,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
               <p className="text-xs text-gray-500">incl. VAT</p>
             </div>
           </div>
-          
+
           {/* Show delivery fee if applicable */}
           {calculatedDeliveryFee > 0 && (
             <div className="mb-3 flex justify-between border-t pt-2">
@@ -213,14 +213,14 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
               </div>
             </div>
           )}
-          
+
           {/* Show total with delivery fee */}
           <div className="mb-3 flex justify-between border-t border-black pt-2">
             <p className="font-bold">Total</p>
             <p className="font-bold">£{finalPrice.toFixed(2)}</p>
           </div>
         </div>
-        
+
         {/* Step 1: Customer Details */}
         {currentStep === 'details' && (
           <CheckoutForm 
@@ -229,7 +229,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
             initialValues={orderDetails}
           />
         )}
-        
+
         {/* Step 2: Shipping */}
         {currentStep === 'shipping' && (
           <CheckoutForm 
@@ -240,7 +240,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
             deliveryFee={pricing?.deliveryFee || "4.99"}
           />
         )}
-        
+
         {/* Step 3: Payment */}
         {currentStep === 'payment' && (
           <CheckoutForm 
@@ -251,7 +251,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
             onSelectPaymentMethod={handlePaymentMethodSelect}
           />
         )}
-        
+
         {/* Step 4: Confirmation */}
         {currentStep === 'confirmation' && (
           <div className="text-center py-8">

@@ -113,10 +113,7 @@ const PlateCustomizer = () => {
       }
     }
     
-    // Add shipping cost if delivery is selected
-    if (customization.shippingMethod === 'delivery' && pricing?.deliveryFee) {
-      price += parseFloat(pricing.deliveryFee); // Use delivery fee from pricing settings
-    }
+    // DO NOT add delivery charges here - they should only be added at checkout
     
     // Round to 2 decimal places
     setTotalPrice(Math.round(price * 100) / 100);
@@ -880,7 +877,7 @@ const PlateCustomizer = () => {
                 <p className="text-2xl font-semibold">
                   Price: <span id="total-price" className="font-bold">£{totalPrice.toFixed(2)}</span>
                 </p>
-                <p className="text-sm text-gray-500">Including VAT</p>
+                <p className="text-sm text-gray-500">Including VAT (+ delivery charges at checkout)</p>
               </div>
               <Button 
                 size="lg"
