@@ -60,7 +60,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
     // Update delivery fee based on shipping method
     if (data.shippingMethod === 'delivery') {
       // Apply delivery fee from pricing data
-      const deliveryFee = parseFloat(pricing?.deliveryFee || "2");
+      const deliveryFee = parseFloat(pricing?.deliveryFee || "10");
       setCalculatedDeliveryFee(deliveryFee);
     } else {
       // No delivery fee for pickup
@@ -237,7 +237,7 @@ const CheckoutModal = ({ isOpen, onClose, customization, totalPrice, plateType }
             onSubmit={handleShippingSubmit} 
             initialValues={orderDetails}
             onBack={() => setCurrentStep('details')}
-            deliveryFee={pricing?.deliveryFee || "2"}
+            deliveryFee={pricing?.deliveryFee || "10"}
           />
         )}
 
