@@ -50,7 +50,7 @@ const CheckoutForm = () => {
         title: "Payment Successful",
         description: "Thank you for your purchase!",
       });
-      
+
       // Redirect to confirmation page
       setLocation('/confirmation');
     }
@@ -76,12 +76,12 @@ export default function Checkout() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  
+
   // Get the order total from local storage
   const orderAmount = localStorage.getItem('orderAmount');
   const orderDetails = localStorage.getItem('orderDetails');
   const [orderId, setOrderId] = useState<string | null>(null);
-  
+
   useEffect(() => {
     if (!orderAmount || !orderDetails) {
       toast({
@@ -132,7 +132,7 @@ export default function Checkout() {
         if (data && data.id) {
           setOrderId(data.id.toString());
           localStorage.setItem('orderId', data.id.toString());
-          
+
           // After order is created, create the payment intent
           const amount = parseFloat(orderAmount);
           return apiRequest("POST", "/api/create-payment-intent", { 
@@ -162,13 +162,13 @@ export default function Checkout() {
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">Complete Your Order</h1>
-      
+
       <Steps value={currentStep} onValueChange={setCurrentStep} className="mb-8">
         <Step label="Order Details" index={0} />
         <Step label="Shipping" index={1} />
         <Step label="Payment" index={2} />
       </Steps>
-      
+
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
