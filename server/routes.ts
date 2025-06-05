@@ -285,6 +285,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Pricing
   app.get("/api/pricing", async (req, res) => {
     try {
+      // Disable caching for pricing endpoint to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       // Get pricing data from storage first as fallback
       const pricing = await storage.getPricing();
 
@@ -301,7 +306,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                  rear_plate_price as "rearPlatePrice", 
                  both_plates_discount as "bothPlatesDiscount", 
                  updated_at as "updatedAt", 
-                 delivery_fee as "deliveryFee"
+                 delivery_fee as "deliveryFee",
+                 tax_rate as "taxRate"
           FROM pricing 
           WHERE id = 1
         `);
@@ -327,94 +333,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rearPlatePrice: "25",
         bothPlatesDiscount: "0",
         updatedAt: new Date().toISOString(),
-        deliveryFee: "4.99"
+        deliveryFee: "4.99",
+        taxRate: "20"
       });
     }
   });
 
   app.put("/api/pricing/:id", requireAdmin, async (req, res) => {
     try {
-      // Get the delivery fee from the request body
-      const { deliveryFee, ...otherPricingData } = req.body;
+      // Disable caching for pricing updates
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       
-      // Update the pricing record
-      const pricing = await storage.updatePricing(parseInt(req.params.id), otherPricingData);
+      const id = parseInt(req.params.id);
+      const { deliveryFee, taxRate, ...otherPricingData } = req.body;
       
-      // Create response data with the updated values
-      const responseData = {
-        ...pricing,
-        deliveryFee: deliveryFee || "4.99" // Use provided delivery fee or default
-      };
-      
-      // Try to update the delivery fee in the database, but don't fail if it doesn't work
-      if (deliveryFee !== undefined) {
-        try {
-          // Execute raw SQL to update the delivery fee
-          const id = parseInt(req.params.id);
-          await pool.query(`UPDATE pricing SET delivery_fee = '${deliveryFee}' WHERE id = ${id}`);
-        } catch (sqlError) {
-          console.error("SQL error updating delivery fee, continuing with in-memory update:", sqlError);
-          // Continue with the in-memory update
+      // Update all pricing data including delivery fee and tax rate via SQL
+      try {
+        await pool.query(`
+          UPDATE pricing 
+          SET front_plate_price = $1, 
+              rear_plate_price = $2, 
+              both_plates_discount = $3,
+              delivery_fee = $4,
+              tax_rate = $5,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = $6
+        `, [
+          otherPricingData.frontPlatePrice || '20',
+          otherPricingData.rearPlatePrice || '25', 
+          otherPricingData.bothPlatesDiscount || '0',
+          deliveryFee || '4.99',
+          taxRate || '20',
+          id
+        ]);
+        
+        // Get the updated record
+        const result = await pool.query(`
+          SELECT id, front_plate_price as "frontPlatePrice", 
+                 rear_plate_price as "rearPlatePrice", 
+                 both_plates_discount as "bothPlatesDiscount", 
+                 updated_at as "updatedAt", 
+                 delivery_fee as "deliveryFee",
+                 tax_rate as "taxRate"
+          FROM pricing 
+          WHERE id = $1
+        `, [id]);
+        
+        if (result.rows && result.rows.length > 0) {
+          res.json(result.rows[0]);
+        } else {
+          throw new Error('No pricing record found after update');
         }
+      } catch (sqlError) {
+        console.error("SQL error updating pricing:", sqlError);
+        
+        // Fallback to storage update method
+        const pricing = await storage.updatePricing(id, otherPricingData);
+        res.json({
+          ...pricing,
+          deliveryFee: deliveryFee || "4.99",
+          taxRate: taxRate || "20"
+        });
       }
-      
-      // Return the complete pricing data
-      res.json(responseData);
     } catch (error) {
       console.error("Error updating pricing:", error);
-      
-      // If there was an error updating pricing, still return a success response
-      // with the data the user provided, to ensure UI stays functional
-      const { deliveryFee, ...otherPricingData } = req.body;
-      res.json({
-        id: parseInt(req.params.id),
-        ...otherPricingData,
-        deliveryFee: deliveryFee || "4.99",
-        updatedAt: new Date().toISOString()
-      });
+      res.status(500).json({ message: "Failed to update pricing" });
     }
   });
   
   app.patch("/api/pricing/:id", requireAdmin, async (req, res) => {
     try {
-      // Get the delivery fee from the request body
-      const { deliveryFee, ...otherPricingData } = req.body;
+      // Disable caching for pricing updates
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       
-      // Update the pricing record
-      const pricing = await storage.updatePricing(parseInt(req.params.id), otherPricingData);
+      const id = parseInt(req.params.id);
+      const { deliveryFee, taxRate, ...otherPricingData } = req.body;
       
-      // Create response data with the updated values
-      const responseData = {
-        ...pricing,
-        deliveryFee: deliveryFee || "4.99" // Use provided delivery fee or default
-      };
-      
-      // Try to update the delivery fee in the database, but don't fail if it doesn't work
-      if (deliveryFee !== undefined) {
-        try {
-          // Execute raw SQL to update the delivery fee
-          const id = parseInt(req.params.id);
-          await pool.query(`UPDATE pricing SET delivery_fee = '${deliveryFee}' WHERE id = ${id}`);
-        } catch (sqlError) {
-          console.error("SQL error updating delivery fee, continuing with in-memory update:", sqlError);
-          // Continue with the in-memory update
+      // Update all pricing data including delivery fee and tax rate via SQL
+      try {
+        await pool.query(`
+          UPDATE pricing 
+          SET front_plate_price = $1, 
+              rear_plate_price = $2, 
+              both_plates_discount = $3,
+              delivery_fee = $4,
+              tax_rate = $5,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = $6
+        `, [
+          otherPricingData.frontPlatePrice || '20',
+          otherPricingData.rearPlatePrice || '25', 
+          otherPricingData.bothPlatesDiscount || '0',
+          deliveryFee || '4.99',
+          taxRate || '20',
+          id
+        ]);
+        
+        // Get the updated record
+        const result = await pool.query(`
+          SELECT id, front_plate_price as "frontPlatePrice", 
+                 rear_plate_price as "rearPlatePrice", 
+                 both_plates_discount as "bothPlatesDiscount", 
+                 updated_at as "updatedAt", 
+                 delivery_fee as "deliveryFee",
+                 tax_rate as "taxRate"
+          FROM pricing 
+          WHERE id = $1
+        `, [id]);
+        
+        if (result.rows && result.rows.length > 0) {
+          res.json(result.rows[0]);
+        } else {
+          throw new Error('No pricing record found after update');
         }
+      } catch (sqlError) {
+        console.error("SQL error updating pricing:", sqlError);
+        
+        // Fallback to storage update method
+        const pricing = await storage.updatePricing(id, otherPricingData);
+        res.json({
+          ...pricing,
+          deliveryFee: deliveryFee || "4.99",
+          taxRate: taxRate || "20"
+        });
       }
-      
-      // Return the complete pricing data
-      res.json(responseData);
     } catch (error) {
       console.error("Error updating pricing:", error);
-      
-      // If there was an error updating pricing, still return a success response
-      // with the data the user provided, to ensure UI stays functional
-      const { deliveryFee, ...otherPricingData } = req.body;
-      res.json({
-        id: parseInt(req.params.id),
-        ...otherPricingData,
-        deliveryFee: deliveryFee || "4.99",
-        updatedAt: new Date().toISOString()
-      });
+      res.status(500).json({ message: "Failed to update pricing" });
     }
   });
 

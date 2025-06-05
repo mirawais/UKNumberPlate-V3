@@ -48,9 +48,11 @@ const PricingSettings = () => {
   // Mutation for updating pricing
   const updatePricingMutation = useMutation({
     mutationFn: (data: Partial<Pricing>) => 
-      apiRequest('PATCH', `/api/pricing/${pricing?.id}`, data),
+      apiRequest('PUT', `/api/pricing/${pricing?.id}`, data),
     onSuccess: () => {
+      // Force refresh of pricing data by invalidating queries
       queryClient.invalidateQueries({ queryKey: ['/api/pricing'] });
+      queryClient.refetchQueries({ queryKey: ['/api/pricing'] });
       toast({
         title: 'Success',
         description: 'Pricing settings updated successfully',
@@ -76,9 +78,16 @@ const PricingSettings = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Convert string values to the correct format
+    if (!pricing) return;
+    
+    // Convert string values to the correct format and ensure all required fields are included
     const pricingData = {
-      ...values,
+      id: pricing.id,
+      frontPlatePrice: values.frontPlatePrice,
+      rearPlatePrice: values.rearPlatePrice,
+      bothPlatesDiscount: values.bothPlatesDiscount,
+      taxRate: values.taxRate,
+      deliveryFee: values.deliveryFee,
     };
     
     updatePricingMutation.mutate(pricingData);
