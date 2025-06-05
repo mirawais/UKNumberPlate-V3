@@ -42,7 +42,7 @@ const CheckoutForm = ({
   initialValues, 
   onBack,
   onSelectPaymentMethod,
-  deliveryFee = "10.00"
+  deliveryFee = "4.99"
 }: CheckoutFormProps) => {
   let schema;
   
