@@ -111,8 +111,8 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
     ? plateWidthPx - (marginPx * 2) - badgeWidthPx 
     : plateWidthPx - (marginPx * 2);
   
-  // Set maximum font size based on plate height - increased slightly as requested
-  const CHARACTER_HEIGHT_RATIO = 0.8; // Character height is about 80% of plate height (increased from 70%)
+  // Set maximum font size based on plate height - increased for better visibility
+  const CHARACTER_HEIGHT_RATIO = 0.9; // Character height is about 90% of plate height (increased from 80%)
   const maxFontSize = plateHeightPx * CHARACTER_HEIGHT_RATIO;
   const minFontSize = maxFontSize * 0.5; // Minimum font size (half of max)
   
@@ -122,13 +122,13 @@ const PlatePreview = ({ customization, colors, badges, carBrands, plateSizes = [
   // Special font scaling for different plate sizes
   let fontScaleFactor = 1.0;
   
-  // Apply aggressive scaling for small plates
+  // Apply scaling for small plates but less aggressive to increase font size
   if (isMotorbike) {
-    fontScaleFactor = 0.5; // Smaller for Motorbike
+    fontScaleFactor = 0.65; // Increased from 0.5 for Motorbike
   } else if (is4x4) {
-    fontScaleFactor = 0.6; // Small for 4x4
+    fontScaleFactor = 0.75; // Increased from 0.6 for 4x4
   } else if (dimensions.width <= 350) {
-    fontScaleFactor = 0.7; // Medium scaling for other small plates
+    fontScaleFactor = 0.8; // Increased from 0.7 for other small plates
   }
   
   // Determine font size
