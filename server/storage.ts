@@ -767,6 +767,5 @@ export class MemStorage implements IStorage {
 // Import it from dbStorage.ts for actual database operations
 export { DatabaseStorage } from './dbStorage';
 
-// Use DatabaseStorage for Supabase database
-import { DatabaseStorage } from './dbStorage';
-export const storage = new DatabaseStorage();
+// For now, use the MemStorage implementation until Supabase connection is verified
+export const storage = new MemStorage();
