@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import newLogoPath from "@assets/New-Logo_1749123504535.png";
 
 const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -25,7 +26,11 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/">
-            <h1 className="text-2xl font-bold text-primary cursor-pointer">SignSquad</h1>
+            <img 
+              src={newLogoPath} 
+              alt="Sign Squad - Specialist in Signs & Printing" 
+              className="h-12 w-auto cursor-pointer"
+            />
           </Link>
         </div>
         
