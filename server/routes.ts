@@ -288,10 +288,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get pricing data from storage first as fallback
       const pricing = await storage.getPricing();
 
-      // Add default delivery fee
+      // Add default delivery fee if not present
       let pricingData = {
         ...pricing,
-        deliveryFee: "4.99"
+        deliveryFee: pricing?.deliveryFee || "4.99"
       };
       
       try {
@@ -300,7 +300,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           SELECT id, front_plate_price as "frontPlatePrice", 
                  rear_plate_price as "rearPlatePrice", 
                  both_plates_discount as "bothPlatesDiscount", 
-                 tax_rate as "taxRate", 
                  updated_at as "updatedAt", 
                  delivery_fee as "deliveryFee"
           FROM pricing 
@@ -327,7 +326,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         frontPlatePrice: "20",
         rearPlatePrice: "25",
         bothPlatesDiscount: "0",
-        taxRate: "0",
         updatedAt: new Date().toISOString(),
         deliveryFee: "4.99"
       });
