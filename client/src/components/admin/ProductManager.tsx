@@ -20,7 +20,7 @@ import type {
 const ProductManager = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   // Queries for all product configurations
   const { data: plateSizes } = useQuery<PlateSize[]>({ queryKey: ['/api/plate-sizes'] });
   const { data: textStyles } = useQuery<TextStyle[]>({ queryKey: ['/api/text-styles'] });
@@ -29,30 +29,30 @@ const ProductManager = () => {
   const { data: carBrands } = useQuery<CarBrand[]>({ queryKey: ['/api/car-brands'] });
   const { data: pricing } = useQuery<Pricing>({ queryKey: ['/api/pricing'] });
   const { data: paymentMethods } = useQuery<PaymentMethod[]>({ queryKey: ['/api/payment-methods'] });
-  
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<string>('');
   const [modalData, setModalData] = useState<any>({});
   const [modalAction, setModalAction] = useState<'create' | 'edit'>('create');
   const [isUploading, setIsUploading] = useState(false);
-  
+
   // File upload mutation
   const uploadFileMutation = useMutation({
     mutationFn: async (file: File) => {
       setIsUploading(true);
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const response = await fetch('/api/uploads', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to upload file');
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
@@ -72,7 +72,7 @@ const ProductManager = () => {
       setIsUploading(false);
     }
   });
-  
+
   // Create/Update mutations for Plate Sizes
   const createPlateSizeMutation = useMutation({
     mutationFn: (data: Omit<PlateSize, 'id'>) => apiRequest('POST', '/api/plate-sizes', data),
@@ -89,7 +89,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const updatePlateSizeMutation = useMutation({
     mutationFn: (data: PlateSize) => apiRequest('PUT', `/api/plate-sizes/${data.id}`, data),
     onSuccess: () => {
@@ -105,7 +105,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   // Create/Update mutations for Text Styles
   const createTextStyleMutation = useMutation({
     mutationFn: (data: Omit<TextStyle, 'id'>) => apiRequest('POST', '/api/text-styles', data),
@@ -122,7 +122,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const updateTextStyleMutation = useMutation({
     mutationFn: (data: TextStyle) => apiRequest('PUT', `/api/text-styles/${data.id}`, data),
     onSuccess: () => {
@@ -138,7 +138,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   // Create/Update mutations for Badges
   const createBadgeMutation = useMutation({
     mutationFn: (data: Omit<Badge, 'id'>) => apiRequest('POST', '/api/badges', data),
@@ -155,7 +155,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const updateBadgeMutation = useMutation({
     mutationFn: (data: Badge) => apiRequest('PUT', `/api/badges/${data.id}`, data),
     onSuccess: () => {
@@ -171,7 +171,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   // Create/Update mutations for Colors
   const createColorMutation = useMutation({
     mutationFn: (data: Omit<Color, 'id'>) => apiRequest('POST', '/api/colors', data),
@@ -188,7 +188,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const updateColorMutation = useMutation({
     mutationFn: (data: Color) => apiRequest('PUT', `/api/colors/${data.id}`, data),
     onSuccess: () => {
@@ -204,7 +204,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   // Create/Update mutations for Car Brands
   const createCarBrandMutation = useMutation({
     mutationFn: (data: Omit<CarBrand, 'id'>) => apiRequest('POST', '/api/car-brands', data),
@@ -221,7 +221,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const updateCarBrandMutation = useMutation({
     mutationFn: (data: CarBrand) => apiRequest('PUT', `/api/car-brands/${data.id}`, data),
     onSuccess: () => {
@@ -237,7 +237,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   // Delete mutations
   const deletePlateSizeMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/plate-sizes/${id}`, {}),
@@ -253,7 +253,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const deleteTextStyleMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/text-styles/${id}`, {}),
     onSuccess: () => {
@@ -268,7 +268,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const deleteBadgeMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/badges/${id}`, {}),
     onSuccess: () => {
@@ -283,7 +283,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const deleteColorMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/colors/${id}`, {}),
     onSuccess: () => {
@@ -298,7 +298,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   const deleteCarBrandMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/car-brands/${id}`, {}),
     onSuccess: () => {
@@ -313,7 +313,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   // Update pricing mutation
   const updatePricingMutation = useMutation({
     mutationFn: (data: Pricing) => apiRequest('PUT', `/api/pricing/${data.id}`, data),
@@ -329,7 +329,7 @@ const ProductManager = () => {
       });
     }
   });
-  
+
   // Handler for opening the modal
   const handleOpenModal = (type: string, action: 'create' | 'edit', data?: any) => {
     setModalType(type);
@@ -337,11 +337,11 @@ const ProductManager = () => {
     setModalData(data || {});
     setIsModalOpen(true);
   };
-  
+
   // Handler for form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (modalType === 'plateSize') {
       if (modalAction === 'create') {
         createPlateSizeMutation.mutate({
@@ -423,7 +423,7 @@ const ProductManager = () => {
       }
     }
   };
-  
+
   // Handler for deleting an item
   const handleDelete = (type: string, id: number) => {
     if (type === 'plateSize') {
@@ -438,11 +438,11 @@ const ProductManager = () => {
       deleteCarBrandMutation.mutate(id);
     }
   };
-  
+
   // Handler for updating pricing
   const handlePricingUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (pricing) {
       updatePricingMutation.mutate({
         ...pricing,
@@ -454,11 +454,11 @@ const ProductManager = () => {
       });
     }
   };
-  
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Product Configuration</h2>
-      
+
       <Tabs defaultValue="pricing">
         <TabsList>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
@@ -469,7 +469,7 @@ const ProductManager = () => {
           <TabsTrigger value="carBrands">Car Brands</TabsTrigger>
           <TabsTrigger value="paymentMethods">Payment Methods</TabsTrigger>
         </TabsList>
-        
+
         {/* Pricing Tab */}
         <TabsContent value="pricing">
           <Card>
@@ -490,7 +490,7 @@ const ProductManager = () => {
                         onChange={(e) => setModalData({...modalData, frontPlatePrice: e.target.value})}
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="rearPlatePrice">Rear Plate Price (£)</Label>
                       <Input 
@@ -501,7 +501,7 @@ const ProductManager = () => {
                         onChange={(e) => setModalData({...modalData, rearPlatePrice: e.target.value})}
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="bothPlatesDiscount">Both Plates Discount (£)</Label>
                       <Input 
@@ -512,18 +512,18 @@ const ProductManager = () => {
                         onChange={(e) => setModalData({...modalData, bothPlatesDiscount: e.target.value})}
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="taxRate">Tax Rate (%)</Label>
                       <Input 
                         id="taxRate" 
-                        type="number" 
-                        step="0.01" 
-                        defaultValue={pricing.taxRate.toString()} 
-                        onChange={(e) => setModalData({...modalData, taxRate: e.target.value})}
-                      />
+                        type="number"
+                      step="0.01"
+                      defaultValue={pricing?.taxRate?.toString() || "20"}
+                      onChange={(e) => setModalData({...modalData, taxRate: e.target.value})}
+                    />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="deliveryFee">Delivery Fee (£)</Label>
                       <Input 
@@ -535,14 +535,14 @@ const ProductManager = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <Button type="submit" className="mt-4">Update Pricing</Button>
                 </form>
               )}
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         {/* Plate Sizes Tab */}
         <TabsContent value="plateSizes">
           <div className="flex justify-end mb-4">
@@ -553,7 +553,7 @@ const ProductManager = () => {
               <PlusIcon className="h-4 w-4" /> Add Plate Size
             </Button>
           </div>
-          
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -604,7 +604,7 @@ const ProductManager = () => {
             </TableBody>
           </Table>
         </TabsContent>
-        
+
         {/* Text Styles Tab */}
         <TabsContent value="textStyles">
           <div className="flex justify-end mb-4">
@@ -615,7 +615,7 @@ const ProductManager = () => {
               <PlusIcon className="h-4 w-4" /> Add Text Style
             </Button>
           </div>
-          
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -678,7 +678,7 @@ const ProductManager = () => {
             </TableBody>
           </Table>
         </TabsContent>
-        
+
         {/* Badges Tab */}
         <TabsContent value="badges">
           <div className="flex justify-end mb-4">
@@ -689,7 +689,7 @@ const ProductManager = () => {
               <PlusIcon className="h-4 w-4" /> Add Badge
             </Button>
           </div>
-          
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -748,7 +748,7 @@ const ProductManager = () => {
             </TableBody>
           </Table>
         </TabsContent>
-        
+
         {/* Colors Tab */}
         <TabsContent value="colors">
           <div className="flex justify-end mb-4">
@@ -759,7 +759,7 @@ const ProductManager = () => {
               <PlusIcon className="h-4 w-4" /> Add Color
             </Button>
           </div>
-          
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -815,7 +815,7 @@ const ProductManager = () => {
             </TableBody>
           </Table>
         </TabsContent>
-        
+
         {/* Car Brands Tab */}
         <TabsContent value="carBrands">
           <div className="flex justify-end mb-4">
@@ -826,7 +826,7 @@ const ProductManager = () => {
               <PlusIcon className="h-4 w-4" /> Add Car Brand
             </Button>
           </div>
-          
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -873,7 +873,7 @@ const ProductManager = () => {
             </TableBody>
           </Table>
         </TabsContent>
-        
+
         {/* Payment Methods Tab */}
         <TabsContent value="paymentMethods">
           <div className="flex justify-end mb-4">
@@ -881,7 +881,7 @@ const ProductManager = () => {
               <PlusIcon className="h-4 w-4" /> Add Payment Method
             </Button>
           </div>
-          
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -917,7 +917,7 @@ const ProductManager = () => {
           </p>
         </TabsContent>
       </Tabs>
-      
+
       {/* Modal for Adding/Editing Items */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
@@ -926,7 +926,7 @@ const ProductManager = () => {
               {modalAction === 'create' ? 'Add' : 'Edit'} {modalType.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
             </DialogTitle>
           </DialogHeader>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {modalType === 'plateSize' && (
               <>
@@ -939,7 +939,7 @@ const ProductManager = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="dimensions">Dimensions</Label>
                   <Input 
@@ -949,7 +949,7 @@ const ProductManager = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="additionalPrice">Additional Price (£)</Label>
                   <Input 
@@ -961,7 +961,7 @@ const ProductManager = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Switch 
                     id="isActive"
@@ -972,7 +972,7 @@ const ProductManager = () => {
                 </div>
               </>
             )}
-            
+
             {modalType === 'textStyle' && (
               <>
                 <div>
@@ -984,7 +984,7 @@ const ProductManager = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="description">Description</Label>
                   <Input 
@@ -1036,7 +1036,7 @@ const ProductManager = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div>
                   <Label htmlFor="additionalPrice">Additional Price (£)</Label>
                   <Input 
@@ -1048,7 +1048,7 @@ const ProductManager = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Switch 
                     id="isActive"
@@ -1059,7 +1059,7 @@ const ProductManager = () => {
                 </div>
               </>
             )}
-            
+
             {modalType === 'badge' && (
               <>
                 <div>
@@ -1071,7 +1071,7 @@ const ProductManager = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="badgeImageFile">Image Upload</Label>
                   <div className="flex items-center gap-2">
@@ -1113,7 +1113,7 @@ const ProductManager = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Switch 
                     id="isActive"
@@ -1122,7 +1122,7 @@ const ProductManager = () => {
                   />
                   <Label htmlFor="isActive">Active</Label>
                 </div>
-                
+
                 {modalData.imagePath && (
                   <div className="mt-4">
                     <Label>Preview</Label>
@@ -1138,7 +1138,7 @@ const ProductManager = () => {
                 )}
               </>
             )}
-            
+
             {modalType === 'color' && (
               <>
                 <div>
@@ -1150,7 +1150,7 @@ const ProductManager = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="hexCode">Hex Color Code</Label>
                   <div className="flex gap-2">
@@ -1169,7 +1169,7 @@ const ProductManager = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Switch 
                     id="isActive"
@@ -1180,7 +1180,7 @@ const ProductManager = () => {
                 </div>
               </>
             )}
-            
+
             {modalType === 'carBrand' && (
               <>
                 <div>
@@ -1192,7 +1192,7 @@ const ProductManager = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Switch 
                     id="isActive"
@@ -1203,7 +1203,7 @@ const ProductManager = () => {
                 </div>
               </>
             )}
-            
+
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="outline">Cancel</Button>
