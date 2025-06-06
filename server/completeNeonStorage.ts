@@ -844,11 +844,111 @@ export class CompleteNeonStorage {
   async updateUploadedFile() { return undefined; }
   async deleteUploadedFile() { return false; }
 
-  async getOrders() { return []; }
-  async getOrder() { return undefined; }
-  async getOrdersByStatus() { return []; }
-  async createOrder() { throw new Error("Not implemented"); }
-  async updateOrder() { return undefined; }
-  async updateOrderStatus() { return undefined; }
-  async getTotalSales() { return 0; }
+  async getOrders() {
+    const result = await pool.query(`
+      SELECT * FROM orders 
+      ORDER BY created_at DESC
+    `);
+    return result.rows;
+  }
+
+  async getOrder(id: number) {
+    const result = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+    return result.rows[0] || undefined;
+  }
+
+  async getOrdersByStatus(status: string) {
+    const result = await pool.query('SELECT * FROM orders WHERE order_status = $1', [status]);
+    return result.rows;
+  }
+
+  async createOrder(orderData: any) {
+    const {
+      customerName,
+      customerEmail,
+      customerPhone,
+      shippingAddress,
+      plateDetails,
+      documentFileId,
+      deliveryFee,
+      shippingMethod,
+      totalPrice,
+      paymentMethod,
+      orderStatus
+    } = orderData;
+
+    const result = await pool.query(`
+      INSERT INTO orders (
+        customer_name, customer_email, customer_phone, shipping_address,
+        plate_details, document_file_id, delivery_fee, shipping_method,
+        total_price, payment_method, order_status, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+      RETURNING *
+    `, [
+      customerName,
+      customerEmail,
+      customerPhone,
+      shippingAddress,
+      JSON.stringify(plateDetails),
+      documentFileId,
+      deliveryFee || 0,
+      shippingMethod || 'pickup',
+      totalPrice,
+      paymentMethod,
+      orderStatus || 'pending_payment'
+    ]);
+
+    return result.rows[0];
+  }
+
+  async updateOrder(id: number, updates: any) {
+    const fields = [];
+    const values = [];
+    let paramIndex = 1;
+
+    Object.keys(updates).forEach(key => {
+      if (key === 'plateDetails') {
+        fields.push(`plate_details = $${paramIndex}`);
+        values.push(JSON.stringify(updates[key]));
+      } else if (key === 'stripePaymentIntentId') {
+        fields.push(`stripe_payment_intent_id = $${paramIndex}`);
+        values.push(updates[key]);
+      } else {
+        const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+        fields.push(`${dbKey} = $${paramIndex}`);
+        values.push(updates[key]);
+      }
+      paramIndex++;
+    });
+
+    if (fields.length === 0) return undefined;
+
+    values.push(id);
+    const result = await pool.query(`
+      UPDATE orders SET ${fields.join(', ')}
+      WHERE id = $${paramIndex}
+      RETURNING *
+    `, values);
+
+    return result.rows[0] || undefined;
+  }
+
+  async updateOrderStatus(id: number, status: string) {
+    const result = await pool.query(`
+      UPDATE orders SET order_status = $1, updated_at = NOW()
+      WHERE id = $2
+      RETURNING *
+    `, [status, id]);
+
+    return result.rows[0] || undefined;
+  }
+
+  async getTotalSales() {
+    const result = await pool.query(`
+      SELECT COALESCE(SUM(total_price), 0) as total 
+      FROM orders 
+      WHERE order_status IN ('completed', 'shipped', 'delivered')
+    `);
+    return parseFloat(result.rows[0]?.total || '0');
+  }
 }

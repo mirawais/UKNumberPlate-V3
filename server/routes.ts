@@ -538,14 +538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/orders", async (req, res) => {
-    try {
-      const order = await storage.createOrder(req.body);
-      res.status(201).json(order);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to create order" });
-    }
-  });
+
 
   app.put("/api/orders/:id/status", requireAdmin, async (req, res) => {
     try {
