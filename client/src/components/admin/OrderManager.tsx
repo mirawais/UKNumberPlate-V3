@@ -73,6 +73,27 @@ const OrderManager = () => {
     }
   }, [selectedOrder]);
 
+  // Helper functions to get names by ID
+  const getPlateSizeName = (id: number) => {
+    return plateSizes?.find(size => size.id === id)?.name || `Size #${id}`;
+  };
+
+  const getTextStyleName = (id: number) => {
+    return textStyles?.find(style => style.id === id)?.name || `Style #${id}`;
+  };
+
+  const getBadgeName = (id: number) => {
+    return badges?.find(badge => badge.id === id)?.name || `Badge #${id}`;
+  };
+
+  const getColorName = (id: number) => {
+    return colors?.find(color => color.id === id)?.name || `Color #${id}`;
+  };
+
+  const getCarBrandName = (id: number) => {
+    return carBrands?.find(brand => brand.id === id)?.name || `Brand #${id}`;
+  };
+
   // Filtered and sorted orders
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
