@@ -52,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Custom font access
   app.get('/fonts/:fontName', (req, res) => {
     const fontPath = path.join(fontsDir, req.params.fontName);
-    
+
     if (fs.existsSync(fontPath)) {
       res.sendFile(fontPath);
     } else {
@@ -289,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
-      
+
       // Get pricing data from storage first as fallback
       const pricing = await storage.getPricing();
 
@@ -298,7 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...pricing,
         deliveryFee: pricing?.deliveryFee || "4.99"
       };
-      
+
       try {
         // Execute a direct SQL query to get all pricing data including delivery_fee
         const result = await pool.query(`
@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           FROM pricing 
           WHERE id = 1
         `);
-        
+
         // Use SQL result if available
         if (result.rows && result.rows.length > 0) {
           pricingData = result.rows[0];
@@ -320,12 +320,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("SQL error getting pricing, using fallback:", sqlError);
         // Continue with fallback pricing data if SQL fails
       }
-      
+
       // Return pricing data (either from SQL or fallback)
       res.json(pricingData);
     } catch (error) {
       console.error("Error getting pricing:", error);
-      
+
       // Send a fallback pricing object if everything else fails
       res.json({
         id: 1,
@@ -345,10 +345,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
-      
+
       const id = parseInt(req.params.id);
       const { deliveryFee, taxRate, ...otherPricingData } = req.body;
-      
+
       // Update all pricing data including delivery fee and tax rate via SQL
       try {
         await pool.query(`
@@ -368,7 +368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           taxRate || '20',
           id
         ]);
-        
+
         // Get the updated record
         const result = await pool.query(`
           SELECT id, front_plate_price as "frontPlatePrice", 
@@ -380,7 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           FROM pricing 
           WHERE id = $1
         `, [id]);
-        
+
         if (result.rows && result.rows.length > 0) {
           res.json(result.rows[0]);
         } else {
@@ -388,7 +388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (sqlError) {
         console.error("SQL error updating pricing:", sqlError);
-        
+
         // Fallback to storage update method
         const pricing = await storage.updatePricing(id, otherPricingData);
         res.json({
@@ -402,17 +402,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update pricing" });
     }
   });
-  
+
   app.patch("/api/pricing/:id", requireAdmin, async (req, res) => {
     try {
       // Disable caching for pricing updates
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
-      
+
       const id = parseInt(req.params.id);
       const { deliveryFee, taxRate, ...otherPricingData } = req.body;
-      
+
       // Update all pricing data including delivery fee and tax rate via SQL
       try {
         await pool.query(`
@@ -432,7 +432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           taxRate || '20',
           id
         ]);
-        
+
         // Get the updated record
         const result = await pool.query(`
           SELECT id, front_plate_price as "frontPlatePrice", 
@@ -444,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           FROM pricing 
           WHERE id = $1
         `, [id]);
-        
+
         if (result.rows && result.rows.length > 0) {
           res.json(result.rows[0]);
         } else {
@@ -452,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (sqlError) {
         console.error("SQL error updating pricing:", sqlError);
-        
+
         // Fallback to storage update method
         const pricing = await storage.updatePricing(id, otherPricingData);
         res.json({
@@ -566,14 +566,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const count = (req as any).session?.cart?.length || 0;
     res.json({ count });
   });
-  
+
   // Order Management APIs
-  
+
   // Create a new order
   app.post('/api/orders', async (req, res) => {
     try {
       const orderData = req.body;
-      
+
       // Validate required fields
       if (!orderData.customerName || !orderData.customerEmail || 
           !orderData.plateDetails || !orderData.totalPrice) {
@@ -581,7 +581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Missing required order information" 
         });
       }
-      
+
       const order = await storage.createOrder(orderData);
       res.status(201).json(order);
     } catch (error: any) {
@@ -591,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Get all orders (admin only)
   app.get('/api/orders', requireAdmin, async (req, res) => {
     try {
@@ -604,7 +604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Get total sales (admin only)
   app.get('/api/orders/total-sales', requireAdmin, async (req, res) => {
     try {
@@ -617,7 +617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Get orders by status (admin only)
   app.get('/api/orders/status/:status', requireAdmin, async (req, res) => {
     try {
@@ -631,17 +631,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Get a single order by ID
   app.get('/api/orders/:id', async (req, res) => {
     try {
       const { id } = req.params;
       const order = await storage.getOrder(parseInt(id));
-      
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       res.json(order);
     } catch (error: any) {
       res.status(500).json({ 
@@ -650,23 +650,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Update order status (admin only)
   app.put('/api/orders/:id/status', requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
-      
+
       if (!status) {
         return res.status(400).json({ message: "Status is required" });
       }
-      
+
       const order = await storage.updateOrderStatus(parseInt(id), status);
-      
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       res.json(order);
     } catch (error: any) {
       res.status(500).json({ 
@@ -675,23 +675,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Update order (admin only)
   app.put('/api/orders/:id', requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
-      
+
       if (Object.keys(updates).length === 0) {
         return res.status(400).json({ message: "No updates provided" });
       }
-      
+
       const order = await storage.updateOrder(parseInt(id), updates);
-      
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       res.json(order);
     } catch (error: any) {
       res.status(500).json({ 
@@ -700,26 +700,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Stripe payment route
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
       const { amount, orderId } = req.body;
-      
+
       if (!amount) {
         return res.status(400).json({ message: "Amount is required" });
       }
-      
+
       // Prepare metadata
       const metadata: { [key: string]: string | number | null } = {
         integration_check: "accept_a_payment"
       };
-      
+
       // Add orderId to metadata if available
       if (orderId) {
         metadata.orderId = String(orderId);
       }
-      
+
       // Create a payment intent with the order amount and currency
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
@@ -727,7 +727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         payment_method_types: ["card"],
         metadata,
       });
-      
+
       // If we have an order ID, update the order with the payment intent ID
       if (orderId) {
         try {
@@ -744,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Continue despite this error - payment can still succeed
         }
       }
-      
+
       res.json({ 
         clientSecret: paymentIntent.client_secret 
       });
@@ -755,29 +755,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Stripe payment webhook to update order status
   app.post("/api/payment-complete", async (req, res) => {
     try {
       const { orderId, paymentIntentId } = req.body;
-      
+
       if (!orderId || !paymentIntentId) {
         return res.status(400).json({ message: "Order ID and Payment Intent ID are required" });
       }
-      
+
       // Verify the payment intent with Stripe
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-      
+
       // Get current order
       const existingOrder = await storage.getOrder(parseInt(orderId));
       if (!existingOrder) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       // Update order with payment status and payment intent ID
       let orderStatus = existingOrder.orderStatus;
       let paymentStatus = existingOrder.paymentStatus;
-      
+
       // Update based on Stripe payment status
       if (paymentIntent.status === 'succeeded') {
         orderStatus = "processing"; // Order is now being processed
@@ -793,14 +793,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderStatus = "cancelled";
         paymentStatus = "failed";
       }
-      
+
       // Update the order with new status and payment ID
       const order = await storage.updateOrder(parseInt(orderId), {
         orderStatus,
         paymentStatus,
         stripePaymentIntentId: paymentIntentId
       });
-      
+
       return res.json({ 
         success: true, 
         order,
@@ -813,23 +813,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Get Stripe configuration status (admin only)
   app.get("/api/stripe/config-status", requireAdmin, async (req, res) => {
     try {
       // Verify that Stripe is properly configured
       const stripePublicKey = process.env.VITE_STRIPE_PUBLIC_KEY;
       const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-      
+
       // Check keys without exposing their full values
       const publicKeyStatus = stripePublicKey ? 
         { status: 'valid', prefix: stripePublicKey.substring(0, 7) } :
         { status: 'missing' };
-        
+
       const secretKeyStatus = stripeSecretKey ? 
         { status: 'valid', prefix: stripeSecretKey.substring(0, 7) } :
         { status: 'missing' };
-      
+
       // Test that we can connect to Stripe
       let connectionTest = 'pending';
       try {
@@ -838,7 +838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         connectionTest = 'failed';
       }
-      
+
       res.json({
         publicKeyStatus,
         secretKeyStatus,
@@ -855,21 +855,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Get payment status of an order
   app.get("/api/order-payment-status/:orderId", async (req, res) => {
     try {
       const { orderId } = req.params;
-      
+
       if (!orderId) {
         return res.status(400).json({ message: "Order ID is required" });
       }
-      
+
       const order = await storage.getOrder(parseInt(orderId));
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       // If we have a payment intent ID, check the actual status from Stripe
       if (order.stripePaymentIntentId) {
         try {
@@ -884,8 +884,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error fetching payment from Stripe:", stripeError);
         }
       }
-      
+
       // Default response with stored status
+      ```text
       return res.json({
         orderStatus: order.orderStatus,
         paymentStatus: order.paymentStatus,
@@ -898,11 +899,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   // Stripe webhook handler for automatic payment status updates
   app.post('/webhook', async (req, res) => {
     const sig = req.headers['stripe-signature'];
-    
+
     // If no endpointSecret is configured, respond with a success but log the issue
     if (!endpointSecret) {
       console.warn('Warning: Stripe webhook secret not configured. Skipping signature verification.');
@@ -917,14 +918,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       return;
     }
-    
+
     // Regular secure flow with signature verification
     if (!sig) {
       return res.status(400).send('Missing stripe-signature header');
     }
-    
+
     let event;
-    
+
     try {
       const body = req.body;
       // Get raw body for signature verification
@@ -937,7 +938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Webhook signature verification failed:', err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-    
+
     // Handle the event
     try {
       await handleStripeEvent(event);
@@ -947,14 +948,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).send(`Webhook Error: ${err.message}`);
     }
   });
-  
+
   // Helper function to handle Stripe webhook events
   async function handleStripeEvent(event: any) {
     switch (event.type) {
       case 'payment_intent.succeeded':
         const paymentIntent = event.data.object;
         console.log('PaymentIntent succeeded:', paymentIntent.id);
-        
+
         // Try to get the order ID from metadata
         const orderId = paymentIntent.metadata?.orderId;
         if (orderId) {
@@ -967,11 +968,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Order ${orderId} updated to processing/paid status`);
         }
         break;
-        
+
       case 'payment_intent.payment_failed':
         const failedPaymentIntent = event.data.object;
         console.log('Payment failed:', failedPaymentIntent.id);
-        
+
         // Try to get the order ID from metadata
         const failedOrderId = failedPaymentIntent.metadata?.orderId;
         if (failedOrderId) {
@@ -984,13 +985,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Order ${failedOrderId} marked as payment failed`);
         }
         break;
-        
+
       // Add more event types as needed
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
   }
-  
+
   // File Upload routes
   // Allow public access for document uploads (customers need to upload documents for road legal plates)
   app.post('/api/uploads', upload.single('file'), async (req, res) => {
@@ -998,7 +999,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
       }
-      
+
       const fileData = {
         filename: req.file.filename,
         originalFilename: req.file.originalname,
@@ -1008,7 +1009,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mimeType: req.file.mimetype,
         isActive: true,
       };
-      
+
       const file = await storage.createUploadedFile(fileData);
       res.status(201).json(file);
     } catch (error: any) {
@@ -1037,7 +1038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!file) {
         return res.status(404).json({ message: 'File not found' });
       }
-      
+
       // Send the file
       res.sendFile(file.filePath);
     } catch (error: any) {
@@ -1054,14 +1055,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!file) {
         return res.status(404).json({ message: 'File not found' });
       }
-      
+
       // Remove the file from storage
       try {
         fs.unlinkSync(file.filePath);
       } catch (err) {
         console.error('Error deleting file:', err);
       }
-      
+
       const success = await storage.deleteUploadedFile(file.id);
       if (success) {
         res.status(204).send();
@@ -1231,7 +1232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!identifier || !title || !content || !location) {
         return res.status(400).json({ message: 'Missing required fields' });
       }
-      
+
       const block = await storage.upsertContentBlock(identifier, title, content, location);
       res.json(block);
     } catch (error: any) {
@@ -1304,11 +1305,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const value = req.body.configValue || req.body.value;
       const type = req.body.configType || req.body.type;
       const { description } = req.body;
-      
+
       if (!key || !value || !type) {
         return res.status(400).json({ message: 'Missing required fields' });
       }
-      
+
       const config = await storage.upsertSiteConfig(key, value, type, description);
       res.json(config);
     } catch (error: any) {
@@ -1316,6 +1317,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Failed to upsert site config',
         error: error.message,
       });
+    }
+  });
+
+  // Admin routes (protected)
+  app.post('/api/admin/change-password', requireAdmin, async (req, res) => {
+    try {
+      const { newPassword } = req.body;
+
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+      }
+
+      await storage.changeAdminPassword(newPassword);
+      res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+      console.error('Error changing admin password:', error);
+      res.status(500).json({ message: 'Failed to change password' });
+    }
+  });
+
+  app.get('/api/admin/orders', requireAdmin, async (req, res) => {
+    try {
+      const orders = await storage.getOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      res.status(500).json({ message: 'Failed to fetch orders' });
     }
   });
 

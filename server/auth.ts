@@ -29,6 +29,67 @@ export const requireAdmin = async (req: Request, res: Response, next: NextFuncti
   next();
 };
 
+export async function login(username: string, password: string) {
+  try {
+    console.log(`Attempting login for username: ${username}`);
+
+    // Get user from database
+    const user = await storage.getUserByUsername(username);
+    console.log(`User found:`, user ? 'Yes' : 'No');
+
+    if (!user) {
+      console.log('User not found in database');
+      throw new Error("Invalid credentials");
+    }
+
+    if (!user.password_hash) {
+      console.log('User found but password_hash is missing');
+      throw new Error("Invalid user data");
+    }
+
+    console.log('Comparing passwords...');
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    console.log(`Password valid: ${isValid}`);
+
+    if (!isValid) {
+      throw new Error("Invalid credentials");
+    }
+
+    // Return user data without password
+    const { password_hash, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  } catch (error) {
+    console.error("Login error:", error);
+    throw error;
+  }
+}
+
+export async function createAdminUser() {
+  try {
+    // Check if admin user already exists
+    const existingAdmin = await storage.getUserByUsername('admin');
+    if (existingAdmin) {
+      console.log('Admin user already exists');
+      return existingAdmin;
+    }
+
+    // Create admin user
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const adminUser = await storage.createUser({
+      username: 'admin',
+      password: hashedPassword,
+      email: 'admin@numberplate.com',
+      isAdmin: true
+    });
+
+    console.log('Admin user created successfully');
+    return adminUser;
+  } catch (error) {
+    console.error('Error creating admin user:', error);
+    throw error;
+  }
+}
+
 // Auth controller
 export const auth = {
   // Login
@@ -40,28 +101,19 @@ export const auth = {
     }
     
     try {
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user) {
-        return res.status(401).json({ message: 'Invalid username or password' });
-      }
-      
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (!passwordMatch) {
-        return res.status(401).json({ message: 'Invalid username or password' });
-      }
+      const userWithoutPassword = await login(username, password);
       
       // Store user ID in session
-      req.session.userId = user.id;
+      req.session.userId = userWithoutPassword.id;
       
       return res.json({ 
-        id: user.id, 
-        username: user.username, 
-        isAdmin: user.isAdmin 
+        id: userWithoutPassword.id, 
+        username: userWithoutPassword.username, 
+        isAdmin: userWithoutPassword.isAdmin 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      return res.status(500).json({ message: 'Server error during login' });
+      return res.status(401).json({ message: error.message || 'Server error during login' });
     }
   },
   

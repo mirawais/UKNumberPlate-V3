@@ -1,3 +1,4 @@
+
 import { Pool } from 'pg';
 import bcrypt from "bcryptjs";
 
@@ -16,8 +17,11 @@ export class NeonStorage {
   }
   
   async getUserByUsername(username: string) {
+    console.log(`Looking up user: ${username}`);
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-    return result.rows[0];
+    const user = result.rows[0];
+    console.log(`Database query result:`, user);
+    return user;
   }
   
   async createUser(userData: any) {
@@ -37,6 +41,21 @@ export class NeonStorage {
       values
     );
     return result.rows[0];
+  }
+
+  // Method to change admin password
+  async changeAdminPassword(newPassword: string) {
+    try {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const result = await pool.query(
+        'UPDATE users SET password_hash = $1 WHERE username = $2 AND is_admin = true RETURNING *',
+        [hashedPassword, 'admin']
+      );
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error changing admin password:', error);
+      throw error;
+    }
   }
 
   // Site configs
