@@ -67,6 +67,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ isAdmin: true, username: req.user?.username });
   });
 
+  // Change password endpoint
+  app.post("/api/auth/change-password", requireAdmin, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user?.id;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      // Verify current password
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const bcrypt = require('bcryptjs');
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+      
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      // Hash new password
+      const saltRounds = 10;
+      const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update password
+      await storage.updateUser(userId, { passwordHash: newPasswordHash });
+
+      res.json({ message: "Password changed successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to change password", error: error.message });
+    }
+  });
+
   // Plate Sizes
   app.get("/api/plate-sizes", async (req, res) => {
     try {
@@ -664,6 +704,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       res.status(500).json({ 
         message: "Error updating order status", 
+        error: error.message 
+      });
+    }
+  });
+
+  // Delete order (admin only)
+  app.delete('/api/orders/:id', requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteOrder(parseInt(id));
+
+      if (!success) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ 
+        message: "Error deleting order", 
         error: error.message 
       });
     }

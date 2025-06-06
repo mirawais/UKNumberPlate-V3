@@ -30,7 +30,14 @@ const AdminLogin = () => {
   });
   
   const loginMutation = useMutation({
-    mutationFn: (data: z.infer<typeof formSchema>) => apiRequest("POST", "/api/auth/login", data),
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      const response = await apiRequest("POST", "/api/auth/login", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Login successful",
@@ -38,10 +45,10 @@ const AdminLogin = () => {
       });
       navigate("/admin");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Login failed",
-        description: "Invalid username or password",
+        description: error.message || "Invalid username or password",
         variant: "destructive",
       });
     },

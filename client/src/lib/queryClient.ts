@@ -3,8 +3,14 @@ import { API_BASE_URL } from "../config";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    try {
+      const json = await res.json();
+      throw new Error(json.message || res.statusText);
+    } catch (e) {
+      // If JSON parsing fails, fallback to text
+      const text = await res.text() || res.statusText;
+      throw new Error(text);
+    }
   }
 }
 

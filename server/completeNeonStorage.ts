@@ -988,4 +988,9 @@ export class CompleteNeonStorage {
     `);
     return parseFloat(result.rows[0]?.total || '0');
   }
+
+  async deleteOrder(id: number) {
+    const result = await pool.query('DELETE FROM orders WHERE id = $1', [id]);
+    return result.rowCount > 0;
+  }
 }
