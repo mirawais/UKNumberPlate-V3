@@ -12,7 +12,7 @@ import {
   navigationItems, type NavigationItem, type InsertNavigationItem,
   contentBlocks, type ContentBlock, type InsertContentBlock,
   uploadedFiles, type UploadedFile, type InsertUploadedFile
-} from "@shared/schema";
+} from "../shared/schema";
 import { mockData } from "./mockData";
 import bcrypt from "bcryptjs";
 
@@ -765,7 +765,7 @@ export class MemStorage implements IStorage {
 
 // DatabaseStorage is implemented separately to avoid circular imports
 // Import it from dbStorage.ts for actual database operations
-export { DatabaseStorage } from './dbStorage';
+// export { DatabaseStorage } from './dbStorage';
 
-// Use MemStorage for now while database schema is being configured
+// Temporarily use MemStorage while fixing import issues, then switch to DatabaseStorage
 export const storage = new MemStorage();

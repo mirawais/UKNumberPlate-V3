@@ -14,7 +14,7 @@ import {
   navigationItems, type NavigationItem, type InsertNavigationItem,
   contentBlocks, type ContentBlock, type InsertContentBlock,
   uploadedFiles, type UploadedFile, type InsertUploadedFile
-} from "@shared/schema";
+} from "../shared/schema";
 import { eq } from 'drizzle-orm';
 import bcrypt from "bcryptjs";
 
