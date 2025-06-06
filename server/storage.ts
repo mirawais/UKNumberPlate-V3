@@ -767,5 +767,6 @@ export class MemStorage implements IStorage {
 // Import it from dbStorage.ts for actual database operations
 export { DatabaseStorage } from './dbStorage';
 
-// For now, use the MemStorage implementation until Supabase connection is verified
-export const storage = new MemStorage();
+// Use DatabaseStorage for Neon database
+import { DatabaseStorage } from './dbStorage';
+export const storage = new DatabaseStorage();

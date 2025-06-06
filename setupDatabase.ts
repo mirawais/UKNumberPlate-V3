@@ -123,9 +123,9 @@ async function setupDatabase() {
     `);
 
     // Check if we need to seed initial data
-    const [plateSizesCount] = await db.select({ count: db.fn.count() }).from(plateSizes);
+    const plateSizesCount = await db.select({ count: sql`count(*)` }).from(plateSizes);
     
-    if (Number(plateSizesCount.count) === 0) {
+    if (Number(plateSizesCount[0].count) === 0) {
       console.log("Seeding initial data...");
       
       // Insert plate sizes
