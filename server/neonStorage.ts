@@ -13,7 +13,19 @@ export class NeonStorage {
   // Users
   async getUser(id: number) {
     const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-    return result.rows[0];
+    if (result.rows[0]) {
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        username: row.username,
+        password_hash: row.password_hash,
+        email: row.email,
+        isAdmin: row.is_admin,
+        createdAt: row.created_at,
+        lastLogin: row.last_login
+      };
+    }
+    return undefined;
   }
   
   async getUserByUsername(username: string) {
@@ -21,7 +33,18 @@ export class NeonStorage {
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];
     console.log(`Database query result:`, user);
-    return user;
+    if (user) {
+      return {
+        id: user.id,
+        username: user.username,
+        password_hash: user.password_hash,
+        email: user.email,
+        isAdmin: user.is_admin,
+        createdAt: user.created_at,
+        lastLogin: user.last_login
+      };
+    }
+    return undefined;
   }
   
   async createUser(userData: any) {
