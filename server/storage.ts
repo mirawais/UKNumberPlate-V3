@@ -763,9 +763,8 @@ export class MemStorage implements IStorage {
   }
 }
 
-// DatabaseStorage is implemented separately to avoid circular imports
-// Import it from dbStorage.ts for actual database operations
-// export { DatabaseStorage } from './dbStorage';
+// Import the working Neon database storage
+import { NeonStorage } from './neonStorage';
 
-// Temporarily use MemStorage while fixing import issues, then switch to DatabaseStorage
-export const storage = new MemStorage();
+// Use NeonStorage for persistent database operations
+export const storage = new NeonStorage();
