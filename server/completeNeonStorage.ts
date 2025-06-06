@@ -849,12 +849,49 @@ export class CompleteNeonStorage {
       SELECT * FROM orders 
       ORDER BY created_at DESC
     `);
-    return result.rows;
+    return result.rows.map(order => ({
+      ...order,
+      customerName: order.customer_name,
+      customerEmail: order.customer_email,
+      customerPhone: order.customer_phone,
+      shippingAddress: order.shipping_address,
+      plateDetails: order.plate_details,
+      totalPrice: order.total_price,
+      paymentMethod: order.payment_method,
+      paymentStatus: order.payment_status,
+      orderStatus: order.order_status,
+      stripePaymentIntentId: order.stripe_payment_intent_id,
+      documentFileId: order.document_file_id,
+      shippingMethod: order.shipping_method,
+      deliveryFee: order.delivery_fee,
+      createdAt: order.created_at,
+      updatedAt: order.updated_at
+    }));
   }
 
   async getOrder(id: number) {
     const result = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
-    return result.rows[0] || undefined;
+    const order = result.rows[0];
+    if (!order) return undefined;
+    
+    return {
+      ...order,
+      customerName: order.customer_name,
+      customerEmail: order.customer_email,
+      customerPhone: order.customer_phone,
+      shippingAddress: order.shipping_address,
+      plateDetails: order.plate_details,
+      totalPrice: order.total_price,
+      paymentMethod: order.payment_method,
+      paymentStatus: order.payment_status,
+      orderStatus: order.order_status,
+      stripePaymentIntentId: order.stripe_payment_intent_id,
+      documentFileId: order.document_file_id,
+      shippingMethod: order.shipping_method,
+      deliveryFee: order.delivery_fee,
+      createdAt: order.created_at,
+      updatedAt: order.updated_at
+    };
   }
 
   async getOrdersByStatus(status: string) {
