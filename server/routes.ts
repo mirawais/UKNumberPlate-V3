@@ -886,7 +886,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Default response with stored status
-      ```text
       return res.json({
         orderStatus: order.orderStatus,
         paymentStatus: order.paymentStatus,
