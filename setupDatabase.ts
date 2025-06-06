@@ -1,4 +1,5 @@
 import { db } from "./server/db";
+import { sql, count } from "drizzle-orm";
 import { 
   plateSizes,
   textStyles,
