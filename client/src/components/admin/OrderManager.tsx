@@ -423,11 +423,12 @@ Thank you for your order!
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleViewOrder(order)}
+                          title="View Order"
                         >
                           <EyeIcon className="h-4 w-4" />
                         </Button>
@@ -435,7 +436,8 @@ Thank you for your order!
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDeleteOrder(order.id)}
-                          className="text-red-600 hover:text-red-800"
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                          title="Delete Order"
                         >
                           <TrashIcon className="h-4 w-4" />
                         </Button>
