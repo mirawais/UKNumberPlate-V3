@@ -48,7 +48,8 @@ const PlateCustomizer = () => {
     isRoadLegal: true,
     documentFile: null,
     documentFileId: undefined,
-    shippingMethod: 'delivery' // Default to delivery
+    shippingMethod: 'delivery', // Default to delivery
+    customFont: undefined // Add customFont field
   });
   
   // Calculate the total price based on selected options
