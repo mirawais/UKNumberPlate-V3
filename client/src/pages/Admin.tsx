@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import AdminPanel from "@/components/admin/AdminPanel";
+import PasswordChange from "@/components/admin/PasswordChange";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -64,6 +65,7 @@ const Admin = () => {
             <span className="text-sm text-gray-600">
               Logged in as <span className="font-semibold">{authData.username}</span>
             </span>
+            <PasswordChange />
             <Button variant="outline" onClick={handleLogout}>Logout</Button>
           </div>
         </div>

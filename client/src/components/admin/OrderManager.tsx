@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { EyeIcon, SearchIcon, DownloadIcon } from 'lucide-react';
+import { EyeIcon, SearchIcon, DownloadIcon, TrashIcon } from 'lucide-react';
 import type { Order, PlateCustomization, PlateSize, TextStyle, Color, Badge as BadgeType, CarBrand } from '@shared/schema';
 
 const OrderManager = () => {
@@ -169,6 +169,33 @@ const OrderManager = () => {
   // Handler for updating payment status
   const handlePaymentStatusChange = (id: number, paymentStatus: string) => {
     updateOrderPaymentStatusMutation.mutate({ id, paymentStatus });
+  };
+
+  // Mutation for deleting orders
+  const deleteOrderMutation = useMutation({
+    mutationFn: (orderId: number) => 
+      apiRequest('DELETE', `/api/orders/${orderId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      toast({
+        title: "Order Deleted",
+        description: "Order has been deleted successfully."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete order.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Handler for deleting order
+  const handleDeleteOrder = (orderId: number) => {
+    if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      deleteOrderMutation.mutate(orderId);
+    }
   };
   
   // Function to format date
@@ -375,13 +402,23 @@ Thank you for your order!
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleViewOrder(order)}
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewOrder(order)}
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteOrder(order.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
