@@ -1,6 +1,5 @@
 
 import { Pool } from 'pg';
-import bcrypt from "bcryptjs";
 
 // Direct database connection using your Neon database
 const pool = new Pool({
@@ -48,10 +47,9 @@ export class NeonStorage {
   }
   
   async createUser(userData: any) {
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
     const result = await pool.query(
       'INSERT INTO users (username, password_hash, email, is_admin) VALUES ($1, $2, $3, $4) RETURNING *',
-      [userData.username, hashedPassword, userData.email || null, userData.isAdmin || false]
+      [userData.username, userData.password, userData.email || null, userData.isAdmin || false]
     );
     return result.rows[0];
   }

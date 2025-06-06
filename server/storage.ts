@@ -763,8 +763,8 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Import the working Neon database storage
-import { NeonStorage } from './neonStorage';
+// Import the complete Neon database storage with full CRUD operations
+import { CompleteNeonStorage } from './completeNeonStorage';
 
-// Use NeonStorage for persistent database operations
-export const storage = new NeonStorage();
+// Use CompleteNeonStorage for full admin functionality and persistent database operations
+export const storage = new CompleteNeonStorage();
