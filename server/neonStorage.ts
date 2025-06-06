@@ -377,5 +377,17 @@ export class NeonStorage {
   async createOrder() { throw new Error("Not implemented"); }
   async updateOrder() { return undefined; }
   async updateOrderStatus() { return undefined; }
-  async getTotalSales() { return 0; }
+  async getTotalSales() {
+    try {
+      const result = await pool.query(`
+        SELECT COALESCE(SUM(CAST(total_price AS DECIMAL)), 0) as total 
+        FROM orders 
+        WHERE payment_status = 'paid' OR order_status = 'completed'
+      `);
+      return parseFloat(result.rows[0]?.total || '0');
+    } catch (error) {
+      console.error('Error calculating total sales:', error);
+      return 0;
+    }
+  }
 }
