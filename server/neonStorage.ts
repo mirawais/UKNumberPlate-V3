@@ -1,431 +1,383 @@
 
-import { 
-  plateSizes, textStyles, badges, colors, carBrands, pricing, paymentMethods,
-  orders, uploadedFiles, navigationItems, contentBlocks, siteConfigs, users
-} from '@shared/schema';
-import { eq } from 'drizzle-orm';
-import { db } from './db';
-import { mockData } from './mockData';
-import bcrypt from 'bcrypt';
-import type {
-  PlateSize, InsertPlateSize, TextStyle, InsertTextStyle, Badge, InsertBadge,
-  Color, InsertColor, CarBrand, InsertCarBrand, Pricing, InsertPricing,
-  PaymentMethod, InsertPaymentMethod, Order, InsertOrder, UploadedFile, InsertUploadedFile,
-  NavigationItem, InsertNavigationItem, ContentBlock, InsertContentBlock,
-  SiteConfig, InsertSiteConfig, User
-} from '@shared/schema';
-
-export function createNeonStorage() {
-  return {
-    // Plate Sizes
-    async getPlateSizes(): Promise<PlateSize[]> {
-      return await db.select().from(plateSizes).where(eq(plateSizes.isActive, true));
-    },
-
-    async getPlateSize(id: number): Promise<PlateSize | undefined> {
-      const result = await db.select().from(plateSizes).where(eq(plateSizes.id, id));
-      return result[0];
-    },
-
-    async createPlateSize(size: InsertPlateSize): Promise<PlateSize> {
-      const result = await db.insert(plateSizes).values(size).returning();
-      return result[0];
-    },
-
-    async updatePlateSize(id: number, size: Partial<PlateSize>): Promise<PlateSize | undefined> {
-      const result = await db.update(plateSizes).set(size).where(eq(plateSizes.id, id)).returning();
-      return result[0];
-    },
-
-    async deletePlateSize(id: number): Promise<boolean> {
-      const result = await db.delete(plateSizes).where(eq(plateSizes.id, id));
-      return result.rowCount > 0;
-    },
-
-    // Text Styles
-    async getTextStyles(): Promise<TextStyle[]> {
-      return await db.select().from(textStyles).where(eq(textStyles.isActive, true));
-    },
-
-    async getActiveTextStyles(): Promise<TextStyle[]> {
-      return await db.select().from(textStyles).where(eq(textStyles.isActive, true));
-    },
-
-    async getTextStyle(id: number): Promise<TextStyle | undefined> {
-      const result = await db.select().from(textStyles).where(eq(textStyles.id, id));
-      return result[0];
-    },
-
-    async createTextStyle(style: InsertTextStyle): Promise<TextStyle> {
-      const result = await db.insert(textStyles).values(style).returning();
-      return result[0];
-    },
-
-    async updateTextStyle(id: number, style: Partial<TextStyle>): Promise<TextStyle | undefined> {
-      const result = await db.update(textStyles).set(style).where(eq(textStyles.id, id)).returning();
-      return result[0];
-    },
-
-    async deleteTextStyle(id: number): Promise<boolean> {
-      const result = await db.delete(textStyles).where(eq(textStyles.id, id));
-      return result.rowCount > 0;
-    },
-
-    // Badges
-    async getBadges(): Promise<Badge[]> {
-      return await db.select().from(badges).where(eq(badges.isActive, true));
-    },
-
-    async getActiveBadges(): Promise<Badge[]> {
-      return await db.select().from(badges).where(eq(badges.isActive, true));
-    },
-
-    async getBadge(id: number): Promise<Badge | undefined> {
-      const result = await db.select().from(badges).where(eq(badges.id, id));
-      return result[0];
-    },
-
-    async createBadge(badge: InsertBadge): Promise<Badge> {
-      const result = await db.insert(badges).values(badge).returning();
-      return result[0];
-    },
-
-    async updateBadge(id: number, badge: Partial<Badge>): Promise<Badge | undefined> {
-      const result = await db.update(badges).set(badge).where(eq(badges.id, id)).returning();
-      return result[0];
-    },
-
-    async deleteBadge(id: number): Promise<boolean> {
-      const result = await db.delete(badges).where(eq(badges.id, id));
-      return result.rowCount > 0;
-    },
-
-    // Colors
-    async getColors(): Promise<Color[]> {
-      return await db.select().from(colors).where(eq(colors.isActive, true));
-    },
-
-    async getActiveColors(): Promise<Color[]> {
-      return await db.select().from(colors).where(eq(colors.isActive, true));
-    },
-
-    async getColor(id: number): Promise<Color | undefined> {
-      const result = await db.select().from(colors).where(eq(colors.id, id));
-      return result[0];
-    },
-
-    async createColor(color: InsertColor): Promise<Color> {
-      const result = await db.insert(colors).values(color).returning();
-      return result[0];
-    },
-
-    async updateColor(id: number, color: Partial<Color>): Promise<Color | undefined> {
-      const result = await db.update(colors).set(color).where(eq(colors.id, id)).returning();
-      return result[0];
-    },
-
-    async deleteColor(id: number): Promise<boolean> {
-      const result = await db.delete(colors).where(eq(colors.id, id));
-      return result.rowCount > 0;
-    },
-
-    // Car Brands
-    async getCarBrands(): Promise<CarBrand[]> {
-      return await db.select().from(carBrands).where(eq(carBrands.isActive, true));
-    },
-
-    async getActiveCarBrands(): Promise<CarBrand[]> {
-      return await db.select().from(carBrands).where(eq(carBrands.isActive, true));
-    },
-
-    async getCarBrand(id: number): Promise<CarBrand | undefined> {
-      const result = await db.select().from(carBrands).where(eq(carBrands.id, id));
-      return result[0];
-    },
-
-    async createCarBrand(brand: InsertCarBrand): Promise<CarBrand> {
-      const result = await db.insert(carBrands).values(brand).returning();
-      return result[0];
-    },
-
-    async updateCarBrand(id: number, brand: Partial<CarBrand>): Promise<CarBrand | undefined> {
-      const result = await db.update(carBrands).set(brand).where(eq(carBrands.id, id)).returning();
-      return result[0];
-    },
-
-    async deleteCarBrand(id: number): Promise<boolean> {
-      const result = await db.delete(carBrands).where(eq(carBrands.id, id));
-      return result.rowCount > 0;
-    },
-
-    // Pricing
-    async getPricing(): Promise<Pricing | undefined> {
-      const result = await db.select().from(pricing).limit(1);
-      return result[0];
-    },
-
-    async updatePricing(id: number, pricingData: Partial<Pricing>): Promise<Pricing | undefined> {
-      const result = await db.update(pricing).set(pricingData).where(eq(pricing.id, id)).returning();
-      return result[0];
-    },
-
-    // Payment Methods
-    async getPaymentMethods(): Promise<PaymentMethod[]> {
-      return await db.select().from(paymentMethods);
-    },
-
-    async createPaymentMethod(method: InsertPaymentMethod): Promise<PaymentMethod> {
-      const result = await db.insert(paymentMethods).values(method).returning();
-      return result[0];
-    },
-
-    async updatePaymentMethod(id: number, method: Partial<PaymentMethod>): Promise<PaymentMethod | undefined> {
-      const result = await db.update(paymentMethods).set(method).where(eq(paymentMethods.id, id)).returning();
-      return result[0];
-    },
-
-    async deletePaymentMethod(id: number): Promise<boolean> {
-      const result = await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
-      return result.rowCount > 0;
-    },
-
-    // Orders
-    async getOrders(): Promise<Order[]> {
-      return await db.select().from(orders);
-    },
-
-    async getOrder(id: number): Promise<Order | undefined> {
-      const result = await db.select().from(orders).where(eq(orders.id, id));
-      return result[0];
-    },
-
-    async getOrdersByStatus(status: string): Promise<Order[]> {
-      return await db.select().from(orders).where(eq(orders.orderStatus, status));
-    },
-
-    async createOrder(order: InsertOrder): Promise<Order> {
-      const result = await db.insert(orders).values(order).returning();
-      return result[0];
-    },
-
-    async updateOrder(id: number, order: Partial<Order>): Promise<Order | undefined> {
-      const result = await db.update(orders).set(order).where(eq(orders.id, id)).returning();
-      return result[0];
-    },
-
-    async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
-      const result = await db.update(orders).set({ orderStatus: status }).where(eq(orders.id, id)).returning();
-      return result[0];
-    },
-
-    async getTotalSales(): Promise<number> {
-      const result = await db.select().from(orders);
-      return result.reduce((total, order) => total + parseFloat(order.totalPrice || '0'), 0);
-    },
-
-    // Uploaded Files
-    async getUploadedFiles(): Promise<UploadedFile[]> {
-      return await db.select().from(uploadedFiles);
-    },
-
-    async getUploadedFile(id: number): Promise<UploadedFile | undefined> {
-      const result = await db.select().from(uploadedFiles).where(eq(uploadedFiles.id, id));
-      return result[0];
-    },
-
-    async createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile> {
-      const result = await db.insert(uploadedFiles).values(file).returning();
-      return result[0];
-    },
-
-    async deleteUploadedFile(id: number): Promise<boolean> {
-      const result = await db.delete(uploadedFiles).where(eq(uploadedFiles.id, id));
-      return result.rowCount > 0;
-    },
-
-    // Navigation Items
-    async getNavigationItems(): Promise<NavigationItem[]> {
-      return await db.select().from(navigationItems);
-    },
-
-    async getActiveNavigationItems(): Promise<NavigationItem[]> {
-      return await db.select().from(navigationItems).where(eq(navigationItems.isActive, true));
-    },
-
-    async createNavigationItem(item: InsertNavigationItem): Promise<NavigationItem> {
-      const result = await db.insert(navigationItems).values(item).returning();
-      return result[0];
-    },
-
-    async updateNavigationItem(id: number, item: Partial<NavigationItem>): Promise<NavigationItem | undefined> {
-      const result = await db.update(navigationItems).set(item).where(eq(navigationItems.id, id)).returning();
-      return result[0];
-    },
-
-    async deleteNavigationItem(id: number): Promise<boolean> {
-      const result = await db.delete(navigationItems).where(eq(navigationItems.id, id));
-      return result.rowCount > 0;
-    },
-
-    // Content Blocks
-    async getContentBlocks(): Promise<ContentBlock[]> {
-      return await db.select().from(contentBlocks);
-    },
-
-    async getActiveContentBlocks(): Promise<ContentBlock[]> {
-      return await db.select().from(contentBlocks).where(eq(contentBlocks.isActive, true));
-    },
-
-    async getContentBlockByIdentifier(identifier: string): Promise<ContentBlock | undefined> {
-      const result = await db.select().from(contentBlocks).where(eq(contentBlocks.identifier, identifier));
-      return result[0];
-    },
-
-    async createContentBlock(block: InsertContentBlock): Promise<ContentBlock> {
-      const result = await db.insert(contentBlocks).values(block).returning();
-      return result[0];
-    },
-
-    async updateContentBlock(id: number, block: Partial<ContentBlock>): Promise<ContentBlock | undefined> {
-      const result = await db.update(contentBlocks).set(block).where(eq(contentBlocks.id, id)).returning();
-      return result[0];
-    },
-
-    async deleteContentBlock(id: number): Promise<boolean> {
-      const result = await db.delete(contentBlocks).where(eq(contentBlocks.id, id));
-      return result.rowCount > 0;
-    },
-
-    async upsertContentBlock(identifier: string, title: string, content: string, location: string): Promise<ContentBlock> {
-      const existing = await this.getContentBlockByIdentifier(identifier);
-      
-      if (existing) {
-        const result = await db.update(contentBlocks)
-          .set({ title, content, location })
-          .where(eq(contentBlocks.identifier, identifier))
-          .returning();
-        return result[0];
-      } else {
-        const result = await db.insert(contentBlocks)
-          .values({ identifier, title, content, location, isActive: true })
-          .returning();
-        return result[0];
-      }
-    },
-
-    // Site Configs
-    async getSiteConfigs(): Promise<SiteConfig[]> {
-      return await db.select().from(siteConfigs);
-    },
-
-    async getSiteConfigByKey(key: string): Promise<SiteConfig | undefined> {
-      const result = await db.select().from(siteConfigs).where(eq(siteConfigs.configKey, key));
-      return result[0];
-    },
-
-    async createSiteConfig(config: InsertSiteConfig): Promise<SiteConfig> {
-      const result = await db.insert(siteConfigs).values(config).returning();
-      return result[0];
-    },
-
-    async updateSiteConfig(id: number, config: Partial<SiteConfig>): Promise<SiteConfig | undefined> {
-      const result = await db.update(siteConfigs).set(config).where(eq(siteConfigs.id, id)).returning();
-      return result[0];
-    },
-
-    async upsertSiteConfig(key: string, value: string, type: string, description?: string): Promise<SiteConfig> {
-      const existing = await this.getSiteConfigByKey(key);
-      
-      if (existing) {
-        const result = await db.update(siteConfigs)
-          .set({ configValue: value, configType: type, description })
-          .where(eq(siteConfigs.configKey, key))
-          .returning();
-        return result[0];
-      } else {
-        const result = await db.insert(siteConfigs)
-          .values({ configKey: key, configValue: value, configType: type, description })
-          .returning();
-        return result[0];
-      }
-    },
-
-    // User authentication
-    async getUserByUsername(username: string): Promise<User | undefined> {
-      const result = await db.select().from(users).where(eq(users.username, username));
-      return result[0];
-    },
-
-    async changeAdminPassword(newPassword: string): Promise<void> {
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await db.update(users)
-        .set({ passwordHash: hashedPassword })
-        .where(eq(users.username, 'admin'));
-    },
-
-    // Seed initial data
-    async seedInitialData(): Promise<void> {
-      try {
-        // Check if data already exists
-        const existingPlateSizes = await this.getPlateSizes();
-        if (existingPlateSizes.length > 0) {
-          console.log('Data already exists, skipping seed');
-          return;
-        }
-
-        console.log('Seeding initial data...');
-
-        // Seed plate sizes
-        for (const size of mockData.plateSizes) {
-          await this.createPlateSize(size);
-        }
-
-        // Seed text styles
-        for (const style of mockData.textStyles) {
-          await this.createTextStyle(style);
-        }
-
-        // Seed badges
-        for (const badge of mockData.badges) {
-          await this.createBadge(badge);
-        }
-
-        // Seed colors
-        for (const color of mockData.colors) {
-          await this.createColor(color);
-        }
-
-        // Seed car brands
-        for (const brand of mockData.carBrands) {
-          await this.createCarBrand(brand);
-        }
-
-        // Seed payment methods
-        for (const method of mockData.paymentMethods) {
-          await this.createPaymentMethod(method);
-        }
-
-        // Seed site configs
-        for (const config of mockData.siteConfigs) {
-          await this.createSiteConfig(config);
-        }
-
-        // Ensure pricing exists
-        const existingPricing = await this.getPricing();
-        if (!existingPricing) {
-          await db.insert(pricing).values({
-            frontPlatePrice: "20",
-            rearPlatePrice: "25", 
-            bothPlatesDiscount: "0",
-            deliveryFee: "4.99",
-            taxRate: "20"
-          });
-        }
-
-        console.log('Initial data seeded successfully');
-      } catch (error) {
-        console.error('Error seeding initial data:', error);
-      }
+import { Pool } from 'pg';
+import bcrypt from "bcryptjs";
+
+// Direct database connection using your Neon database
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL
+});
+
+// Simple storage implementation using direct SQL queries
+export class NeonStorage {
+  
+  // Users
+  async getUser(id: number) {
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    if (result.rows[0]) {
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        username: row.username,
+        password_hash: row.password_hash,
+        email: row.email,
+        isAdmin: row.is_admin,
+        createdAt: row.created_at,
+        lastLogin: row.last_login
+      };
     }
-  };
+    return undefined;
+  }
+  
+  async getUserByUsername(username: string) {
+    console.log(`Looking up user: ${username}`);
+    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const user = result.rows[0];
+    console.log(`Database query result:`, user);
+    if (user) {
+      return {
+        id: user.id,
+        username: user.username,
+        password_hash: user.password_hash,
+        email: user.email,
+        isAdmin: user.is_admin,
+        createdAt: user.created_at,
+        lastLogin: user.last_login
+      };
+    }
+    return undefined;
+  }
+  
+  async createUser(userData: any) {
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const result = await pool.query(
+      'INSERT INTO users (username, password_hash, email, is_admin) VALUES ($1, $2, $3, $4) RETURNING *',
+      [userData.username, hashedPassword, userData.email || null, userData.isAdmin || false]
+    );
+    return result.rows[0];
+  }
+  
+  async updateUser(id: number, updates: any) {
+    const setClause = Object.keys(updates).map((key, index) => `${key} = $${index + 2}`).join(', ');
+    const values = [id, ...Object.values(updates)];
+    const result = await pool.query(
+      `UPDATE users SET ${setClause} WHERE id = $1 RETURNING *`,
+      values
+    );
+    return result.rows[0];
+  }
+
+  // Method to change admin password
+  async changeAdminPassword(newPassword: string) {
+    try {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const result = await pool.query(
+        'UPDATE users SET password_hash = $1 WHERE username = $2 AND is_admin = true RETURNING *',
+        [hashedPassword, 'admin']
+      );
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error changing admin password:', error);
+      throw error;
+    }
+  }
+
+  // Site configs
+  async getSiteConfigs() {
+    const result = await pool.query('SELECT * FROM site_config ORDER BY config_key');
+    return result.rows.map(row => ({
+      configKey: row.config_key,
+      configValue: row.config_value,
+      configType: row.config_type,
+      id: row.id
+    }));
+  }
+
+  async getSiteConfigByKey(key: string) {
+    const result = await pool.query('SELECT * FROM site_config WHERE config_key = $1', [key]);
+    if (result.rows[0]) {
+      const row = result.rows[0];
+      return {
+        configKey: row.config_key,
+        configValue: row.config_value,
+        configType: row.config_type,
+        id: row.id
+      };
+    }
+    return undefined;
+  }
+
+  async createSiteConfig(config: any) {
+    const result = await pool.query(
+      'INSERT INTO site_config (config_key, config_value, config_type) VALUES ($1, $2, $3) RETURNING *',
+      [config.configKey, config.configValue, config.configType]
+    );
+    const row = result.rows[0];
+    return {
+      configKey: row.config_key,
+      configValue: row.config_value,
+      configType: row.config_type,
+      id: row.id
+    };
+  }
+
+  async updateSiteConfig(id: number, config: any) {
+    const result = await pool.query(
+      'UPDATE site_config SET config_value = $2 WHERE id = $1 RETURNING *',
+      [id, config.configValue]
+    );
+    if (result.rows[0]) {
+      const row = result.rows[0];
+      return {
+        configKey: row.config_key,
+        configValue: row.config_value,
+        configType: row.config_type,
+        id: row.id
+      };
+    }
+    return undefined;
+  }
+
+  async upsertSiteConfig(key: string, value: string, type: string) {
+    const existing = await this.getSiteConfigByKey(key);
+    if (existing) {
+      return await this.updateSiteConfig(existing.id, { configValue: value });
+    } else {
+      return await this.createSiteConfig({ configKey: key, configValue: value, configType: type });
+    }
+  }
+
+  // Plate sizes
+  async getPlateSizes() {
+    const result = await pool.query('SELECT * FROM plate_sizes WHERE is_active = true ORDER BY display_order');
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      dimensions: row.dimensions,
+      additionalPrice: row.additional_price?.toString() || '0',
+      isActive: row.is_active,
+      description: row.description
+    }));
+  }
+
+  async getActivePlateSizes() {
+    return this.getPlateSizes();
+  }
+
+  // Text styles
+  async getTextStyles() {
+    const result = await pool.query('SELECT * FROM text_styles WHERE is_active = true ORDER BY display_order');
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      additionalPrice: row.additional_price?.toString() || '0',
+      isActive: row.is_active
+    }));
+  }
+
+  async getActiveTextStyles() {
+    return this.getTextStyles();
+  }
+
+  // Badges
+  async getBadges() {
+    const result = await pool.query('SELECT * FROM badges WHERE is_active = true ORDER BY display_order');
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      imagePath: row.image_path,
+      additionalPrice: row.additional_price?.toString() || '0',
+      isActive: row.is_active
+    }));
+  }
+
+  async getActiveBadges() {
+    return this.getBadges();
+  }
+
+  // Colors
+  async getColors() {
+    const result = await pool.query('SELECT * FROM colors WHERE is_active = true');
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      hexCode: row.hex_code,
+      isActive: row.is_active
+    }));
+  }
+
+  async getActiveColors() {
+    return this.getColors();
+  }
+
+  // Car brands
+  async getCarBrands() {
+    const result = await pool.query('SELECT * FROM car_brands WHERE is_active = true');
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      isActive: row.is_active
+    }));
+  }
+
+  async getActiveCarBrands() {
+    return this.getCarBrands();
+  }
+
+  // Pricing
+  async getPricing() {
+    const result = await pool.query('SELECT * FROM pricing ORDER BY id DESC LIMIT 1');
+    if (result.rows[0]) {
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        frontPlatePrice: row.front_plate_price?.toString() || '20',
+        rearPlatePrice: row.rear_plate_price?.toString() || '25',
+        bothPlatesPrice: row.both_plates_price?.toString() || '40',
+        bothPlatesDiscount: row.both_plates_discount?.toString() || '5',
+        taxRate: row.tax_rate?.toString() || '20',
+        deliveryFee: row.delivery_fee || '4.99'
+      };
+    }
+    // Return default pricing if none exists
+    return {
+      id: 1,
+      frontPlatePrice: '20',
+      rearPlatePrice: '25',
+      bothPlatesPrice: '40',
+      bothPlatesDiscount: '5',
+      taxRate: '20',
+      deliveryFee: '4.99'
+    };
+  }
+
+  async updatePricing(id: number, updates: any) {
+    const setClause = [];
+    const values = [id];
+    let valueIndex = 2;
+
+    if (updates.frontPlatePrice !== undefined) {
+      setClause.push(`front_plate_price = $${valueIndex++}`);
+      values.push(parseFloat(updates.frontPlatePrice));
+    }
+    if (updates.rearPlatePrice !== undefined) {
+      setClause.push(`rear_plate_price = $${valueIndex++}`);
+      values.push(parseFloat(updates.rearPlatePrice));
+    }
+    if (updates.bothPlatesPrice !== undefined) {
+      setClause.push(`both_plates_price = $${valueIndex++}`);
+      values.push(parseFloat(updates.bothPlatesPrice));
+    }
+    if (updates.bothPlatesDiscount !== undefined) {
+      setClause.push(`both_plates_discount = $${valueIndex++}`);
+      values.push(parseFloat(updates.bothPlatesDiscount));
+    }
+    if (updates.taxRate !== undefined) {
+      setClause.push(`tax_rate = $${valueIndex++}`);
+      values.push(parseFloat(updates.taxRate));
+    }
+    if (updates.deliveryFee !== undefined) {
+      setClause.push(`delivery_fee = $${valueIndex++}`);
+      values.push(updates.deliveryFee);
+    }
+
+    if (setClause.length === 0) {
+      return await this.getPricing();
+    }
+
+    const result = await pool.query(
+      `UPDATE pricing SET ${setClause.join(', ')} WHERE id = $1 RETURNING *`,
+      values
+    );
+
+    if (result.rows[0]) {
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        frontPlatePrice: row.front_plate_price?.toString() || '20',
+        rearPlatePrice: row.rear_plate_price?.toString() || '25',
+        bothPlatesPrice: row.both_plates_price?.toString() || '40',
+        bothPlatesDiscount: row.both_plates_discount?.toString() || '5',
+        taxRate: row.tax_rate?.toString() || '20',
+        deliveryFee: row.delivery_fee || '4.99'
+      };
+    }
+    return undefined;
+  }
+
+  // Payment methods
+  async getPaymentMethods() {
+    const result = await pool.query('SELECT * FROM payment_methods WHERE is_active = true ORDER BY display_order');
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      isActive: row.is_active,
+      paymentProcessor: row.payment_processor
+    }));
+  }
+
+  async getActivePaymentMethods() {
+    return this.getPaymentMethods();
+  }
+
+  // Stub methods for features not yet implemented
+  async getNavigationItems() { return []; }
+  async getActiveNavigationItems() { return []; }
+  async getNavigationItem() { return undefined; }
+  async createNavigationItem() { throw new Error("Not implemented"); }
+  async updateNavigationItem() { return undefined; }
+  async deleteNavigationItem() { return false; }
+
+  async getContentBlocks() { return []; }
+  async getActiveContentBlocks() { return []; }
+  async getContentBlockByIdentifier() { return undefined; }
+  async createContentBlock() { throw new Error("Not implemented"); }
+  async updateContentBlock() { return undefined; }
+  async upsertContentBlock() { throw new Error("Not implemented"); }
+
+  async getUploadedFiles() { return []; }
+  async getUploadedFile() { return undefined; }
+  async getUploadedFileByFilename() { return undefined; }
+  async getUploadedFilesByType() { return []; }
+  async createUploadedFile() { throw new Error("Not implemented"); }
+  async updateUploadedFile() { return undefined; }
+  async deleteUploadedFile() { return false; }
+
+  async getPlateSize() { return undefined; }
+  async createPlateSize() { throw new Error("Not implemented"); }
+  async updatePlateSize() { return undefined; }
+  async deletePlateSize() { return false; }
+
+  async getTextStyle() { return undefined; }
+  async createTextStyle() { throw new Error("Not implemented"); }
+  async updateTextStyle() { return undefined; }
+  async deleteTextStyle() { return false; }
+
+  async getBadge() { return undefined; }
+  async createBadge() { throw new Error("Not implemented"); }
+  async updateBadge() { return undefined; }
+  async deleteBadge() { return false; }
+
+  async getColor() { return undefined; }
+  async createColor() { throw new Error("Not implemented"); }
+  async updateColor() { return undefined; }
+  async deleteColor() { return false; }
+
+  async getCarBrand() { return undefined; }
+  async createCarBrand() { throw new Error("Not implemented"); }
+  async updateCarBrand() { return undefined; }
+  async deleteCarBrand() { return false; }
+
+  async getPaymentMethod() { return undefined; }
+  async createPaymentMethod() { throw new Error("Not implemented"); }
+  async updatePaymentMethod() { return undefined; }
+  async deletePaymentMethod() { return false; }
+
+  async getOrders() { return []; }
+  async getOrder() { return undefined; }
+  async getOrdersByStatus() { return []; }
+  async createOrder() { throw new Error("Not implemented"); }
+  async updateOrder() { return undefined; }
+  async updateOrderStatus() { return undefined; }
+  async getTotalSales() { return 0; }
 }

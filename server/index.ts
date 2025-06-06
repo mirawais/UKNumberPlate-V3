@@ -3,7 +3,6 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import session from "express-session";
 import memorystore from "memorystore";
-import { createNeonStorage } from "./neonStorage";
 
 const MemoryStore = memorystore(session);
 
@@ -79,12 +78,7 @@ app.use((req, res, next) => {
     port,
     host: "0.0.0.0",
     reusePort: true,
-  }, async () => {
+  }, () => {
     log(`serving on port ${port}`);
-    // Initialize database storage
-    const storage = createNeonStorage();
-
-    // Seed initial data
-    await storage.seedInitialData();
   });
 })();

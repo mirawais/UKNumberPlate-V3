@@ -268,6 +268,6 @@ export interface PlateCustomization {
   isRoadLegal: boolean;
   documentFile?: File | null; // For storing the uploaded document for road legal plates
   documentFileId?: number; // For storing the ID of the uploaded document file
-  customFont?: string | undefined; // Font name to use for plate text rendering
+  customFont?: string; // Font name to use for plate text rendering
   shippingMethod: 'delivery' | 'pickup'; // Shipping method selection
 };

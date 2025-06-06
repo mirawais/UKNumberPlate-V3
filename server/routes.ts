@@ -1,6 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-// Storage will be passed as parameter
+import { storage } from "./storage";
 import { auth, requireAuth, requireAdmin } from "./auth";
 import Stripe from "stripe";
 import { type SessionData } from "express-session";
@@ -48,7 +48,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // In production, you should set this as an environment variable
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-export async function registerRoutes(app: Express, storage: any): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<Server> {
   // Custom font access
   app.get('/fonts/:fontName', (req, res) => {
     const fontPath = path.join(fontsDir, req.params.fontName);
