@@ -89,8 +89,8 @@ const OrderManager = () => {
           const query = searchQuery.toLowerCase();
           return (
             order.id.toString().includes(query) ||
-            order.customerName.toLowerCase().includes(query) ||
-            order.customerEmail.toLowerCase().includes(query)
+            (order.customerName || '').toLowerCase().includes(query) ||
+            (order.customerEmail || '').toLowerCase().includes(query)
           );
         }
         
