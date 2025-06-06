@@ -75,27 +75,27 @@ async function directMigration() {
     
     // Insert pricing
     await pool.query(`
-      INSERT INTO pricing (front_plate_price, rear_plate_price, both_plates_discount, tax_rate, delivery_fee) 
-      VALUES (20, 25, 5, 20, 4.99)
+      INSERT INTO pricing (front_plate_price, rear_plate_price, both_plates_price, both_plates_discount, tax_rate, delivery_fee) 
+      VALUES (20, 25, 40, 5, 20, '4.99')
     `);
     console.log("Inserted pricing...");
     
     // Insert payment methods
     await pool.query(`
-      INSERT INTO payment_methods (name, is_active) 
+      INSERT INTO payment_methods (name, is_active, payment_processor) 
       VALUES 
-        ('Credit Card', true),
-        ('PayPal', true),
-        ('Bank Transfer', true),
-        ('Apple Pay', true),
-        ('Google Pay', true)
+        ('Credit Card', true, 'stripe'),
+        ('PayPal', true, 'paypal'),
+        ('Bank Transfer', true, 'manual'),
+        ('Apple Pay', true, 'stripe'),
+        ('Google Pay', true, 'stripe')
     `);
     console.log("Inserted payment methods...");
     
     // Insert admin user
     const hashedPassword = await bcrypt.hash("admin123", 10);
     await pool.query(`
-      INSERT INTO users (username, password, is_admin) 
+      INSERT INTO users (username, password_hash, is_admin) 
       VALUES ($1, $2, true)
     `, ["admin", hashedPassword]);
     console.log("Inserted admin user...");
