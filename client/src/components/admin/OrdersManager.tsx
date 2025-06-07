@@ -143,24 +143,29 @@ export default function OrdersManager() {
   });
 
   // Helper functions to get names by ID
-  const getPlateSizeName = (id: number) => {
-    return plateSizes?.find((size: any) => size.id === id)?.name || `Size #${id}`;
+  const getPlateSizeName = (id: number | string) => {
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    return plateSizes?.find((size: any) => size.id === numId)?.name || `Size #${id}`;
   };
 
-  const getTextStyleName = (id: number) => {
-    return textStyles?.find((style: any) => style.id === id)?.name || `Style #${id}`;
+  const getTextStyleName = (id: number | string) => {
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    return textStyles?.find((style: any) => style.id === numId)?.name || `Style #${id}`;
   };
 
-  const getBadgeName = (id: number) => {
-    return badges?.find((badge: any) => badge.id === id)?.name || `Badge #${id}`;
+  const getBadgeName = (id: number | string) => {
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    return badges?.find((badge: any) => badge.id === numId)?.name || `Badge #${id}`;
   };
 
-  const getColorName = (id: number) => {
-    return colors?.find((color: any) => color.id === id)?.name || `Color #${id}`;
+  const getColorName = (id: number | string) => {
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    return colors?.find((color: any) => color.id === numId)?.name || `Color #${id}`;
   };
 
-  const getCarBrandName = (id: number) => {
-    return carBrands?.find((brand: any) => brand.id === id)?.name || `Brand #${id}`;
+  const getCarBrandName = (id: number | string) => {
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    return carBrands?.find((brand: any) => brand.id === numId)?.name || `Brand #${id}`;
   };
   
   // Filtered orders based on status and search
@@ -510,8 +515,8 @@ export default function OrdersManager() {
                                     <div className="bg-muted/30 p-2 rounded-md">
                                       <div className="text-sm font-medium mb-1">Plate Details:</div>
                                       <div className="text-sm text-muted-foreground space-y-1">
-                                        <div>Size: {typeof parsedPlateDetails?.plateSize === 'number' ? getPlateSizeName(parsedPlateDetails.plateSize) : parsedPlateDetails?.plateSize || parsedPlateDetails?.size || "Standard"}</div>
-                                        <div>Style: {typeof parsedPlateDetails?.textStyle === 'number' ? getTextStyleName(parsedPlateDetails.textStyle) : parsedPlateDetails?.textStyle || parsedPlateDetails?.style || "Standard"}</div>
+                                        <div>Size: {parsedPlateDetails?.plateSize ? getPlateSizeName(parsedPlateDetails.plateSize) : parsedPlateDetails?.size ? getPlateSizeName(parsedPlateDetails.size) : "Standard"}</div>
+                                        <div>Style: {parsedPlateDetails?.textStyle ? getTextStyleName(parsedPlateDetails.textStyle) : parsedPlateDetails?.style ? getTextStyleName(parsedPlateDetails.style) : "Standard"}</div>
                                         <div>Material: {parsedPlateDetails?.material || "Standard"}</div>
                                         <div>Layout: {parsedPlateDetails?.layout || "Standard"}</div>
                                         {parsedPlateDetails?.plateType && (
@@ -524,22 +529,22 @@ export default function OrdersManager() {
                                       <div className="text-sm font-medium mb-1">Customization:</div>
                                       <div className="text-sm text-muted-foreground space-y-1">
                                         {parsedPlateDetails?.badge && parsedPlateDetails.badge !== "none" && (
-                                          <div>Badge: {typeof parsedPlateDetails.badge === 'number' ? getBadgeName(parsedPlateDetails.badge) : parsedPlateDetails.badge === 'gb' ? 'GB' : parsedPlateDetails.badge}</div>
+                                          <div>Badge: {parsedPlateDetails.badge === 'gb' ? 'GB' : (parsedPlateDetails.badge ? getBadgeName(parsedPlateDetails.badge) : parsedPlateDetails.badge)}</div>
                                         )}
                                         {parsedPlateDetails?.borderColor && parsedPlateDetails.borderColor !== "none" && (
-                                          <div>Border Color: {typeof parsedPlateDetails.borderColor === 'number' ? getColorName(parsedPlateDetails.borderColor) : parsedPlateDetails.borderColor}</div>
+                                          <div>Border Color: {parsedPlateDetails.borderColor ? getColorName(parsedPlateDetails.borderColor) : parsedPlateDetails.borderColor}</div>
                                         )}
                                         {parsedPlateDetails?.border && parsedPlateDetails.border !== "none" && (
                                           <div>Border Style: {parsedPlateDetails.border}</div>
                                         )}
                                         {parsedPlateDetails?.textColor && parsedPlateDetails.textColor !== "none" && (
-                                          <div>Text Color: {typeof parsedPlateDetails.textColor === 'number' ? getColorName(parsedPlateDetails.textColor) : parsedPlateDetails.textColor}</div>
+                                          <div>Text Color: {parsedPlateDetails.textColor ? getColorName(parsedPlateDetails.textColor) : parsedPlateDetails.textColor}</div>
                                         )}
                                         {parsedPlateDetails?.backgroundType && parsedPlateDetails.backgroundType !== "none" && (
                                           <div>Background: {parsedPlateDetails.backgroundType}</div>
                                         )}
                                         {parsedPlateDetails?.carBrand && parsedPlateDetails.carBrand !== "none" && (
-                                          <div>Car Brand: {typeof parsedPlateDetails.carBrand === 'number' ? getCarBrandName(parsedPlateDetails.carBrand) : parsedPlateDetails.carBrand}</div>
+                                          <div>Car Brand: {parsedPlateDetails.carBrand ? getCarBrandName(parsedPlateDetails.carBrand) : parsedPlateDetails.carBrand}</div>
                                         )}
                                       </div>
                                     </div>
