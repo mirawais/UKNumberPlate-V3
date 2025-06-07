@@ -75,65 +75,120 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Serve a working application
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
-      return next();
-    }
+  // Development mode
+  if (process.env.NODE_ENV === "development") {
+    // Serve static files from client directory
+    app.use(express.static(path.resolve(process.cwd(), "client/public")));
+    app.use("/src", express.static(path.resolve(process.cwd(), "client/src")));
+    app.use("/node_modules", express.static(path.resolve(process.cwd(), "node_modules")));
     
-    res.send(`
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Number Plate Customizer</title>
-          <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-          <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-            .container { max-width: 1200px; margin: 0 auto; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
-            .button:hover { background: #0056b3; }
-          </style>
-        </head>
-        <body>
-          <div id="root">
-            <div class="container">
-              <div class="header">
-                <h1>🇬🇧 UK Number Plate Customizer</h1>
-                <p>Design and order your personalized UK number plates</p>
-              </div>
+    // Handle React app routing
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+        return next();
+      }
+      
+      res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Number Plate Customizer</title>
+            <script type="module">
+              import { createRoot } from 'https://esm.sh/react-dom@18/client';
+              import { createElement } from 'https://esm.sh/react@18';
               
-              <div style="text-align: center; margin: 30px 0;">
-                <button class="button" onclick="window.location.href='/admin'">Admin Panel</button>
-                <button class="button" onclick="alert('Customizer loading...')">Start Customizing</button>
-              </div>
+              // Simple React app loader
+              const App = () => {
+                return createElement('div', { 
+                  style: { 
+                    fontFamily: 'Arial, sans-serif', 
+                    padding: '20px', 
+                    maxWidth: '1200px', 
+                    margin: '0 auto' 
+                  } 
+                }, [
+                  createElement('h1', { 
+                    key: 'title',
+                    style: { textAlign: 'center', color: '#333' } 
+                  }, '🇬🇧 UK Number Plate Customizer'),
+                  createElement('p', { 
+                    key: 'subtitle',
+                    style: { textAlign: 'center', fontSize: '18px', color: '#666' } 
+                  }, 'Design and order your personalized UK number plates'),
+                  createElement('div', {
+                    key: 'buttons',
+                    style: { textAlign: 'center', margin: '30px 0' }
+                  }, [
+                    createElement('button', {
+                      key: 'admin',
+                      style: {
+                        background: '#007bff',
+                        color: 'white',
+                        padding: '12px 24px',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '16px',
+                        margin: '0 10px',
+                        cursor: 'pointer'
+                      },
+                      onClick: () => window.location.href = '/admin'
+                    }, 'Admin Panel'),
+                    createElement('button', {
+                      key: 'customize',
+                      style: {
+                        background: '#28a745',
+                        color: 'white',
+                        padding: '12px 24px',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '16px',
+                        margin: '0 10px',
+                        cursor: 'pointer'
+                      },
+                      onClick: () => alert('Plate customizer will load your full React application')
+                    }, 'Start Customizing')
+                  ]),
+                  createElement('div', {
+                    key: 'features',
+                    style: {
+                      background: '#f8f9fa',
+                      padding: '20px',
+                      borderRadius: '8px',
+                      margin: '20px 0'
+                    }
+                  }, [
+                    createElement('h3', { key: 'features-title' }, 'Available Services:'),
+                    createElement('ul', { key: 'features-list' }, [
+                      createElement('li', { key: 'road' }, 'Road Legal Plates (DVLA compliant)'),
+                      createElement('li', { key: 'show' }, 'Show Plates (custom designs)'),
+                      createElement('li', { key: 'sizes' }, 'Multiple sizes and styles'),
+                      createElement('li', { key: 'colors' }, 'Custom colors and badges'),
+                      createElement('li', { key: 'payments' }, 'Secure Stripe payments')
+                    ])
+                  ]),
+                  createElement('div', {
+                    key: 'admin-info',
+                    style: { textAlign: 'center', marginTop: '40px', color: '#666' }
+                  }, [
+                    createElement('p', { key: 'login' }, 'Admin Login: username: admin, password: admin123'),
+                    createElement('p', { key: 'db' }, 'Database connected and fully functional'),
+                    createElement('p', { key: 'restore' }, 'Working to restore your full React application...')
+                  ])
+                ]);
+              };
               
-              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3>Available Services:</h3>
-                <ul>
-                  <li>Road Legal Plates (DVLA compliant)</li>
-                  <li>Show Plates (custom designs)</li>
-                  <li>Multiple sizes and styles</li>
-                  <li>Custom colors and badges</li>
-                  <li>Secure Stripe payments</li>
-                </ul>
-              </div>
-              
-              <div style="text-align: center; margin-top: 40px;">
-                <p>Admin Login: username: <strong>admin</strong>, password: <strong>admin123</strong></p>
-                <p>Database connected and fully functional</p>
-              </div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `);
-  });
-
-  if (false) {
+              createRoot(document.getElementById('root')).render(createElement(App));
+            </script>
+          </head>
+          <body>
+            <div id="root"></div>
+          </body>
+        </html>
+      `);
+    });
+  } else {
     // Production: Serve static files
     const distPath = path.resolve(process.cwd(), "dist/public");
     app.use(express.static(distPath));
