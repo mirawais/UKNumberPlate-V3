@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { createServer } from "http";
 import { registerRoutes } from "./routes";
 import session from "express-session";
 import memorystore from "memorystore";
@@ -82,7 +83,10 @@ app.use((req, res, next) => {
       const vite = await createServer({
         server: { 
           middlewareMode: true,
-          hmr: { port: 5001 }
+          hmr: { port: 5001 },
+          fs: {
+            allow: ['..']
+          }
         },
         appType: "spa",
         root: path.resolve(process.cwd(), "client"),
@@ -90,6 +94,11 @@ app.use((req, res, next) => {
       });
 
       app.use(vite.ssrFixStacktrace);
+      
+      // Serve API routes before Vite middleware
+      await registerRoutes(app);
+      
+      // Vite middleware handles all other requests
       app.use(vite.middlewares);
       log("Vite dev server setup completed");
     } catch (error) {
@@ -139,22 +148,16 @@ app.use((req, res, next) => {
       }
     }
   } else {
-    // Production: Serve static files
-    const distPath = path.resolve(process.cwd(), "dist/public");
-    app.use(express.static(distPath));
-    
-    // Handle client-side routing
-    app.get("*", (req, res, next) => {
-      if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
-        return next();
-      }
-      res.sendFile(path.join(distPath, "index.html"));
-    });
+    // Production: Register routes directly
+    await registerRoutes(app);
   }
+
+  // Create HTTP server
+  const httpServer = createServer(app);
 
   // Always serve the app on port 5000
   const port = 5000;
-  server.listen(port, "0.0.0.0", () => {
+  httpServer.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();
