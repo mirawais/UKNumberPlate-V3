@@ -76,6 +76,9 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Register API routes first
+  await registerRoutes(app);
+
   // Setup Vite dev server for React app
   if (process.env.NODE_ENV === "development") {
     try {
@@ -83,10 +86,7 @@ app.use((req, res, next) => {
       const vite = await createServer({
         server: { 
           middlewareMode: true,
-          hmr: { port: 5001 },
-          fs: {
-            allow: ['..']
-          }
+          hmr: { port: 5001 }
         },
         appType: "spa",
         root: path.resolve(process.cwd(), "client"),
@@ -94,11 +94,6 @@ app.use((req, res, next) => {
       });
 
       app.use(vite.ssrFixStacktrace);
-      
-      // Serve API routes before Vite middleware
-      await registerRoutes(app);
-      
-      // Vite middleware handles all other requests
       app.use(vite.middlewares);
       log("Vite dev server setup completed");
     } catch (error) {
@@ -147,9 +142,6 @@ app.use((req, res, next) => {
         log("Serving fallback HTML");
       }
     }
-  } else {
-    // Production: Register routes directly
-    await registerRoutes(app);
   }
 
   // Create HTTP server
