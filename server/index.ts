@@ -76,6 +76,9 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Register API routes first
+  await registerRoutes(app);
+
   // Setup Vite dev server for React app
   if (process.env.NODE_ENV === "development") {
     try {
@@ -83,24 +86,16 @@ app.use((req, res, next) => {
       const vite = await createServer({
         server: { 
           middlewareMode: true,
-          hmr: { port: 5001 },
           host: "0.0.0.0",
-          allowedHosts: [
-            "localhost",
-            "127.0.0.1",
-            "0.0.0.0",
-            ".replit.dev",
-            ".repl.co"
-          ]
+          hmr: false // Disable HMR to prevent connection issues
         },
-        appType: "spa",
         root: path.resolve(process.cwd(), "client"),
         configFile: path.resolve(process.cwd(), "vite.config.ts"),
+        optimizeDeps: {
+          force: true // Force dependency optimization
+        }
       });
 
-      // Register API routes before Vite
-      await registerRoutes(app);
-      
       app.use(vite.middlewares);
       log("Vite dev server setup completed");
     } catch (error) {
