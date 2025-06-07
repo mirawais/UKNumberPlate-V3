@@ -87,7 +87,15 @@ app.use((req, res, next) => {
         server: { 
           middlewareMode: true,
           host: "0.0.0.0",
-          hmr: false // Disable HMR to prevent connection issues
+          hmr: false, // Disable HMR to prevent connection issues
+          allowedHosts: [
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0",
+            ".replit.dev",
+            ".repl.co",
+            "643571cc-5b2b-4330-87f4-abda9456d49e-00-8jkny1csq62c.riker.replit.dev"
+          ]
         },
         root: path.resolve(process.cwd(), "client"),
         configFile: path.resolve(process.cwd(), "vite.config.ts"),
