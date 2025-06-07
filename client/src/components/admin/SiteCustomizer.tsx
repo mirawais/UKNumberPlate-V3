@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '../lib/queryClient';
-import { useSiteConfig } from '../context/SiteConfigContext';
+import { apiRequest } from '@/lib/queryClient';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import { 
   Tabs, 
   TabsContent, 
   TabsList, 
   TabsTrigger 
-} from '../components/ui/tabs';
+} from '@/components/ui/tabs';
 import { 
   Card, 
   CardContent, 
@@ -15,7 +15,7 @@ import {
   CardFooter, 
   CardHeader, 
   CardTitle 
-} from '../components/ui/card';
+} from '@/components/ui/card';
 import { 
   Form, 
   FormControl, 
@@ -24,19 +24,19 @@ import {
   FormItem, 
   FormLabel, 
   FormMessage 
-} from '../components/ui/form';
+} from '@/components/ui/form';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Button } from '../components/ui/button';
-import { Switch } from '../components/ui/switch';
-import { Separator } from '../components/ui/separator';
-import { useToast } from '../hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { Loader2, Upload } from 'lucide-react';
 

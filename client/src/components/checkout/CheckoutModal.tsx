@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { Steps, Step } from '../components/ui/steps';
-import { useToast } from '../hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Steps, Step } from '@/components/ui/steps';
+import { useToast } from '@/hooks/use-toast';
 import CheckoutForm from './CheckoutForm';
-import { apiRequest } from '../lib/queryClient';
+import { apiRequest } from '@/lib/queryClient';
 import type { PlateCustomization, Pricing } from '@shared/schema';
 
 interface CheckoutModalProps {
