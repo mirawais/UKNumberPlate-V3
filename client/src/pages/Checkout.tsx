@@ -1,10 +1,10 @@
 import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Steps, Step } from "@/components/ui/steps";
-import { Button } from "@/components/ui/button";
+import { apiRequest } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
+import { Steps, Step } from "../components/ui/steps";
+import { Button } from "../components/ui/button";
 import { useLocation } from 'wouter';
 
 // Make sure to call loadStripe outside of a component's render to avoid

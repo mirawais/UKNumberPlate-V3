@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Card, CardContent } from '../components/ui/card';
 import ProductManager from './ProductManager';
 import OrdersManager from './OrdersManager';
 import SiteCustomizer from './SiteCustomizer';
-import { Button } from '@/components/ui/button';
+import { Button } from '../components/ui/button';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('products');

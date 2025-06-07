@@ -6,7 +6,7 @@ import {
   splitTextForDisplay, 
   getPlateDimensions,
   UK_PLATE_SPECS
-} from '@/lib/plateUtils';
+} from '../lib/plateUtils';
 
 interface PlatePreviewProps {
   customization: PlateCustomization;
