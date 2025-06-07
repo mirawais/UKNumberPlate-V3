@@ -52,7 +52,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, MoreHorizontal, Search, FileText, Download } from 'lucide-react';
+import { Loader2, MoreHorizontal, Search, FileText, Download, Trash2, Eye } from 'lucide-react';
 
 interface Order {
   id: number;
@@ -171,6 +171,34 @@ export default function OrdersManager() {
       id: selectedOrder.id,
       status,
     });
+  };
+
+  // Delete order mutation
+  const deleteOrderMutation = useMutation({
+    mutationFn: (orderId: number) => 
+      apiRequest('DELETE', `/api/orders/${orderId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders/total-sales'] });
+      toast({
+        title: "Order Deleted",
+        description: "Order has been deleted successfully."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete order.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Handle order deletion
+  const handleDeleteOrder = (orderId: number) => {
+    if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      deleteOrderMutation.mutate(orderId);
+    }
   };
   
   // Parse plateDetails for selected order
@@ -315,16 +343,18 @@ export default function OrdersManager() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
+                  <div className="flex gap-1 justify-end">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setSelectedOrder(order)}
+                          title="View Order"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
                     <DialogContent className="max-w-4xl">
                       <DialogHeader>
                         <DialogTitle>Order #{order?.id}</DialogTitle>
@@ -647,6 +677,16 @@ export default function OrdersManager() {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteOrder(order.id)}
+                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                    title="Delete Order"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))
