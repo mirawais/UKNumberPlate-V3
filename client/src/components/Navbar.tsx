@@ -1,10 +1,10 @@
 import { Link } from "wouter";
-import { Button } from "../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import newLogoPath from "../../../attached_assets/New-Logo_1749123504535.png";
+import newLogoPath from "@/../../attached_assets/New-Logo_1749123504535.png";
 
 const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);

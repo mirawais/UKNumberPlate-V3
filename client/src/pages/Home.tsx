@@ -1,6 +1,6 @@
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import PlateCustomizer from "../components/plates/PlateCustomizer";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import PlateCustomizer from "@/components/plates/PlateCustomizer";
 
 const Home = () => {
   return (

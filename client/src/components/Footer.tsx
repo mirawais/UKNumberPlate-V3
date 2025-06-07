@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, ArrowRight } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import newLogoPath from "@assets/New-Logo_1749123504535.png";
 
