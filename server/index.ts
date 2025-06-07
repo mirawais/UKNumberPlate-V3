@@ -76,9 +76,6 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Register API routes first
-  await registerRoutes(app);
-
   // Setup Vite dev server for React app
   if (process.env.NODE_ENV === "development") {
     try {
@@ -93,7 +90,34 @@ app.use((req, res, next) => {
         configFile: path.resolve(process.cwd(), "vite.config.ts"),
       });
 
-      app.use(vite.ssrFixStacktrace);
+      // Register API routes before Vite
+      await registerRoutes(app);
+      
+      // Handle client-side routing for React
+      app.get('/', async (req, res, next) => {
+        try {
+          const url = req.originalUrl;
+          const template = await vite.transformIndexHtml(url, `
+            <!DOCTYPE html>
+            <html lang="en">
+              <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>UK Number Plate Customizer</title>
+              </head>
+              <body>
+                <div id="root"></div>
+                <script type="module" src="/src/main.tsx"></script>
+              </body>
+            </html>
+          `);
+          res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+        } catch (e) {
+          vite.ssrFixStacktrace(e);
+          next(e);
+        }
+      });
+
       app.use(vite.middlewares);
       log("Vite dev server setup completed");
     } catch (error) {
