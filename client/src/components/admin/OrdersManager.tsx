@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/ui/table";
+} from "@/components/ui/table";
 import {
   Card,
   CardContent,
@@ -19,18 +19,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/ui/card";
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/ui/select";
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+} from "@/components/ui/select";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
