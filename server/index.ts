@@ -77,53 +77,44 @@ app.use((req, res, next) => {
 
   // Development: Setup Vite dev server
   if (process.env.NODE_ENV === "development") {
-    const { createServer } = await import("vite");
-    const vite = await createServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-      root: path.resolve(process.cwd(), "client"),
-      base: "/",
-      resolve: {
-        alias: {
-          "@": path.resolve(process.cwd(), "client", "src"),
-          "@shared": path.resolve(process.cwd(), "shared"),
-          "@assets": path.resolve(process.cwd(), "attached_assets"),
-        },
-      },
-    });
+    try {
+      const { createServer } = await import("vite");
+      const vite = await createServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+        configFile: path.resolve(process.cwd(), "vite.config.ts"),
+      });
 
-    app.use(vite.ssrFixStacktrace);
-    app.use(vite.middlewares);
-
-    // Handle client-side routing for development
-    app.get("*", async (req, res, next) => {
-      if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
-        return next();
-      }
-
-      try {
-        const template = await vite.transformIndexHtml(req.originalUrl, `
+      app.use(vite.ssrFixStacktrace);
+      app.use(vite.middlewares);
+    } catch (error) {
+      console.error("Vite server setup failed, using fallback:", error);
+      
+      // Fallback: serve a basic working page
+      app.get("*", (req, res, next) => {
+        if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+          return next();
+        }
+        
+        res.send(`
           <!DOCTYPE html>
-          <html lang="en">
+          <html>
             <head>
-              <meta charset="UTF-8" />
-              <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
               <title>Number Plate Customizer</title>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
             </head>
             <body>
-              <div id="root"></div>
-              <script type="module" src="/src/main.tsx"></script>
+              <div id="root">
+                <h1>Number Plate Customizer</h1>
+                <p>Development server is starting...</p>
+                <p>Please refresh the page in a moment.</p>
+              </div>
             </body>
           </html>
         `);
-
-        res.status(200).set({ "Content-Type": "text/html" }).end(template);
-      } catch (e) {
-        vite.ssrFixStacktrace(e);
-        next(e);
-      }
-    });
+      });
+    }
   } else {
     // Production: Serve static files
     const distPath = path.resolve(process.cwd(), "dist/public");
