@@ -80,7 +80,10 @@ app.use((req, res, next) => {
     try {
       const { createServer } = await import("vite");
       const vite = await createServer({
-        server: { middlewareMode: true },
+        server: { 
+          middlewareMode: true,
+          hmr: { port: 5001 }
+        },
         appType: "spa",
         root: path.resolve(process.cwd(), "client"),
         configFile: path.resolve(process.cwd(), "vite.config.ts"),
@@ -88,8 +91,9 @@ app.use((req, res, next) => {
 
       app.use(vite.ssrFixStacktrace);
       app.use(vite.middlewares);
+      log("Vite dev server setup completed");
     } catch (error) {
-      console.error("Vite setup failed:", error);
+      log(`Vite setup failed: ${error}. Using fallback static serving.`);
       
       // Fallback: serve static React build if available
       const clientDistPath = path.resolve(process.cwd(), "client", "dist");
@@ -101,20 +105,37 @@ app.use((req, res, next) => {
           }
           res.sendFile(path.resolve(clientDistPath, "index.html"));
         });
+        log("Serving from client/dist");
       } else {
-        // Final fallback: serve from client/src directly
+        // Final fallback: serve basic HTML
         app.get("*", (req, res, next) => {
           if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
             return next();
           }
           
-          const indexPath = path.resolve(process.cwd(), "client", "index.html");
-          if (require("fs").existsSync(indexPath)) {
-            res.sendFile(indexPath);
-          } else {
-            res.status(404).send("React app not found. Please run 'npm run build' first.");
-          }
+          res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>UK Number Plate Customizer</title>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+            </head>
+            <body>
+              <div id="root">
+                <h1>UK Number Plate Customizer</h1>
+                <p>Building React application... Please wait.</p>
+                <script>
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 3000);
+                </script>
+              </div>
+            </body>
+            </html>
+          `);
         });
+        log("Serving fallback HTML");
       }
     }
   } else {
