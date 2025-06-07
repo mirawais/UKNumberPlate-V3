@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useSearch } from 'wouter';
-import { Button } from '../components/ui/button';
-import { Card } from '../components/ui/card';
-import { useToast } from '../hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 import { Check, AlertCircle } from 'lucide-react';
-import { apiRequest } from '../lib/queryClient';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function Confirmation() {
   const [orderDetails, setOrderDetails] = useState<any>(null);
