@@ -6,6 +6,16 @@ import path from "path";
 
 const MemoryStore = memorystore(session);
 
+function log(message: string) {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  console.log(`${formattedTime} [express] ${message}`);
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -65,20 +75,65 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Setup Vite only in development
+  // Development: Setup Vite dev server
   if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
+    const { createServer } = await import("vite");
+    const vite = await createServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+      root: path.resolve(process.cwd(), "client"),
+      base: "/",
+    });
+
+    app.use(vite.ssrFixStacktrace);
+    app.use(vite.middlewares);
+
+    // Handle client-side routing for development
+    app.get("*", async (req, res, next) => {
+      if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+        return next();
+      }
+
+      try {
+        const template = await vite.transformIndexHtml(req.originalUrl, `
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>Number Plate Customizer</title>
+            </head>
+            <body>
+              <div id="root"></div>
+              <script type="module" src="/src/main.tsx"></script>
+            </body>
+          </html>
+        `);
+
+        res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      } catch (e) {
+        vite.ssrFixStacktrace(e);
+        next(e);
+      }
+    });
   } else {
-    serveStatic(app);
+    // Production: Serve static files
+    const distPath = path.resolve(process.cwd(), "dist/public");
+    app.use(express.static(distPath));
+    
+    // Handle client-side routing
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+        return next();
+      }
+      res.sendFile(path.join(distPath, "index.html"));
+    });
   }
 
   // Always serve the app on port 5000
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();

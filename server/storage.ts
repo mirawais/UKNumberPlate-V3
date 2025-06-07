@@ -13,7 +13,6 @@ import {
   contentBlocks, type ContentBlock, type InsertContentBlock,
   uploadedFiles, type UploadedFile, type InsertUploadedFile
 } from "../shared/schema";
-import { mockData } from "./mockData";
 import bcrypt from "bcryptjs";
 
 // Interface for all storage operations
@@ -193,26 +192,15 @@ export class MemStorage implements IStorage {
       isAdmin: true
     });
     
-    // Initialize with mock data
-    mockData.plateSizes.forEach(size => this.createPlateSize(size));
-    mockData.textStyles.forEach(style => this.createTextStyle(style));
-    mockData.badges.forEach(badge => this.createBadge(badge));
-    mockData.colors.forEach(color => this.createColor(color));
-    mockData.carBrands.forEach(brand => this.createCarBrand(brand));
-    mockData.paymentMethods.forEach(method => this.createPaymentMethod(method));
-    
-    // Initialize site configs
-    if (mockData.siteConfigs) {
-      mockData.siteConfigs.forEach(config => this.createSiteConfig(config));
-    }
-    
     // Initial pricing
     this.pricingMap.set(1, {
       id: 1,
       frontPlatePrice: "15",
       rearPlatePrice: "15",
+      bothPlatesPrice: "25",
       bothPlatesDiscount: "5",
       taxRate: "20",
+      deliveryFee: "5",
       updatedAt: new Date()
     });
   }
@@ -553,6 +541,10 @@ export class MemStorage implements IStorage {
   async getTotalSales(): Promise<number> {
     return Array.from(this.ordersMap.values())
       .reduce((total, order) => total + Number(order.totalPrice), 0);
+  }
+
+  async deleteOrder(id: number): Promise<boolean> {
+    return this.ordersMap.delete(id);
   }
   
   // Navigation Items methods
