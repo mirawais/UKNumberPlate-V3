@@ -1,0 +1,47 @@
+2025-06-10T12:36:41.114210915Z ==> Cloning from https://github.com/mirawais/UKNumberPlate-V3
+2025-06-10T12:36:41.838925239Z ==> Checking out commit e70fb2065d037a213df7a5bde565ed2d711dd34a in branch main
+2025-06-10T12:36:44.071352289Z ==> Using Node.js version 22.14.0 (default)
+2025-06-10T12:36:44.100406345Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-06-10T12:36:46.046096549Z ==> Using Bun version 1.1.0 (default)
+2025-06-10T12:36:46.046121149Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-06-10T12:36:46.100251838Z ==> Running build command 'npm install; npm run build'...
+2025-06-10T12:36:55.48832325Z 
+2025-06-10T12:36:55.48835314Z added 469 packages, and audited 470 packages in 9s
+2025-06-10T12:36:55.48836493Z 
+2025-06-10T12:36:55.4883712Z 59 packages are looking for funding
+2025-06-10T12:36:55.48837726Z   run `npm fund` for details
+2025-06-10T12:36:55.500361194Z 
+2025-06-10T12:36:55.500382204Z 4 moderate severity vulnerabilities
+2025-06-10T12:36:55.500387854Z 
+2025-06-10T12:36:55.500394004Z To address all issues, run:
+2025-06-10T12:36:55.500399034Z   npm audit fix
+2025-06-10T12:36:55.500402504Z 
+2025-06-10T12:36:55.500405894Z Run `npm audit` for details.
+2025-06-10T12:36:55.675491784Z 
+2025-06-10T12:36:55.675515415Z > rest-express@1.0.0 build
+2025-06-10T12:36:55.675522255Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-06-10T12:36:55.675528865Z 
+2025-06-10T12:36:55.858230649Z vite v5.4.14 building for production...
+2025-06-10T12:36:55.905097248Z transforming...
+2025-06-10T12:36:56.425846637Z Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+2025-06-10T12:36:56.425898738Z   npx update-browserslist-db@latest
+2025-06-10T12:36:56.425904058Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-06-10T12:36:56.820618206Z ✓ 91 modules transformed.
+2025-06-10T12:36:56.821156913Z x Build failed in 941ms
+2025-06-10T12:36:56.821220834Z error during build:
+2025-06-10T12:36:56.821228794Z [vite:css] [postcss] Cannot find module '@tailwindcss/typography'
+2025-06-10T12:36:56.821233444Z Require stack:
+2025-06-10T12:36:56.821238134Z - /opt/render/project/src/tailwind.config.ts
+2025-06-10T12:36:56.821242724Z file: /opt/render/project/src/client/src/index.css:undefined:NaN
+2025-06-10T12:36:56.821246884Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-06-10T12:36:56.821250854Z     at Function.resolve (node:internal/modules/helpers:146:19)
+2025-06-10T12:36:56.821255684Z     at _resolve (/opt/render/project/src/node_modules/jiti/dist/jiti.js:1:241814)
+2025-06-10T12:36:56.821260085Z     at jiti (/opt/render/project/src/node_modules/jiti/dist/jiti.js:1:244531)
+2025-06-10T12:36:56.821264105Z     at /opt/render/project/src/tailwind.config.ts:89:45
+2025-06-10T12:36:56.821268225Z     at evalModule (/opt/render/project/src/node_modules/jiti/dist/jiti.js:1:247313)
+2025-06-10T12:36:56.821272305Z     at jiti (/opt/render/project/src/node_modules/jiti/dist/jiti.js:1:245241)
+2025-06-10T12:36:56.821276285Z     at /opt/render/project/src/node_modules/tailwindcss/lib/lib/load-config.js:51:30
+2025-06-10T12:36:56.821280225Z     at loadConfig (/opt/render/project/src/node_modules/tailwindcss/lib/lib/load-config.js:58:6)
+2025-06-10T12:36:56.821284635Z     at getTailwindConfig (/opt/render/project/src/node_modules/tailwindcss/lib/lib/setupTrackingContext.js:71:116)
+2025-06-10T12:36:56.846123214Z ==> Build failed 😞
+2025-06-10T12:36:56.846146884Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
