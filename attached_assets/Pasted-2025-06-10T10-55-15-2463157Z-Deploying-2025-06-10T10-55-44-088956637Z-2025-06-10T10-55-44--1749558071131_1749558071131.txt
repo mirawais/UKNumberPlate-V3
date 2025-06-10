@@ -1,0 +1,101 @@
+2025-06-10T10:55:15.2463157Z ==> Deploying...
+2025-06-10T10:55:44.088956637Z 
+2025-06-10T10:55:44.088962547Z Error: DATABASE_URL must be set. Did you forget to provision a database?
+2025-06-10T10:55:44.088967077Z     at file:///opt/render/project/src/dist/index.js:1276:9
+2025-06-10T10:55:44.088971517Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-06-10T10:55:44.088977708Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)
+2025-06-10T10:55:44.088980788Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+2025-06-10T10:55:44.088983438Z 
+2025-06-10T10:55:44.088986298Z Node.js v22.14.0
+2025-06-10T10:55:44.894764273Z ==> Exited with status 1
+2025-06-10T10:55:44.910802303Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-06-10T10:55:50.328232914Z ==> Running 'npm run start'
+2025-06-10T10:55:51.130300201Z 
+2025-06-10T10:55:51.130318532Z > rest-express@1.0.0 start
+2025-06-10T10:55:51.130322152Z > NODE_ENV=production node dist/index.js
+2025-06-10T10:55:51.130324262Z 
+2025-06-10T10:55:57.121038371Z file:///opt/render/project/src/dist/index.js:1276
+2025-06-10T10:55:57.121086182Z   throw new Error(
+2025-06-10T10:55:57.121090962Z         ^
+2025-06-10T10:55:57.121094362Z 
+2025-06-10T10:55:57.121098822Z Error: DATABASE_URL must be set. Did you forget to provision a database?
+2025-06-10T10:55:57.121103323Z     at file:///opt/render/project/src/dist/index.js:1276:9
+2025-06-10T10:55:57.121107453Z     at ModuleJob.run (node:internal/modules/esm/module_job:271:25)
+2025-06-10T10:55:57.121111883Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)
+2025-06-10T10:55:57.121115683Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+2025-06-10T10:55:57.121119353Z 
+2025-06-10T10:55:57.121123083Z Node.js v22.14.0
+2025-06-10T11:46:40.408321572Z ==> Deploying...
+2025-06-10T11:47:05.002156532Z ==> Running 'npm run start'
+2025-06-10T11:47:06.097578899Z 
+2025-06-10T11:47:06.0976436Z > rest-express@1.0.0 start
+2025-06-10T11:47:06.09764926Z > NODE_ENV=production node dist/index.js
+2025-06-10T11:47:06.09765213Z 
+2025-06-10T11:47:12.699811788Z 11:47:12 [express] serving on port 5000
+2025-06-10T11:47:47.897130537Z ==> New primary port detected: 5000. Restarting deploy to update network configuration...
+2025-06-10T11:47:48.02788033Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-06-10T11:48:09.144214093Z ==> Running 'npm run start'
+2025-06-10T11:48:10.150213272Z 
+2025-06-10T11:48:10.150243052Z > rest-express@1.0.0 start
+2025-06-10T11:48:10.150250763Z > NODE_ENV=production node dist/index.js
+2025-06-10T11:48:10.150253753Z 
+2025-06-10T11:48:16.551954891Z 11:48:16 [express] serving on port 5000
+2025-06-10T11:48:18.485574261Z ==> Your service is live 🎉
+2025-06-10T11:48:49.109691391Z ==> Detected a new open port HTTP:5000
+2025-06-10T11:49:50.069813972Z ==> Detected a new open port HTTP:5000
+2025-06-10T11:50:51.101437504Z ==> Detected a new open port HTTP:5000
+2025-06-10T11:51:52.038941946Z ==> Detected a new open port HTTP:5000
+2025-06-10T11:52:52.802857497Z ==> Detected a new open port HTTP:5000
+2025-06-10T11:53:08.060610716Z ==> Detected service running on port 5000
+2025-06-10T11:53:08.16428044Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-06-10T12:18:30.352575281Z ==> Deploying...
+2025-06-10T12:18:54.2538445Z ==> Running 'npm run start'
+2025-06-10T12:18:55.346849436Z 
+2025-06-10T12:18:55.346878267Z > rest-express@1.0.0 start
+2025-06-10T12:18:55.346885317Z > NODE_ENV=production node dist/index.js
+2025-06-10T12:18:55.346887877Z 
+2025-06-10T12:19:01.948101422Z file:///opt/render/project/src/dist/index.js:6
+2025-06-10T12:19:01.948127553Z   throw Error('Dynamic require of "' + x + '" is not supported');
+2025-06-10T12:19:01.948131153Z         ^
+2025-06-10T12:19:01.948133702Z 
+2025-06-10T12:19:01.948136182Z Error: Dynamic require of "fs" is not supported
+2025-06-10T12:19:01.948139413Z     at file:///opt/render/project/src/dist/index.js:6:9
+2025-06-10T12:19:01.948141873Z     at file:///opt/render/project/src/dist/index.js:2561:9
+2025-06-10T12:19:01.948144063Z 
+2025-06-10T12:19:01.948146553Z Node.js v22.14.0
+2025-06-10T12:19:03.451276459Z ==> Exited with status 1
+2025-06-10T12:19:03.468522019Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-06-10T12:19:09.867830022Z ==> Running 'npm run start'
+2025-06-10T12:19:10.968955363Z 
+2025-06-10T12:19:10.968982623Z > rest-express@1.0.0 start
+2025-06-10T12:19:10.968990703Z > NODE_ENV=production node dist/index.js
+2025-06-10T12:19:10.968992953Z 
+2025-06-10T12:19:18.466118293Z file:///opt/render/project/src/dist/index.js:6
+2025-06-10T12:19:18.466138953Z   throw Error('Dynamic require of "' + x + '" is not supported');
+2025-06-10T12:19:18.466141993Z         ^
+2025-06-10T12:19:18.466144383Z 
+2025-06-10T12:19:18.466146983Z Error: Dynamic require of "fs" is not supported
+2025-06-10T12:19:18.466151063Z     at file:///opt/render/project/src/dist/index.js:6:9
+2025-06-10T12:19:18.466153463Z     at file:///opt/render/project/src/dist/index.js:2561:9
+2025-06-10T12:19:18.466155723Z 
+2025-06-10T12:19:18.466158043Z Node.js v22.14.0
+2025-06-10T12:19:29.800964877Z ==> Running 'npm run start'
+2025-06-10T12:19:31.003036136Z 
+2025-06-10T12:19:31.003131118Z > rest-express@1.0.0 start
+2025-06-10T12:19:31.003682648Z > NODE_ENV=production node dist/index.js
+2025-06-10T12:19:31.003691158Z 
+2025-06-10T12:19:37.494808442Z ==> Running 'npm run start'
+2025-06-10T12:19:38.3931393Z 12:19:38 [express] serving on port 5000
+2025-06-10T12:19:38.492903078Z 
+2025-06-10T12:19:38.492939668Z > rest-express@1.0.0 start
+2025-06-10T12:19:38.492944898Z > NODE_ENV=production node dist/index.js
+2025-06-10T12:19:38.492947088Z 
+2025-06-10T12:19:45.193495575Z file:///opt/render/project/src/dist/index.js:6
+2025-06-10T12:19:45.193526776Z   throw Error('Dynamic require of "' + x + '" is not supported');
+2025-06-10T12:19:45.193531836Z         ^
+2025-06-10T12:19:45.193535666Z 
+2025-06-10T12:19:45.193539716Z Error: Dynamic require of "fs" is not supported
+2025-06-10T12:19:45.193544306Z     at file:///opt/render/project/src/dist/index.js:6:9
+2025-06-10T12:19:45.193548276Z     at file:///opt/render/project/src/dist/index.js:2561:9
+2025-06-10T12:19:45.193552296Z 
+2025-06-10T12:19:45.193556416Z Node.js v22.14.0
