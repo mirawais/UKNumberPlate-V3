@@ -1,20 +1,23 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 export default defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
-    themePlugin(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
+    // Only load Replit-specific plugins when in Replit environment
+    ...(process.env.REPL_ID !== undefined
       ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
+          // These plugins are only available in Replit
+          await import("@replit/vite-plugin-runtime-error-modal").then((m) => m.default()),
+          await import("@replit/vite-plugin-shadcn-theme-json").then((m) => m.default()),
+          ...(process.env.NODE_ENV !== "production"
+            ? [
+                await import("@replit/vite-plugin-cartographer").then((m) =>
+                  m.cartographer(),
+                ),
+              ]
+            : []),
         ]
       : []),
   ],
