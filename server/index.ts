@@ -79,7 +79,7 @@ app.use((req, res, next) => {
   // Register API routes first
   await registerRoutes(app);
 
-  // Setup Vite dev server for React app
+  // Setup Vite dev server for React app in development, serve static files in production
   if (process.env.NODE_ENV === "development") {
     try {
       const { createServer } = await import("vite");
@@ -151,6 +151,27 @@ app.use((req, res, next) => {
         });
         log("Serving fallback HTML");
       }
+    }
+  } else {
+    // Production: serve built React app
+    const clientDistPath = path.resolve(process.cwd(), "dist", "public");
+    if (require("fs").existsSync(clientDistPath)) {
+      app.use(express.static(clientDistPath));
+      app.get("*", (req, res, next) => {
+        if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+          return next();
+        }
+        res.sendFile(path.resolve(clientDistPath, "index.html"));
+      });
+      log("Serving from dist/public");
+    } else {
+      log("Production build not found. Please run 'npm run build' first.");
+      app.get("*", (req, res, next) => {
+        if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+          return next();
+        }
+        res.status(503).send("Application is building. Please wait...");
+      });
     }
   }
 
