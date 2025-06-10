@@ -22,7 +22,7 @@ const Navbar = () => {
   }, [cartData]);
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-white shadow-md hidden">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/">

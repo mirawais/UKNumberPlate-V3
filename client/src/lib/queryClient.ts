@@ -7,9 +7,8 @@ async function throwIfResNotOk(res: Response) {
       const json = await res.json();
       throw new Error(json.message || res.statusText);
     } catch (e) {
-      // If JSON parsing fails, fallback to text
-      const text = await res.text() || res.statusText;
-      throw new Error(text);
+      // If JSON parsing fails, fallback to status text
+      throw new Error(res.statusText || `HTTP ${res.status}`);
     }
   }
 }
@@ -62,11 +61,17 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: (failureCount, error) => {
+        // Don't retry on 4xx errors except 401
+        if (error instanceof Error && error.message.includes('HTTP 4')) {
+          return false;
+        }
+        return failureCount < 2;
+      },
     },
     mutations: {
       retry: false,
