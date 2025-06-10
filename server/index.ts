@@ -108,10 +108,10 @@ app.use((req, res, next) => {
       log("Vite dev server setup completed");
     } catch (error) {
       log(`Vite setup failed: ${error}. Using fallback static serving.`);
-      
+
       // Fallback: serve static React build if available
       const clientDistPath = path.resolve(process.cwd(), "client", "dist");
-      if (require("fs").existsSync(clientDistPath)) {
+      if (await import("fs").then(fs => fs.existsSync(clientDistPath))) {
         app.use(express.static(clientDistPath));
         app.get("*", (req, res, next) => {
           if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
@@ -126,7 +126,7 @@ app.use((req, res, next) => {
           if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
             return next();
           }
-          
+
           res.send(`
             <!DOCTYPE html>
             <html>
@@ -155,7 +155,7 @@ app.use((req, res, next) => {
   } else {
     // Production: serve built React app
     const clientDistPath = path.resolve(process.cwd(), "dist", "public");
-    if (require("fs").existsSync(clientDistPath)) {
+    if (await import("fs").then(fs => fs.existsSync(clientDistPath))) {
       app.use(express.static(clientDistPath));
       app.get("*", (req, res, next) => {
         if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
